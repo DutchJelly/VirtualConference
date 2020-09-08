@@ -6,7 +6,7 @@ Vragen en benodigde informatie:
   (Max amount of people, max map-size, permissions to enter rooms)
   
   - Do you have a specific platform in mind that the tool is to be used for or should it be cross-platform?
-  (We are thinking about Discord, since it has a public API)
+  (We are thinking about Discord or Jitsi, since they have a public API)
 
   - What form do you want the tool to be in? A webpage, an application?
 
