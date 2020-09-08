@@ -1,0 +1,3 @@
+## Team Turing Complete - Virtual Conference Room App
+
+This virtual conference room app is worked on for the Software Engineering course at the liacs institute.
