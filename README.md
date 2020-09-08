@@ -18,7 +18,7 @@ Vragen en benodigde informatie:
 
   
 - What are the most important priorities and what is more optional?
-  (In case of unforseeen circumstances)
+  (In case of unforseen circumstances)
 
 - Do you have a prototype conference in mind that we could use for testing?
 
