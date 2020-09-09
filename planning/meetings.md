@@ -7,4 +7,4 @@
 ### Planned meetings
 | date | info |
 |:-:|---|
-| 10-09-2020 | Meeting 1 with H. Basold |
+| 11-09-2020 | Meeting 1 with H. Basold |
