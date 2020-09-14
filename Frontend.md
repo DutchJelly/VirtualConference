@@ -27,3 +27,5 @@ Activiteiten organisator
 - Organisator kan 'ruimtes' ergens plaatsen en grootte/vorm aanpassen
 - Organisator maakt per kamer een infoblok aan
 - Organisator geeft titel aan kamer
+- Organisator kan gebruiker uit het event gooien
+- Organisator kan announcement plaatsen
