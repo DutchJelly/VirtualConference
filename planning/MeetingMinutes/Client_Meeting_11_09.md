@@ -1,6 +1,6 @@
 # Client Meeting 11-09-2020 (13.00 - 13.35) [Iedereen + H. Basold]
 
-Tijdens deze bijeenkomst is gesproken over functionaliteiten die vereisd en gewild zijn voor de service. Ook is besproken wat van een eerste demo verwacht wordt en wanneer de eerstvolgende meeting plaats zal vinden.
+Tijdens deze bijeenkomst is gesproken over functionaliteiten die vereist en gewild zijn voor de service. Ook is besproken wat van een eerste demo verwacht wordt en wanneer de eerstvolgende meeting plaats zal vinden.
 
 De volgende functionaliteiten zijn besproken:
 * *OS*: Uiteindelijk is de wens dat de service met meerde operating systemen compitabel is (denk aan UNIX, Windows, maar eventueel ook mobiele varianten als Android). Om te beginnen is het verstandig met één OS te beginnen en vanaf daar uit te breiden.
