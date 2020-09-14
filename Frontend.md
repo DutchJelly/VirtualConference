@@ -4,6 +4,7 @@ Activiteiten online gebruiker
 - Gebruiker ziet plattegrond en staat gang begaande grond
 - Gebruiker ziet waar andere gebruikers zijn
 - Gebruiker kan op trapgat klikken om van etage te wisselen
+- Gebruiker kan op 'i' klikken om infoblokje van de kamer te zien
 - Gebruiker kan op een kamer klikken om deel te nemen
 - Gebruiker kan een kamer verlaten door op 'verlaten' te klikken
 - Gebruiker kan op een andere gebruiker klikken om gesprek te beginnen: Chat/Video
@@ -22,7 +23,7 @@ Activiteiten organisator
     * Kamer 3 - Gesprekken
     * Keukenblok/koffiehoek
     * Wc
- ^ Overige tussenruimte is gang
+    ^ Overige tussenruimte is gang
 - Organisator kan 'ruimtes' ergens plaatsen en grootte/vorm aanpassen
 - Organisator maakt per kamer een infoblok aan
 - Organisator geeft titel aan kamer
