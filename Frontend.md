@@ -3,7 +3,7 @@ Activiteiten online gebruiker
 - Gebruiker krijgt fotobolletje met gebruikersnaam
 - Gebruiker ziet plattegrond en staat gang begaande grond
 - Gebruiker ziet waar andere gebruikers zijn
-- Gebruiker kan op trapgat klikken om van etage te wisselen
+- Gebruiker kan op etagenummer klikken om van etage te wisselen
 - Gebruiker kan op 'i' klikken om infoblokje van de kamer te zien
 - Gebruiker kan op een kamer klikken om deel te nemen
 - Gebruiker kan een kamer verlaten door op 'verlaten' te klikken
@@ -17,7 +17,6 @@ Activiteiten organisator
 - Organisator kan API kiezen
 - Organisator kan aantal etages kiezen
 - Organisator kan verschillende 'ruimtes' kiezen:
-    * Trapgat
     * Kamer 1 - lezing
     * Kamer 2 - interactief
     * Kamer 3 - Gesprekken
