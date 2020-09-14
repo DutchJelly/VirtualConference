@@ -8,5 +8,5 @@
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
-| 14-09-2020 | 14:00-? | Snellius room 405 | Team meeting |
+| 14-09-2020 | 15:21-? | Snellius room 405 | Team meeting |
 | 21-09-2020 | 11:00-? | Snellius room 405 | Meeting 2 with H. Basold |
