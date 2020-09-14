@@ -23,7 +23,7 @@ Activiteiten organisator
     * Kamer 3 - Gesprekken
     * Keukenblok/koffiehoek
     * Wc
-    ^ Overige tussenruimte is gang
+    * Overige tussenruimte is gang
 - Organisator kan 'ruimtes' ergens plaatsen en grootte/vorm aanpassen
 - Organisator maakt per kamer een infoblok aan
 - Organisator geeft titel aan kamer
