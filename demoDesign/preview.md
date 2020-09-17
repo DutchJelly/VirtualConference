@@ -32,4 +32,4 @@ All video logic is included in this room. When exiting the room, the call stops.
 **real life**
 You can also start a conversation with someone in real life and update the app so online users can see their avatars and ask to join their conversation. 
 
-*I think it'd be really nice if on-site members can simply scan some qr code or another person to automatically sync the converstation with the online converstation view*.
+*I think it'd be really nice if on-site members can simply scan some qr code of another person to automatically sync the converstation with the online converstation view*.
