@@ -24,6 +24,9 @@ In this form users can:
 - open a window with all conference info (not added to this design yet)
 - click a room or hallway to zoom in and join it.
 
+TODO
+- [ ] announcements menu item
+- [ ] agenda menu item
 
 
 # room view
