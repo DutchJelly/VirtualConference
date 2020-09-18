@@ -19,6 +19,11 @@ In this form users can:
 - open a window with all conference info (not added to this design yet)
 - click a room or hallway to zoom in and join it.
 
+TODO
+- [ ] login with google
+- [ ] login with linkedin
+- [ ] choose profile image without logging in
+
 # room view
 
 ![](./TTC_conference_schets1_roomview.png)
