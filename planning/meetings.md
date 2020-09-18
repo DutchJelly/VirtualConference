@@ -10,6 +10,5 @@
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
-
 | 21-09-2020 | 13:00-? | Snellius room 405 | Meeting 5 with TTC |
 | 28-09-2020 | 11:00-? | Snellius room 405 | Meeting 2 with H. Basold |
