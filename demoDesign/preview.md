@@ -8,6 +8,11 @@ Users log in with a conference code and a username on this form.
 
 We might have to use accounts because uploading images can be a pain. So the upload image button could be added here, but it'd not be as user-friendly.
 
+TODO
+- [ ] login with google
+- [ ] login with linkedin
+- [ ] choose profile image without logging in
+
 # overview form
 
 ![](./TTC_conference_schets1_overview.png)
@@ -19,10 +24,7 @@ In this form users can:
 - open a window with all conference info (not added to this design yet)
 - click a room or hallway to zoom in and join it.
 
-TODO
-- [ ] login with google
-- [ ] login with linkedin
-- [ ] choose profile image without logging in
+
 
 # room view
 
