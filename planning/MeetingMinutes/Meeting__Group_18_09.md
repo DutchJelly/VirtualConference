@@ -1,4 +1,4 @@
-# Preparation for Client Meeting 18-09-2020 (11.10 - ???) [Iedereen]
+# Group Meeting 18-09-2020 (11.10 - 13:00) [Iedereen]
 
 ### De Meeting
 ~~Jelle ontbreekt tussen 11.00 en 11.45, Wouter tussen 12.00 en 12.45.
@@ -6,6 +6,11 @@ We zullen Henning vragen om de afspraak naar 13.00 te verzetten, in het geval
 dat dit niet mogelijk is zal er iemand ontbreken tijdens de meeting.~~  
 Henning heeft verzocht om de meeting naar 28 september (11.00) te verzetten en vanaf daar om de week een meeting te plannen. 
 
+
+
+### Bijeenkomen maandag 21 september
+Scrum Master & Product Owner behandelen, voor de rest werken aan de git deadline.
+We komen bijeen om 13.00 (kan nog veranderen i.v.m. Luuk zijn HCi).
 
 <br/><br/>
 
