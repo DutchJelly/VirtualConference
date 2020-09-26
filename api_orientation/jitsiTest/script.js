@@ -22,6 +22,11 @@ function onLoad(){
     };
 
     const api = new JitsiMeetExternalAPI(domain, options);
+
+    api.on("audioMuteStatusChanged", ensureMute);
 }
 
+function ensureMute(state){
+    console.log(JSON.stringify(state));
+}
 
