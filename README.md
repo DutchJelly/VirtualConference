@@ -8,6 +8,7 @@ This virtual conference room app is worked on for the Software Engineering cours
 * Wouter Ebing
 * Jelle Keulemans
 *
+*
 
 ### Languages:
 * Html, css
