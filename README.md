@@ -2,7 +2,7 @@
 
 This virtual conference room app is worked on for the Software Engineering course at the liacs institute.
 
-# Made by:
+### Made by:
 * Luuk van den Nouweland
 *
 *
