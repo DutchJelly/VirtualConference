@@ -5,7 +5,7 @@ This virtual conference room app is worked on for the Software Engineering cours
 ### Made by:
 * Luuk van den Nouweland
 * Richard Middelkoop
-*
+* Wouter Ebing
 *
 *
 
