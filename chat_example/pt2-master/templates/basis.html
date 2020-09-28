@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>{% block title %}Web Chat {% endblock %}</title>
+
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/stijl.css') }}">
+    </head>
+
+    <body>
+        <!-- starten van de main sectie -->
+        <div class="main-sectie" style="text-align: center;">
+            <div>
+                <!-- Starten van Flash error -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="alert alert-{{ messages[0][0] }} " role="alert">
+                            {{ messages[0][1] }}
+                        </div>
+                        <hr>
+                    {% endif %}
+                {% endwith %}
+                <!-- Eind van Flash error -->
+
+                <!-- Hierin komt de inhoud van de inlogpagina of de registratiepagina te staan -->
+                {% block content%}
+                {% endblock %}
+            </div>
+        </div>
+        <!--Eind van de main sectie -->
+    </body>
+</html>

@@ -1,0 +1,63 @@
+<html>
+    <head>
+        <title>Web Chat</title>
+
+        <link rel="stylesheet" type="text/css" href="{{url_for('static', filename='css/stijl.css')}}"> 
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+    </head>
+
+    <body>
+        <div class="container">
+            <!-- Starten van Flash bericht -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="alert alert-{{ messages[0][0] }} " role="alert">
+                        {{ messages[0][1] }}
+                    </div>
+                    <hr>
+                {% endif %}
+            {% endwith %}
+            <!-- Eind van Flash bericht -->
+            <h1>Web Chat</h1>
+            <div class="row">
+                <button type="button" class="uitloggen button_style">Log uit hier</button>
+                <div class="container-fixed col col-md-12 scroll">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Actieve Gebruikers</th>
+                                <th>
+                                    <!-- Opgeven van een groepsnaam voor het aanmaken van een groepschat-->
+                                    <form class="form-inline" action='#' style="float: right">
+                                        <div class="form-group">
+                                            Groepsnaam:
+                                            <input type="text" id="groep_naam" name="groep_naam" class="form-control" />
+                                            <button type="button" class="groep_aanmaken form-control">Aanmaken</button>
+                                        </div>
+                                    </form>
+                                </th>
+                            </tr>                            
+                        </thead>
+                        <!-- Gebruikerslijst -->
+                        <tbody id="gebruikers">
+                        </tbody>
+                        <tbody id="groepen">
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Lijst van namen bij het aanmaken van een groepschat -->
+                <div id="naamlijst" style="text-align: center"></div>
+                <br/>
+                <br/>
+
+                <!-- Chat venster -->
+                <div style="width: 45%;" id="chat"></div>
+            </div>
+        </div>
+
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.4/socket.io.min.js"></script>
+        <script type="text/javascript" src="{{url_for('static', filename='scripts/chat.js')}}"></script>
+    </body>
+</html>
