@@ -57,7 +57,12 @@ export default {
         this.handleTempError();
         return;
       }
-      const response = await this.$axios("http://localhost:5000");
+      const response = await this.$axios.post("http://localhost:5000/login", {
+        data: {
+          username: this.loginForm.username,
+          password: this.loginForm.password
+        }
+      });
       console.log({ response });
       // this.$router.push("/overview");
     },

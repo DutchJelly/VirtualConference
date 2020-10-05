@@ -13,7 +13,8 @@ module.exports = {
   ],
   plugins: [
   ],
-  // add your custom rules here
+  'vue/singleline-html-element-content-newline': 'off',
+  'vue/multiline-html-element-content-newline': 'off',
   rules: {
     "quotes": ["error", "double"],
     "semi": ["warning", "always"]
