@@ -1,0 +1,8 @@
+Websockets
+Backend unit test (Jest en Supertest)
+Environment variables (voor de secret key) en de dotenv module
+Express error handler en subclass van error
+Logging (winston module)
+DDOS protection / rate limiting
+Opslaan van de logintoken in de frontend (Nuxt auth module, of eigen implementatie met de Vuex store)
+Onderzoek naar typeorm met een 'echte' database i.p.v. SQLite

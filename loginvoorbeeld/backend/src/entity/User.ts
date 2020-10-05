@@ -1,28 +1,26 @@
-import {Entity, BaseEntity, Column, PrimaryColumn, OneToMany, ManyToOne, PrimaryGeneratedColumn, ManyToMany} from "typeorm"
+import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert} from "typeorm"
+import { genSaltSync, hashSync} from "bcrypt"
+import {IsEmail, Length,  } from "class-validator"
 
 @Entity()
 export class User extends BaseEntity {
 
+    @BeforeInsert()
+    private hashPassword() {
+        this.password = hashSync(this.password, genSaltSync())
+    }
+
     @PrimaryColumn()
+    @IsEmail()
     username!: string;
 
     @Column()
+    @Length(8)
     password!: string;
 
-    @Column()
-    @OneToMany((type) => Message, (message) => message.sender)
-    messages!: Message[]
-}
-
-@Entity()
-export class Message extends BaseEntity {
-    @PrimaryGeneratedColumn()
-    id!: number;
-
-    @Column()
-    contents!: string;
-
-    @Column()
-    @ManyToOne((type) => User, (user) => user.messages)
-    sender!: User;
+    toUserData() {
+        return {
+            username: this.username
+        }
+    }
 }
