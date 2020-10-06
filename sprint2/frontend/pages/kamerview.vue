@@ -3,15 +3,18 @@
 
     <div class="sidebar">
       <div class="sidebar-header">
-        test
+        TemplateRoom 01
       </div>
       <div class="sidebar-items">
         <div class="sidebar-content">
-          Richard
-          Wouter
+          <ul id="templateUserList">
+            <li v-for="item in items" :key="item.user">
+              {{ item.user }}
+            </li>
+          </ul>
         </div>
         <div class="sidebar-search-bar">
-          type to find something
+          <input type="text" placeholder="Search for users">
         </div>
       </div>
     </div>
@@ -20,7 +23,16 @@
 </template>
 
 <script>
-export default {};
+export default {
+  data() {
+    return { 
+      items: [
+        { user: 'Richard' },
+        { user: 'Wouter' }
+      ]
+    }
+  }
+};
 </script>
 
 <style>
@@ -46,7 +58,7 @@ export default {};
 
 
 .sidebar-header{
-  @apply px-1;
+  @apply text-xl px-1 py-1 flex flex-col items-center justify-center;
 }
 
 .sidebar-items{
@@ -55,12 +67,14 @@ export default {};
 
 .sidebar-content{
   @apply px-1;
+  height: 90%;
   position: relative;
 }
 
-.sidebar-search-bar{
-  @apply px-1;
+.sidebar-search-bar input{
+  @apply px-1 rounded border-2 border-transparent border-gray-800;
   position: relative;
+  width: 100%;
 }
 
 </style>
