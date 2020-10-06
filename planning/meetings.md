@@ -11,8 +11,10 @@
 |28-09-2020 | 11:00-12:00 | Snellius room 405 | Meeting 2 with H. Basold |
 |05-10-2020 | 12:30-14:30 | MS teams | Meeting 7 with TTC(Jie & Richard) |
 |05-10-2020 | 14:30-16:56 | MS teams | Meeting 7 with TTC |
+|06-10-2020 | 10:02-10:40 | MS teams | Meeting 8 with TTC |
 
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
+|08-10-2020 | 16:15-? | MS teams | Meeting 9 with TTC |
 |12-10-2020 | 10:00-? | Snellius room 405 | Meeting 2 with H. Basold |
