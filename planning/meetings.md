@@ -16,5 +16,5 @@
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
-|08-10-2020 | 16:15-? | MS teams | Meeting 9 |
+|08-10-2020 | 16:15-? | MS teams | Meeting 9 with TTC |
 |12-10-2020 | 10:00-? | Snellius room 405 | Meeting 2 with H. Basold |
