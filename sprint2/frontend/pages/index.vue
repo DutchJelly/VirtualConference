@@ -101,7 +101,7 @@ body{
 }
 
 .banner{
-  @apply text-6xl text-white bg-gray-700 w-full text-center p-5 bg-opacity-75;
+  @apply text-4xl text-white bg-gray-700 w-full text-center p-5 bg-opacity-75;
   position: absolute;
   top: 0px;
 }
@@ -109,8 +109,10 @@ body{
 .login-prompt {
 
   /* @apply w-11/12 max-w-lg bg-white shadow-lg rounded flex flex-col items-center py-6; */
-  width: 50%;
-  max-width: 500px;
+  
+  width: 500px;
+  max-width: 90%;
+  margin: 2rem;
 }
 
 .login-prompt-item{
