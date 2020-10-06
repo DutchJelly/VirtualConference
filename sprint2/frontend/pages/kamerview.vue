@@ -72,9 +72,11 @@ export default {
 }
 
 .sidebar-search-bar input{
-  @apply px-1 rounded border-2 border-transparent border-gray-800;
-  position: relative;
-  width: 100%;
+  @apply px-1 border-t-2 border-gray-800;
+  position: absolute;
+  left: 1%;
+  bottom: 0.2%;
+  width: 98%;
 }
 
 </style>
