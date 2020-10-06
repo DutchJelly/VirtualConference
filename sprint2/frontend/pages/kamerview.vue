@@ -1,6 +1,8 @@
 <template>
   <main class="kamerpage">
-
+    <div class="kamer">
+      filler
+    </div>
     <div class="sidebar">
       <div class="sidebar-header">
         TemplateRoom 01
@@ -45,6 +47,10 @@ export default {
   -o-background-size: cover;
   background-size: cover;
   transform: scale(1.02);
+}
+
+.kamer{
+  @apply bg-gray;
 }
 
 .sidebar{
