@@ -22,7 +22,7 @@
         <div class="sidebar-content">
           <ul id="templateUserList">
             <li v-for="item in items" :key="item.user">
-              <div v-if="item.user.includes(message)">
+              <div v-if="item.user.toLowerCase().includes(message.toLowerCase())">
                 {{ item.user }}
               </div>
             </li>
