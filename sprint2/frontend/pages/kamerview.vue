@@ -1,7 +1,13 @@
 <template>
   <main class="kamerpage">
     <div class="kamer">
-      filler
+      <ul id="templateUserList">
+        <li v-for="item in items" :key="item.user">
+          <div class="user">
+            <span class="userHover">{{ item.user }}</span>
+          </div>
+        </li>
+      </ul>
     </div>
     <div class="sidebar">
       <div class="sidebar-header">
@@ -34,7 +40,7 @@ export default {
       ]
     }
   }
-};
+}
 </script>
 
 <style>
@@ -50,7 +56,28 @@ export default {
 }
 
 .kamer{
-  @apply bg-gray;
+  @apply bg-white rounded shadow-lg;
+  height: 90%;
+  width: 82%;
+  left: 3%;
+  position: fixed;
+}
+
+.user{
+  width: 50px;
+  height: 50px;
+  -webkit-border-radius: 25px;
+  -moz-border-radius: 25px;
+  border-radius: 25px;
+  background: red;
+}
+
+.user span{
+  visibility: hidden;
+}
+
+.user:hover span{
+  visibility: visible;
 }
 
 .sidebar{
