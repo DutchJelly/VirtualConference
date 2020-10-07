@@ -22,15 +22,14 @@
         <div class="sidebar-content">
           <ul id="templateUserList">
             <li v-for="item in items" :key="item.user">
-              {{ item.user }}
-              <div v-if="item.user.includes(searchInput)">
-                {{ item.user }}hi
+              <div v-if="item.user.includes(message)">
+                {{ item.user }}
               </div>
             </li>
           </ul>
         </div>
         <div class="sidebar-search-bar">
-          <input type="text" placeholder="Search for users">
+          <input v-model='message' type="text" placeholder="Search for users">
         </div>
       </div>
     </div>
@@ -46,7 +45,7 @@ export default {
         { user: 'Richard' },
         { user: 'Wouter' }
       ],
-      searchInput:"",
+      message:"",
     }
   }
 }
