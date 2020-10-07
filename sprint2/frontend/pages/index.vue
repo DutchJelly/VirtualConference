@@ -106,6 +106,12 @@ body{
   top: 0px;
 }
 
+@media only screen and (max-width: 450px) {
+  .banner{
+    @apply text-2xl;
+  }
+}
+
 .login-prompt {
 
   /* @apply w-11/12 max-w-lg bg-white shadow-lg rounded flex flex-col items-center py-6; */
