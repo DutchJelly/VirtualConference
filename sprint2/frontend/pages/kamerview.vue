@@ -23,6 +23,9 @@
           <ul id="templateUserList">
             <li v-for="item in items" :key="item.user">
               {{ item.user }}
+              <div v-if="item.user.includes(searchInput)">
+                {{ item.user }}hi
+              </div>
             </li>
           </ul>
         </div>
@@ -42,7 +45,8 @@ export default {
       items: [
         { user: 'Richard' },
         { user: 'Wouter' }
-      ]
+      ],
+      searchInput:"",
     }
   }
 }
@@ -61,7 +65,7 @@ export default {
 }
 
 .kamer{
-  @apply bg-white rounded shadow-lg;
+  @apply bg-white rounded shadow-lg p-5;
   height: 90%;
   width: 82%;
   left: 3%;
@@ -75,6 +79,7 @@ export default {
   -moz-border-radius: 25px;
   border-radius: 25px;
   background: red;
+  postion: relative;
 }
 
 
