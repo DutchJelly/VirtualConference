@@ -4,7 +4,12 @@
       <ul id="templateUserList">
         <li v-for="item in items" :key="item.user">
           <div class="user">
-            <span class="userHover">{{ item.user }}</span>
+            <div class="popupBox">
+              <span class="userHover">
+                Gebruikersnaam: {{ item.user }}
+                Status: Beschikbaar
+              </span>
+            </div>
           </div>
         </li>
       </ul>
@@ -72,11 +77,17 @@ export default {
   background: red;
 }
 
-.user span{
+
+.user .popupBox{
+  @apply bg-gray-400 rounded;
+  width: 400%;
+  position: relative;
+  left: 55px;
+  top: 2px;
   visibility: hidden;
 }
 
-.user:hover span{
+.user:hover .popupBox{
   visibility: visible;
 }
 
