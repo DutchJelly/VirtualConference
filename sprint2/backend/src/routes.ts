@@ -10,25 +10,27 @@ import { Socket } from "socket.io";
 const env = require('dotenv');
 env.config();
 
-export const app = express()
-export const socketPort = process.env.SOCKET_PORT;
-export const apiPort = process.env.API_PORT;
-export const server = require('http').createServer(app);
-const io = require('socket.io')(server);
+const app = express();
 
+export const apiPort = process.env.API_PORT
+export const http = require('http').createServer(app);
+const io = require('socket.io')(http);
 
 app.use(cors({
     origin: "*"
 }))
 
 var socketMapping = new Map<string, Socket>();
+var allSockets:Socket[] = [];
 
 io.sockets.on('connection', (s: Socket) => {
     console.log(`${s.id} was connected`);
     s.on('register', (data) => {
+        console.log('received register event');
         if(data.username && onlineUsers.includes(data.username))
             socketMapping.set(data.username, s);
     });
+    allSockets.push(s);
 });
 
 io.sockets.on('disconnect', (x: Socket) => {
@@ -37,6 +39,7 @@ io.sockets.on('disconnect', (x: Socket) => {
         if(socketMapping.get(key) && socketMapping.get(key) === x)
             socketMapping.delete(key);
     }
+    
 });
 
 
@@ -103,10 +106,12 @@ var rooms = new Map<string, string[]>();
 
 app.get('/testlogin/:username', json(), async (req, res, next) => {
     var username = req.params.username;
-    console.log(username);
+    console.log(`a user logged in: ${username}`);
     if(!onlineUsers.includes(username))
         onlineUsers.push(username);
     res.status(200).json({message: `you logged in`, online: onlineUsers})
+
+
 })
 
 app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) => {
@@ -116,12 +121,14 @@ app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) =>
     
     if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
         res.status(400).json({message: "error, one of the users is not online"});
+        console.log("withwho or user wasn't logged in");
         return;
     }
 
     requested.set(user, withwho);
     //withwho gets request with socketio
 
+    console.log('sent a socket event of requestConversation');
     socketMapping.get(withwho)?.emit("requestConversation", {user});
 
 })
@@ -160,16 +167,11 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 app.get('/test', json(), (req, res, next) => {
     io.emit("test", "hello");
     res.status(200).json({hi: "hello"});
+
+    allSockets.forEach(x => x.emit("requestConversation", "test"));
 })
 
-
-
-
-
-
-
 app.get('/')
-
 
 app.use((req, res) => {
     if (!res.headersSent)

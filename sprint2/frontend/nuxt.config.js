@@ -34,8 +34,15 @@ export default {
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
     // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    'nuxt-socket-io',
   ],
+  io: {
+    sockets: [{
+      name: 'main',
+      url: 'http://localhost:5000'
+    }]
+  },
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {},

@@ -1,7 +1,7 @@
 <template>
   <div class="main">
       <h1>{{message}}</h1>
-      <ul><li v-for="(item, index) in users" :key="index"><button class="user" @click.prevent="requestConversation(item)">{{item}}</button></li></ul>
+      <ul><li v-for="(item, index) in users" :key="index"><button class="user" @click.prevent="sendConversationRequest(item)">{{item}}</button></li></ul>
       <ConformationPrompt v-if="pendingRequest" user="test" />
   </div>
 </template>
@@ -11,13 +11,12 @@
 // import VueSocketIO from 'vue-socket.io'
 
 import ConformationPrompt from '../components/conformation_prompt'
-import Vue from 'vue'
-import moment from 'moment'
-import io from 'socket.io-client'
-
 
 export default {
     name: 'Jitsi',
+    components: {
+        ConformationPrompt
+    },
     data(){
         return{
             username: this.$route.fullPath.substr(this.$route.fullPath.lastIndexOf('?')+1) || null,
@@ -26,37 +25,45 @@ export default {
             pendingRequest: false
         }
     },
+    beforeMount(){
+        this.socket = this.$nuxtSocket({
+            channel: '/index'
+        })
+        this.socket.on('requestConversation', (msg, cb) => {
+            alert("hello");
+        })
+    },
     async mounted(){
-
         try{
             var response = await this.$axios(`http://localhost:5000/testlogin/${this.username}`);
             this.users = response.data.online;
-            Vue.prototype.$moment = moment;
-            Vue.prototype.$socket = io(`http://localhost:4001`);
-            this.$socket.emit('register', ({data: {username: this.username}}))
-
-        }catch{
+            await this.socket.emit('register', {
+                data: {username: this.username}
+            }, (resp) => { })
+        }catch(exception){
+            // alert(exception);
             this.message = `login failed for ${this.username}`
         }
-
-        this.$socket.on('requestConversation', (data) => {
+    },
+    sockets: {
+        connect() {
+            alert("socket was connected");
+        },
+        requestConversation(data){
+            alert(data);
+            this.message = "ermm"
             this.pendingRequest = true;
-        });
-        
-
-        
+        }
     },
-    components: {
-        ConformationPrompt
-    },
+    
     methods: {
-        requestConversation: async function(withWho){
+        sendConversationRequest: async function(withWho){
+            console.log("hello world");
             if(this.username === withWho){
                 this.message = "you cannot click on yourself";
                 return;
             }
             this.message = "";
-
             await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${withWho}`);
         }
     }
