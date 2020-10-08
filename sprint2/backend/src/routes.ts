@@ -4,24 +4,41 @@ import { User } from "./entity/User";
 import { validate} from "class-validator"
 import {compareSync} from "bcrypt"
 import {verify, sign, decode} from "jsonwebtoken"
+import { Socket } from "socket.io";
 
 
-
+const env = require('dotenv');
+env.config();
 
 export const app = express()
-export const port = 5000;
+export const socketPort = process.env.SOCKET_PORT;
+export const apiPort = process.env.API_PORT;
+export const server = require('http').createServer(app);
+const io = require('socket.io')(server);
 
-// var http = require('http').createServer(app);
-// var io = require('socket.io')(http);
-// var socket = io();
-
-var server = require('http').Server(app);
-
-var io = require('socket.io')(server);
 
 app.use(cors({
     origin: "*"
 }))
+
+var socketMapping = new Map<string, Socket>();
+
+io.sockets.on('connection', (s: Socket) => {
+    console.log(`${s.id} was connected`);
+    s.on('register', (data) => {
+        if(data.username && onlineUsers.includes(data.username))
+            socketMapping.set(data.username, s);
+    });
+});
+
+io.sockets.on('disconnect', (x: Socket) => {
+    console.log(`${x.id} was disconnected`);
+    for(var key in socketMapping.keys()){
+        if(socketMapping.get(key) && socketMapping.get(key) === x)
+            socketMapping.delete(key);
+    }
+});
+
 
 app.get('/user/:email', async (req, res, next) => {
     const email = req.params.email;
@@ -104,7 +121,9 @@ app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) =>
 
     requested.set(user, withwho);
     //withwho gets request with socketio
-    io.emit(`${withwho}_requestconversation`, JSON.stringify({user}))
+
+    socketMapping.get(withwho)?.emit("requestConversation", {user});
+
 })
 
 app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => {
