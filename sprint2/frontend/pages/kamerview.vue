@@ -1,51 +1,31 @@
 <template>
   <main class="kamerpage">
     <div class="kamer">
-      <ul id="templateUserList">
-        <li v-for="item in items" :key="item.user">
-          <div class="user">
-            <div class="popupBox">
-              <span class="userHover">
-                Gebruikersnaam: {{ item.user }}
-                Status: Beschikbaar
-              </span>
-            </div>
-          </div>
-        </li>
-      </ul>
+      <userIcon v-bind:items="items"></userIcon>
     </div>
-    <div class="sidebar">
-      <div class="sidebar-header">
-        TemplateRoom 01
-      </div>
-      <div class="sidebar-items">
-        <div class="sidebar-content">
-          <ul id="templateUserList">
-            <li v-for="item in items" :key="item.user">
-              <div v-if="item.user.toLowerCase().includes(message.toLowerCase())">
-                {{ item.user }}
-              </div>
-            </li>
-          </ul>
-        </div>
-        <div class="sidebar-search-bar">
-          <input v-model='message' type="text" placeholder="Search for users">
-        </div>
-      </div>
-    </div>
-
+    <sidebar roomName="templateRoom01" v-bind:items="items"></sidebar>
   </main>
 </template>
 
 <script>
+
+import sidebar from '../components/sidebar'
+import userIcon from '../components/userIcon'
+
 export default {
+
+  components: {
+     sidebar,
+     userIcon
+  },
+
   data() {
+    
     return { 
       items: [
         { user: 'Richard' },
         { user: 'Wouter' }
-      ],
-      message:"",
+      ]
     }
   }
 }
@@ -69,62 +49,6 @@ export default {
   width: 82%;
   left: 3%;
   position: fixed;
-}
-
-.user{
-  width: 50px;
-  height: 50px;
-  -webkit-border-radius: 25px;
-  -moz-border-radius: 25px;
-  border-radius: 25px;
-  background: red;
-  postion: relative;
-}
-
-
-.user .popupBox{
-  @apply bg-gray-400 rounded;
-  width: 400%;
-  position: relative;
-  left: 55px;
-  top: 2px;
-  visibility: hidden;
-}
-
-.user:hover .popupBox{
-  visibility: visible;
-}
-
-.sidebar{
-  @apply bg-white rounded shadow-lg;
-  height: 90%;
-  width: 10%;
-  min-width: 150px;
-  position: fixed;
-  right: 3%;
-}
-
-
-.sidebar-header{
-  @apply text-xl px-1 py-1 flex flex-col items-center justify-center;
-}
-
-.sidebar-items{
-  
-}
-
-.sidebar-content{
-  @apply px-1;
-  height: 90%;
-  position: relative;
-}
-
-.sidebar-search-bar input{
-  @apply px-1 border-t-2 border-gray-800;
-  position: absolute;
-  left: 1%;
-  bottom: 0.2%;
-  width: 98%;
 }
 
 </style>
