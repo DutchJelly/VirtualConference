@@ -10,48 +10,41 @@
 // import Vue from 'vue'
 // import VueSocketIO from 'vue-socket.io'
 
-import ConformationPrompt from '../components/conformation_prompt'
+// import Vue from 'vue';
+import moment from 'moment';
+
 
 export default {
     name: 'Jitsi',
-    components: {
-        ConformationPrompt
-    },
     data(){
         return{
-            username: this.$route.fullPath.substr(this.$route.fullPath.lastIndexOf('?')+1) || null,
+            username: this.$route.query.username,
             message: "",
             users: [],
             pendingRequest: false,
             socket: null,
-        }
+        };
     },
     async mounted(){
-        try{
-            var response = await this.$axios(`http://localhost:5000/testlogin/${this.username}`);
-            this.users = response.data.online;
-        }catch(exception){
-            this.message = `login failed for ${this.username}`
-            return;
-        }
+        var response = await this.$axios(
+            `http://localhost:5000/testlogin/${this.username}`
+        );
 
         this.socket = this.$nuxtSocket({
             name: "home",
         });
-        this.socket.on("requestConversation", (msg, cb) => {
-            alert("hello");
-        })
+        //Incoming socket events:
+        this.socket.on("requestConversation", (data) => {
 
-        
-        console.log("emitting register event");
-        this.socket.emit("register", {
-            data: {username: this.username}
-        })
-
+        });
         this.socket.on("message", (data) => {
             console.log("Received this message from the server:", data);
         });
-        this.socket.emit("getMessage", { time: new Date() });
+
+        //The server doesn't know what user is using this socket, tell the server.
+        this.socket.emit("register", {username: this.username});
+
+        this.users = response.data.online;
     },
     
     methods: {

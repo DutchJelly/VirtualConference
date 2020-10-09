@@ -13,8 +13,9 @@ env.config();
 export const app = express();
 export const socketPort = process.env.SOCKET_PORT;
 export const apiPort = process.env.API_PORT;
-export const httpServer = require('http').createServer(app);
-const io = socketio(httpServer);
+export const server = require("http").createServer(app);
+const io = socketio(server);
+
 
 app.use(
     cors({
@@ -37,20 +38,19 @@ var socketMapping = new Map<string, Socket>();
 
 //Handle socket connections
 io.on('connection', (socket) => {
-    console.log(`${socket.id} was connected`);
+    console.log(`[SocketIO:connection] A client with socket id ${socket.id} was connected.`);
+    
     socket.on("register", (data) => {
-        console.log('received register event');
-        if(data.username && onlineUsers.includes(data.username))
+        if(!data || !data.username) 
+            return;
+        console.log(`[SocketIO:register] User "${data.username}" wants to authenticate on socket ${socket.id}.`);
+        if(data.username && onlineUsers.includes(data.username)){
             socketMapping.set(data.username, socket);
+            console.log(`[SocketIO:register] Socket "${socket.id}" is now linked to the user "${data.username}".`)
+        }
     });
 
-    socket.on("getMessage", (data) => {
-        console.log("Received getMessage with this data:", { data });
-        socket.emit("message", {
-            message: `Hello from the server at ${new Date().toISOString()}`,
-        });
-        console.log(`Sent message back to ${socket.id}`);
-    });
+    //TODO add periodic socketio event handling here to see if a user is online 
 });
 
 //API requests
