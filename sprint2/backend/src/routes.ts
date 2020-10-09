@@ -4,45 +4,56 @@ import { User } from "./entity/User";
 import { validate} from "class-validator"
 import {compareSync} from "bcrypt"
 import {verify, sign, decode} from "jsonwebtoken"
-import { Socket } from "socket.io";
+import socketio, { Socket } from "socket.io";
 
 
 const env = require('dotenv');
 env.config();
 
-const app = express();
+export const app = express();
+export const socketPort = process.env.SOCKET_PORT;
+export const apiPort = process.env.API_PORT;
+export const httpServer = require('http').createServer(app);
+const io = socketio(httpServer);
 
-export const apiPort = process.env.API_PORT
-export const http = require('http').createServer(app);
-const io = require('socket.io')(http);
+app.use(
+    cors({
+        origin: "*"
+    })
+);
 
-app.use(cors({
-    origin: "*"
-}))
+//testing jitsi rooms
+var onlineUsers:string[] = [];
 
+//map user to a user that he requested
+var requested = new Map<string, string>();
+
+//map room to list of users
+var rooms = new Map<string, string[]>();
+
+//map username to the socket they're on
 var socketMapping = new Map<string, Socket>();
-var allSockets:Socket[] = [];
 
-io.sockets.on('connection', (s: Socket) => {
-    console.log(`${s.id} was connected`);
-    s.on('register', (data) => {
+
+//Handle socket connections
+io.on('connection', (socket) => {
+    console.log(`${socket.id} was connected`);
+    socket.on("register", (data) => {
         console.log('received register event');
         if(data.username && onlineUsers.includes(data.username))
-            socketMapping.set(data.username, s);
+            socketMapping.set(data.username, socket);
     });
-    allSockets.push(s);
+
+    socket.on("getMessage", (data) => {
+        console.log("Received getMessage with this data:", { data });
+        socket.emit("message", {
+            message: `Hello from the server at ${new Date().toISOString()}`,
+        });
+        console.log(`Sent message back to ${socket.id}`);
+    });
 });
 
-io.sockets.on('disconnect', (x: Socket) => {
-    console.log(`${x.id} was disconnected`);
-    for(var key in socketMapping.keys()){
-        if(socketMapping.get(key) && socketMapping.get(key) === x)
-            socketMapping.delete(key);
-    }
-    
-});
-
-
+//API requests
 app.get('/user/:email', async (req, res, next) => {
     const email = req.params.email;
     const token = req.headers.authorization
@@ -93,15 +104,7 @@ app.post('/login', json(), async (req, res, next) => {
     res.status(200).json({token: loginToken})
 })
 
-// Testing jitsi rooms
 
-var onlineUsers:string[] = [];
-
-//map user to a user that he requested
-var requested = new Map<string, string>();
-
-//map room to list of users
-var rooms = new Map<string, string[]>();
 
 
 app.get('/testlogin/:username', json(), async (req, res, next) => {
@@ -110,8 +113,6 @@ app.get('/testlogin/:username', json(), async (req, res, next) => {
     if(!onlineUsers.includes(username))
         onlineUsers.push(username);
     res.status(200).json({message: `you logged in`, online: onlineUsers})
-
-
 })
 
 app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) => {
@@ -130,7 +131,6 @@ app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) =>
 
     console.log('sent a socket event of requestConversation');
     socketMapping.get(withwho)?.emit("requestConversation", {user});
-
 })
 
 app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => {
@@ -158,7 +158,6 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     requested.delete(withwho);
 
     //Notify withWho that user has accepted the conversation.
-    io.emit(`${withwho}_acceptconversation`, JSON.stringify({user, room: "room"}))
 
     //Return the room name to user.
     res.status(200).json({user: withwho, room: "room"});
@@ -167,12 +166,14 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 app.get('/test', json(), (req, res, next) => {
     io.emit("test", "hello");
     res.status(200).json({hi: "hello"});
-
-    allSockets.forEach(x => x.emit("requestConversation", "test"));
+    for(var key in socketMapping){
+        socketMapping.get(key)?.emit("test", "hello world");
+    }
 })
 
 app.get('/')
 
+//404 not found error for API if no route matched
 app.use((req, res) => {
     if (!res.headersSent)
         res.status(404).json({error: 'This route could not be found'})

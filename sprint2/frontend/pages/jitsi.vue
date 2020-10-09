@@ -22,38 +22,36 @@ export default {
             username: this.$route.fullPath.substr(this.$route.fullPath.lastIndexOf('?')+1) || null,
             message: "",
             users: [],
-            pendingRequest: false
+            pendingRequest: false,
+            socket: null,
         }
-    },
-    beforeMount(){
-        this.socket = this.$nuxtSocket({
-            channel: '/index'
-        })
-        this.socket.on('requestConversation', (msg, cb) => {
-            alert("hello");
-        })
     },
     async mounted(){
         try{
             var response = await this.$axios(`http://localhost:5000/testlogin/${this.username}`);
             this.users = response.data.online;
-            await this.socket.emit('register', {
-                data: {username: this.username}
-            }, (resp) => { })
         }catch(exception){
-            // alert(exception);
             this.message = `login failed for ${this.username}`
+            return;
         }
-    },
-    sockets: {
-        connect() {
-            alert("socket was connected");
-        },
-        requestConversation(data){
-            alert(data);
-            this.message = "ermm"
-            this.pendingRequest = true;
-        }
+
+        this.socket = this.$nuxtSocket({
+            name: "home",
+        });
+        this.socket.on("requestConversation", (msg, cb) => {
+            alert("hello");
+        })
+
+        
+        console.log("emitting register event");
+        this.socket.emit("register", {
+            data: {username: this.username}
+        })
+
+        this.socket.on("message", (data) => {
+            console.log("Received this message from the server:", data);
+        });
+        this.socket.emit("getMessage", { time: new Date() });
     },
     
     methods: {
