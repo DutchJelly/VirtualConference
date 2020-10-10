@@ -71,7 +71,7 @@ export default {
       }
       // const response = await this.$axios("http://localhost:5000");
       // console.log({ response });
-      window.location.href = `/jitsi?username=${this.username}`;
+      window.location.href = `/jitsi?username=${this.loginForm.username}`;
       // this.$router.push("/overview");
     },
     handleTempError() {
