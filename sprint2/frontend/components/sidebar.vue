@@ -1,7 +1,7 @@
 <template>
     <main class="sidebar">
         <div class="sidebar-header">{{roomName}}</div>
-        <userList v-bind:items="items" v-bind:contains="message" class="sidebar-content"></userList>
+        <UserList :onUserClick="onUserClick" v-bind:items="items" v-bind:contains="message" class="sidebar-content"></UserList>
         <div class="sidebar-search-bar">
             <input v-model='message' type="text" placeholder="Search for users">
         </div>
@@ -10,15 +10,13 @@
 
 <script>
 
-import userList from './userList'
 
 export default {
+    name: 'SideBar',
     props: {
         roomName: String,
         items: Array,
-    },
-    components: {
-        userList
+        onUserClick: Function,
     },
 
     data() {

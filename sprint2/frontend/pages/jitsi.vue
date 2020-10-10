@@ -1,6 +1,13 @@
 <template>
-  <div class="main">
+  <div class="main kamerpage">
     
+
+    <TimedInfoMessageBox v-if="info" :message="info" time="2"/>
+    <div class="kamer">
+      <UserIcon :items="users"></UserIcon>
+    </div>
+    <Sidebar :onUserClick="conversations().sendRequest" roomName="templateRoom01" :items="users"></Sidebar>
+
     <Conference
         class="absolute-center"
         v-show="conversation.room !== ''"
@@ -16,15 +23,6 @@
         :onDecline="conversations().declineRequest"
         :user="conversationRequest.user" 
     />
-
-    <TimedInfoMessageBox v-if="info" :message="info" time="5"/>
-    <ul>
-        <li v-for="(item, index) in users" :key="index">
-            <button class="user" @click.prevent="conversations().sendRequest(item)"> 
-                {{item}} 
-            </button>
-        </li>
-    </ul>
       
   </div>
 </template>
@@ -39,7 +37,9 @@ export default {
         return{
             username: this.$route.query.username,
             info: "", //when updating info the timed message box will automatically update
-            users: [],
+            users: [
+                
+            ],
             socket: null,
 
             conversation: {
@@ -82,8 +82,10 @@ export default {
         //Temporary way to handle users 'loggin on'
         this.socket.on("testlogin", (data) => {
             if(!data || !data.online) return;
-
-            this.users = data.online;
+            
+            for(var online of data.online){
+                this.users.push({user: online});
+            }
         });
 
         this.socket.on("requestAccepted", (data) => {
@@ -99,7 +101,9 @@ export default {
         //The server doesn't know what user is using this socket, tell the server.
         this.socket.emit("register", {username: this.username});
 
-        this.users = response.data.online;
+        for(var online of response.data.online){
+            this.users.push({user: online});
+        }
     },
     methods: {
 
@@ -113,12 +117,12 @@ export default {
             return{
                 sendRequest: async function(withWho){
                     console.log("hello world");
-                    if(self.username === withWho){
-                        self.message = "you cannot click on yourself";
+                    if(self.username === withWho.user){
+                        self.info = "you cannot invite yourself to a conversation";
                         return;
                     }
                     self.message = "";
-                    await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${withWho}`);
+                    await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${withWho.user}`);
                 },
                 
                 acceptRequest: async function(withWho){
@@ -182,6 +186,24 @@ export default {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%)
+}
+
+.kamerpage{
+  @apply w-full min-h-screen flex flex-col items-center justify-center;
+  background: black url("../static/login_background.svg") no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+  transform: scale(1.02);
+}
+
+.kamer{
+  @apply bg-white rounded shadow-lg p-5;
+  height: 90%;
+  width: 82%;
+  left: 3%;
+  position: fixed;
 }
 
 </style>

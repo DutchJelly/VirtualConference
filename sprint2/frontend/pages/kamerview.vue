@@ -1,23 +1,15 @@
 <template>
   <main class="kamerpage">
     <div class="kamer">
-      <userIcon v-bind:items="items"></userIcon>
+      <UserIcon v-bind:items="items"></UserIcon>
     </div>
-    <sidebar roomName="templateRoom01" v-bind:items="items"></sidebar>
+    <Sidebar roomName="templateRoom01" v-bind:items="items"></Sidebar>
   </main>
 </template>
 
 <script>
 
-import sidebar from '../components/sidebar'
-import userIcon from '../components/userIcon'
-
 export default {
-
-  components: {
-     sidebar,
-     userIcon
-  },
 
   data() {
     
