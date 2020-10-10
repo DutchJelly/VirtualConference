@@ -4,8 +4,8 @@
       <span class="user">{{this.user}}</span> wants to start a conversation with you
     </div>
     <div class="buttons">
-      <button id="accept">Accept</button>
-      <button id="decline">Decline</button>
+      <button id="accept" @click.prevent="onAccept(user)">Accept</button>
+      <button id="decline" @click.prevent="onDecline(user)">Decline</button>
     </div>
   </main>
 </template>
@@ -15,16 +15,15 @@
 export default {
   name: 'ConformationPrompt',
   props: {
-    user: String
+    user: String,
+    onAccept: Function,
+    onDecline: Function
   },
 
   data() {
     return {
     
     };
-  },
-  created: function(){
-  
   },
   methods: {
     

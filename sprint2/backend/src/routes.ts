@@ -100,6 +100,7 @@ app.post('/login', json(), async (req, res, next) => {
     }
     // TODO: use proper secret key
     // or use sessions (with redis)
+
     const loginToken = sign({username}, `secret`)
     res.status(200).json({token: loginToken})
 })
@@ -110,9 +111,14 @@ app.post('/login', json(), async (req, res, next) => {
 app.get('/testlogin/:username', json(), async (req, res, next) => {
     var username = req.params.username;
     console.log(`a user logged in: ${username}`);
-    if(!onlineUsers.includes(username))
-        onlineUsers.push(username);
-    res.status(200).json({message: `you logged in`, online: onlineUsers})
+    if(onlineUsers.includes(username)){
+        res.status(200).json({message: `you logged in`, online: onlineUsers});
+        return;
+    }
+    onlineUsers.push(username);
+    res.status(200).json({message: `you logged in`, online: onlineUsers});
+
+    io.emit('testlogin', {online: onlineUsers});
 })
 
 app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) => {
@@ -131,6 +137,7 @@ app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) =>
 
     console.log('sent a socket event of requestConversation');
     socketMapping.get(withwho)?.emit("requestConversation", {user});
+    res.status(200).json({message: `sent a request to ${withwho}`});
 })
 
 app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => {
@@ -161,14 +168,6 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 
     //Return the room name to user.
     res.status(200).json({user: withwho, room: "room"});
-})
-
-app.get('/test', json(), (req, res, next) => {
-    io.emit("test", "hello");
-    res.status(200).json({hi: "hello"});
-    for(var key in socketMapping){
-        socketMapping.get(key)?.emit("test", "hello world");
-    }
 })
 
 app.get('/')
