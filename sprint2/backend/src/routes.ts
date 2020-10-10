@@ -165,9 +165,32 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     requested.delete(withwho);
 
     //Notify withWho that user has accepted the conversation.
+    socketMapping.get(withwho)?.emit("requestAccepted", {user, room: "room1234123123132"});
 
     //Return the room name to user.
-    res.status(200).json({user: withwho, room: "room"});
+    res.status(200).json({user: withwho, room: "room1234123123132"});
+})
+
+app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) => {
+    var user = req.params.name;
+    var withwho = req.params.withwho;
+
+    console.log(`decline conversation user: ${user}, withWho: ${withwho}`);
+
+    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
+        console.log(`decline not successful because on of the users was not online. Passed user args: [${user}, ${withwho}]`);
+        res.status(400).json({message: "error, one of the users is not online"});
+        return;
+    }
+
+    if(requested.get(withwho) !== user){
+        console.log("decline not successful because no request was opened");
+        res.status(400).json({message: "no request is opened"});
+        return;
+    }
+    requested.delete(withwho);
+    socketMapping.get(withwho)?.emit("requestDeclined", {user});
+    res.status(200).json({message: "request was declined"});
 })
 
 app.get('/')

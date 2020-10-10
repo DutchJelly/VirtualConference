@@ -2,7 +2,7 @@
   <main class="info-container">
     <div :class="'timed-info-message ' + (!show ? 'hide' : '')">
       <span class="info-label">Info: </span>
-      {{this.message}}
+      {{this.currentMessage}}
     </div>
   </main>
 </template>
@@ -28,7 +28,7 @@ export default {
     message: function(newVal, oldVal) {
       //If the timer of another message is still 
       //running, we add the message to a queue.
-      if(this.timeout) {
+      if(this.timeout != null) {
         //TODO: this seems to be ignored.. New messages are not waiting for previous messages.
         this.nonShown.push(newVal);
         return;
@@ -45,7 +45,7 @@ export default {
   methods: {
     startTimer: function(){
       //Don't start another timer if one is running already.
-      if(this.timeout) return;
+      if(this.timeout != null) return;
 
       this.timeout = setTimeout(() => {
         //At the end of the timeout, we set the timeout to null again.
@@ -53,7 +53,7 @@ export default {
 
         //If there's some element in the list of non shown messages, we
         //show that and start another timer.
-        if(this.nonShown.length){
+        if(this.nonShown.length > 0){
           this.currentMessage = this.nonShown[0];
           this.nonShown.shift();
           this.startTimer();

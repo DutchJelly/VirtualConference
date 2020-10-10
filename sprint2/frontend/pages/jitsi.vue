@@ -1,9 +1,17 @@
 <template>
   <div class="main">
     
+    <Conference
+        class="absolute-center"
+        v-show="conversation.room !== ''"
+        :user="this.username"
+        :withWho="conversation.user"
+        :room="conversation.room"
+    />
+
     <ConformationPrompt 
         class="absolute-center" 
-        v-if="conversationRequest.pending"
+        v-show="conversationRequest.pending"
         :onAccept="conversations().acceptRequest"
         :onDecline="conversations().declineRequest"
         :user="conversationRequest.user" 
@@ -33,6 +41,12 @@ export default {
             info: "", //when updating info the timed message box will automatically update
             users: [],
             socket: null,
+
+            conversation: {
+                room: "",
+                user: "",
+            },
+            
             conversationRequest: {
                 pending: false,
                 user: "none",
@@ -72,6 +86,16 @@ export default {
             this.users = data.online;
         });
 
+        this.socket.on("requestAccepted", (data) => {
+            this.info = `${data.user} accepted your conversation request`;
+            this.conversation.user = data.user;
+            this.conversation.room = data.room;
+        });
+
+        this.socket.on("requestDeclined", (data) => {
+            this.info = `${data.user} declined your conversation request`;
+        });
+
         //The server doesn't know what user is using this socket, tell the server.
         this.socket.emit("register", {username: this.username});
 
@@ -96,27 +120,56 @@ export default {
                     self.message = "";
                     await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${withWho}`);
                 },
-                acceptRequest: function(withWho){
-                    self.socket.emit("acceptJitsiRequest", {user: self.username, withWho});
-                    self.conversationRequest.pending = false;
-                    self.conversationRequest.user = "none";
+                
+                acceptRequest: async function(withWho){
+                    var response = undefined;
+                    try{
+                        response = await self.$axios(`http://localhost:5000/acceptconversation/${self.username}/${withWho}`);
 
-                    //Automatically decline all other requests that were sent after the accepted one.
-                    self.conversationRequest.pendingQueue.forEach(element => {
-                        this.declineRequest(element);
-                    });
-                    self.conversationRequest.pendingQueue = [];
+                        self.conversationRequest.pending = false;
+                        self.conversationRequest.user = "none";
+
+                        self.conversation.user = withWho;
+                        self.conversation.room = response.data.room;
+
+                        //Automatically decline all other requests that were sent after the accepted one.
+
+                        for(var pendingUser in self.conversationRequest.pendingUsers){
+                            this.declineRequest(pendingUser);
+                        }
+                        // self.conversationRequest.pendingUsers.forEach(element => {
+                        //     this.declineRequest(element);
+                        // });
+                        self.conversationRequest.pendingUsers = [];
+                        
+                    }catch(error){
+                        self.conversationRequest.pending = false;
+                        self.conversationRequest.user = "none";
+                        self.info = "something went wrong with accepting the request";
+                    }
                 },
-                declineRequest: function(withWho){
-                    self.socket.emit("declineJitsiRequest", {user: self.username, withWho});
-                    if(self.conversationRequest.pendingQueue.length){
-                        self.conversationRequest.user = pendingQueue[0];
-                        pendingQueue.shift();
+                declineRequest: async function(withWho){
+                    var response = undefined;
+                    response = await self.$axios(`http://localhost:5000/declineconversation/${self.username}/${withWho}`);
+                    if(self.conversationRequest.pendingUsers.length > 0){
+                        self.conversationRequest.user = self.conversationRequest.pendingUsers[0];
+                        self.conversationRequest.pendingUsers.shift();
                         return;
                     }
                     self.conversationRequest.pending = false;
                     self.conversationRequest.user = "none";
-                }
+                    // try{
+                        
+                    // }catch(error){
+                    //     if(response && response.data.message){
+                    //         self.info = response.data.message;
+                    //     }else{
+                    //         self.info = "something went wrong";
+                    //     }
+                    // }
+                    
+                },
+                
             }
         }
     }

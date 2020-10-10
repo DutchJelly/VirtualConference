@@ -1,11 +1,11 @@
 <template>
   <main class="conformation-window">
     <div class="message">
-      <span class="user">{{this.user}}</span> wants to start a conversation with you
+      <span class="user">{{user}}</span> wants to start a conversation with you
     </div>
     <div class="buttons">
-      <button id="accept" @click.prevent="onAccept(user)">Accept</button>
-      <button id="decline" @click.prevent="onDecline(user)">Decline</button>
+      <button id="accept" @click.prevent="onAccept(user);">Accept</button>
+      <button id="decline" @click.prevent="onDecline(user);">Decline</button>
     </div>
   </main>
 </template>
@@ -17,7 +17,7 @@ export default {
   props: {
     user: String,
     onAccept: Function,
-    onDecline: Function
+    onDecline: Function,
   },
 
   data() {
