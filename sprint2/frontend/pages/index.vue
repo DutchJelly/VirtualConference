@@ -69,8 +69,9 @@ export default {
         this.handleTempError();
         return;
       }
-      const response = await this.$axios("http://localhost:5000");
-      console.log({ response });
+      // const response = await this.$axios("http://localhost:5000");
+      // console.log({ response });
+      window.location.href = `/jitsi?username=${this.username}`;
       // this.$router.push("/overview");
     },
     handleTempError() {
