@@ -15,6 +15,7 @@
 |07-10-2020 | 19:00-22:30 | MS teams | Meeting 9 with TTC (Milou en Luuk) |
 |07-10-2020 | 14:00-15:02 | MS teams | Meeting 9 with TTC (Wouter en Richard) |
 |08-10-2020 | 16:15-18:06 | MS teams | Meeting 10 with TTC |
+|10-10-2020 | 09:00-00:00 | Discord | Meeting 11 with TTC (Luuk en Milou) |
 
 ### Planned meetings
 | date | time | where | info |
