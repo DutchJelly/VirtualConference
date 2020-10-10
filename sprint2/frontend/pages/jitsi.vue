@@ -30,7 +30,7 @@ export default {
     data(){
         return{
             username: this.$route.query.username,
-            info: "",
+            info: "", //when updating info the timed message box will automatically update
             users: [],
             socket: null,
             conversationRequest: {
@@ -81,6 +81,8 @@ export default {
 
         //Nested functions are not possible. This is the next best thing.
         conversations: function(){
+            //We have to save the 'this' in a variable because the context
+            //is different for these nested functions.
             var self = this;
             
             //Return all functions as json.
