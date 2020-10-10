@@ -26,34 +26,49 @@ export default {
   watch: {
     //Function that fires when message prop changes
     message: function(newVal, oldVal) {
-
-      if(this.timeout != null) {
+      //If the timer of another message is still 
+      //running, we add the message to a queue.
+      if(this.timeout) {
+        //TODO: this seems to be ignored.. New messages are not waiting for previous messages.
         this.nonShown.push(newVal);
         return;
       } 
+
+      //When getting a new prop value we are adjusting the state to show it.
       this.currentMessage = newVal;
       this.show = true;
+
+      //Start a timer for making the message dissapear again.
       this.startTimer();
     }
   },
   methods: {
     startTimer: function(){
-      if(this.timeout != null) return;
+      //Don't start another timer if one is running already.
+      if(this.timeout) return;
 
       this.timeout = setTimeout(() => {
-        //if the timeout ends and there's an element not shown, start a new one.
+        //At the end of the timeout, we set the timeout to null again.
         this.timeout = null;
+
+        //If there's some element in the list of non shown messages, we
+        //show that and start another timer.
         if(this.nonShown.length){
           this.currentMessage = this.nonShown[0];
           this.nonShown.shift();
           this.startTimer();
-        }else{
+        }
+        
+        //If there's no other message to show, we simply hide the element again.
+        else{
           this.show = false;
         }
       }, this.time*1000);
     }
   },
   mounted(){
+    //Ensure that the props message gets added to the state when the component
+    //is created.
     if(this.message){
       this.currentMessage = this.message;
       this.startTimer();
