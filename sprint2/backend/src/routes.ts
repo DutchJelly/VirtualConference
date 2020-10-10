@@ -5,7 +5,7 @@ import { validate} from "class-validator"
 import {compareSync} from "bcrypt"
 import {verify, sign, decode} from "jsonwebtoken"
 import socketio, { Socket } from "socket.io";
-
+import randomstring from "randomstring";
 
 const env = require('dotenv');
 env.config();
@@ -155,20 +155,39 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         return;
     }
 
-    for(var value in rooms.values()){
+    for(var value of rooms.values()){
         if(value.includes(withwho)){
             res.status(400).json({message: "user is already in conversation"});
             return;
         }
     }
 
-    requested.delete(withwho);
+    var userIsInRoom = false;
+    var roomName = "";
+    for(var room of rooms.keys()){
+        if(rooms.get(room)?.includes(user)){
+            userIsInRoom = true;
+            roomName = room;
+        }
+    }
 
+    if(userIsInRoom){
+        //If user is in room already, add withwho to it.
+        rooms.get(roomName)?.push(withwho);
+    }else{
+        //If not, create a new room with the two users.
+        roomName = randomstring.generate();
+        rooms.set(roomName, [user, withwho]);
+    }
+    
+    //Delete withwho from requested mapping because request is answered.
+    requested.delete(withwho);
+    
     //Notify withWho that user has accepted the conversation.
-    socketMapping.get(withwho)?.emit("requestAccepted", {user, room: "room1234123123132"});
+    socketMapping.get(withwho)?.emit("requestAccepted", {user, room: roomName});
 
     //Return the room name to user.
-    res.status(200).json({user: withwho, room: "room1234123123132"});
+    res.status(200).json({user: withwho, room: roomName});
 })
 
 app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) => {

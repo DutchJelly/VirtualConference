@@ -83,6 +83,7 @@ export default {
         this.socket.on("testlogin", (data) => {
             if(!data || !data.online) return;
             
+            this.users = [];
             for(var online of data.online){
                 this.users.push({user: online});
             }
@@ -149,7 +150,8 @@ export default {
                     }catch(error){
                         self.conversationRequest.pending = false;
                         self.conversationRequest.user = "none";
-                        self.info = "something went wrong with accepting the request";
+                        self.info = error;
+                        // self.info = "something went wrong with accepting the request";
                     }
                 },
                 declineRequest: async function(withWho){
