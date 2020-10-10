@@ -18,9 +18,15 @@
     "@nuxtjs/axios": "^5.12.2",
     "core-js": "^3.6.5",
     "global": "^4.4.0",
+    "moment": "^2.29.1",
     "nuxt": "^2.14.6",
+    "nuxt-socket-io": "^1.1.11",
+    "socket.io-client": "^2.3.1",
     "typeorm": "^0.2.26",
-    "vue-plugin-load-script": "^1.3.2"
+    "vue-plugin-load-script": "^1.3.2",
+    "vue-resource": "^1.5.1",
+    "vue-socket.io": "^3.0.10",
+    "vue-socket.io-extended": "^4.0.5"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^3.1.0",

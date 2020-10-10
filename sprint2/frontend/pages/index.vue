@@ -43,7 +43,6 @@
 
 export default {
 
-
   data() {
     return {
       loginForm: {
@@ -104,6 +103,12 @@ body{
   @apply text-4xl text-white bg-gray-700 w-full text-center p-5 bg-opacity-75;
   position: absolute;
   top: 0px;
+}
+
+@media only screen and (max-width: 450px) {
+  .banner{
+    @apply text-2xl;
+  }
 }
 
 .login-prompt {
