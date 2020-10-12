@@ -2,7 +2,7 @@
     <main class="sidebar-content">
         <ul v-for="item in items" :key="item.user">
             <div v-if="item.user.toLowerCase().includes(contains.toLowerCase())">
-                <button class="user" @click.prevent="onUserClick(item)">
+                <button class="user">
                     {{ item.user }}
                 </button>
             </div>
@@ -17,7 +17,6 @@ export default {
     props: {
         items: Array,
         contains: String,
-        onUserClick: Function,
     },
 }
 </script>
