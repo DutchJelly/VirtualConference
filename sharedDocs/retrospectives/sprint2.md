@@ -18,20 +18,20 @@
 
 ### issues die we wel terugschuiven
 
-**Kamerview - frontend** (ready)
+**Kamerview - frontend** (ready) *frontend*
 De kamerview is gemaakt, en werkte voor de demo. Er is besloten dat dit issue echter nog niet helemaal klaar was: de stijl is nog niet helemaal zoals in de ontwerpen, en kan dus nog wat werk gebruiken.
 
-**Userlist - frontend** (ready)
+**Userlist - frontend** (ready) *frontend*
 Hier geldt hetzelfde als de kamerview: de stijl (css) moet nog even worden aangepast/geschreven.
 
-**Gesprek management** (ready)
-Het gesprek management mist nog de optie om conversatietypes te ondersteunen. Dit moet nog worden toegevoegd aan de backend. Ook zou er met een database gewerkt kunnen/moeten worden zodat de applicatie niet kapot gaan wanneer de backend opnieuw opstart. *dit is een backend issue*
+**Gesprek management** (ready) *backend*
+Het gesprek management mist nog de optie om conversatietypes te ondersteunen. Dit moet nog worden toegevoegd aan de backend. Ook zou er met een database gewerkt kunnen/moeten worden zodat de applicatie niet kapot gaan wanneer de backend opnieuw opstart. 
 
-**Login handling** (ready)
-Het inloggen werkt nu helemaal op zichzelf alleen met een gebruikersnaam en wachtwoord. Er moet nu met sessies gewerkt worden, en moeten er socket updates worden gegeven 'on-login'.
+**Login handling** (ready) *backend*
+Het inloggen werkt nu helemaal op zichzelf alleen met een gebruikersnaam en wachtwoord. Er moet nu met sessies gewerkt worden, en moeten er socket updates worden gegeven 'on-login'. 
 
-**Jitsi GUI** (ready)
-Op de demo deed de embedded jitsi-conferentie het. Hier willen we echter nog veel functies aan toevoegen. Wat er nog miste was de optie om op te hangen, maar dit zal worden geimplementeerd in een issue die meer over de API van jitsi gaat.
+**Jitsi GUI** (done) *frontend*
+Op de demo deed de embedded jitsi-conferentie het. Hier willen we echter nog veel functies aan toevoegen. Wat er nog miste was de optie om op te hangen, maar dit zal worden geimplementeerd in een issue die meer over de API van jitsi gaat. Dit was ook geen gespecificeerde functie van dit issue.
 
 ### issues die nog in progress waren
 
@@ -62,9 +62,6 @@ Dit is niet gedaan omdat er nog weinig formele 'routes' waren in onze API. Ook z
 
 # Nieuwe issues
 
-**userlist data**
-Alle benodigde userdata moet goed worden gerepresenteerd in de userlist component.
-
 **sorteren gebruikersiconen**
 De gebruikersiconen die in de kamer 'rondlopen' moeten ook gesorteerd/gehighlight worden als de gebruikerslijst wordt gesorteerd.
 
@@ -72,7 +69,13 @@ De gebruikersiconen die in de kamer 'rondlopen' moeten ook gesorteerd/gehighligh
 Jitsi moet worden veranderd naar een component met modulaire functies zoals 'onHangup', 'onJoin', etc. De jitsi API heeft heel veel events die gebruikt kunnen worden. Ook moet dit natuurlijk groepen en de conversatietypes ondersteunen. Dit is handig om te doen na/met de 'gespreksmanagement' issue. 
 
 **registreer pagina**
-Gebruikers moeten kunnen registreren.
+Gebruikers moeten zich kunnen registreren.
+
+**frontend inlogsessie management**
+De frontend moet statisch, in de nuxt store bijvoorbeeld, een sessie bewaren van de ingelogde gebruiker.
+
+**coding standards updaten**
+De coding standards moeten worden aangepast zodat ze ook toepasselijk zijn voor het vue.js framework en onze express backend.
 
 # Takenverdeling voorkeuren
 **Luuk**: database/inloggin
