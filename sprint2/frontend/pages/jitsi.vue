@@ -4,9 +4,9 @@
 
     <TimedInfoMessageBox v-if="info" :message="info" time="2"/>
     <div class="kamer">
-      <UserIcon :onUserClick="conversations().sendRequest" :items="users"></UserIcon>
+      <UserIcon :items="users"></UserIcon>
     </div>
-    <Sidebar roomName="templateRoom01" :items="users"></Sidebar>
+    <Sidebar :onUserClick="conversations().sendRequest" roomName="templateRoom01" :items="users"></Sidebar>
 
     <Conference
         class="absolute-center"

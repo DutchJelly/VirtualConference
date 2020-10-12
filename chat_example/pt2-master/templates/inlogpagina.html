@@ -1,0 +1,21 @@
+{% from 'macro-veld.html' import weergaveveld %}
+{% extends "basis.html" %}
+
+{% block title %}Inloggen {% endblock %}
+
+{% block content %}
+    <h2>Log hier in!</h2>
+
+    <form action="{{ url_for('index') }}", method="POST">
+        {{ weergaveveld(form.gebruikersnaam, 'Gebruikersnaam', autocomplete="off", autofocus=true) }}
+        {{ weergaveveld(form.wachtwoord, 'Wachtwoord') }}
+        <div class="form-group">
+            <input type="submit" value="Inloggen" class="btn btn-warning">
+        </div>
+        {{ form.csrf_token }}
+    </form>
+
+    <hr>
+
+    <p>Nog niet geregistreerd? <a href={{url_for('registratie')}}><span style="color: #996699">Registreer hier</span></a>.</p>
+{% endblock %}
