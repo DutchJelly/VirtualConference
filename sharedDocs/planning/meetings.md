@@ -18,9 +18,10 @@
 |10-10-2020 | 09:00-11:15 | Discord | Meeting 11 with TTC (Luuk en Milou) |
 |10-10-2020 | 17:15-17:40 | MS teams | Meeting 12 with TTC (Jie, Jelle, Milou en Richard) |
 |12-10-2020 | 10:00-10:30 | Snellius room 405 | Meeting 3 with H. Basold |
+|12-10-2020 | 13:30-15:00 | Snellius room 405 | Meeting 13 with TTC |
+|14-10-2020 | 14:00-14:34 | MS teams | Meeting 14 with TTC |
 
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
-|08-10-2020 | 16:15-? | MS teams | Meeting 9 with TTC |
 |28-10-2020 | 15:00-? | MS teams | Meeting 4 with H. Basold |
