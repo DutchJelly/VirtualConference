@@ -1,9 +1,13 @@
 <template>
   <main class="kamerpage">
     <div class="kamer">
-      <UserIcon v-bind:items="items"></UserIcon>
+      <UserIcon v-bind:items="items"
+      v-bind:contains="value"></UserIcon>
     </div>
-    <Sidebar roomName="templateRoom01" v-bind:items="items"></Sidebar>
+    <Sidebar 
+      roomName="templateRoom01"
+      v-bind:items="items"
+      v-on:inputChange="handleChange"></Sidebar>
   </main>
 </template>
 
@@ -17,7 +21,14 @@ export default {
       items: [
         { user: 'Richard' },
         { user: 'Wouter' }
-      ]
+      ],
+      value: '',
+    }
+  },
+  methods: {
+    handleChange(event) {
+      const { value } = event.target;
+      this.value = value;
     }
   }
 }
