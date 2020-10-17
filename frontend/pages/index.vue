@@ -1,5 +1,3 @@
-var sessionKey = "";
-
 <template>
   <main class="login-page">
     
@@ -31,7 +29,9 @@ var sessionKey = "";
         </div>
       </div>
 
-      <button class="login-button" @click.prevent="login">Login</button>
+      <button class="login-button" @click.prevent="login">login</button>
+	  <button class="login-button" @click.prevent="logout">logout</button>
+		<button class="login-button" @click.prevent="debug">debug</button>
 
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
@@ -49,14 +49,11 @@ export default {
     return {
       loginForm: {
         username: "",
-        password: "",
+		password: "",
+		sessionKey: ""
       },
       error: null,
-	};
-	return {
-		sessionKey: ""
-	};
-	
+	};	
   },
   created: function(){
   
@@ -83,19 +80,44 @@ export default {
 		  password: this.loginForm.password
         }
 	  })
-	  console.log("TEST")
-	  console.log(response);
-	  sessionKey = response.data.sessionKey;
-	  console.log(sessionKey);
-	//   data: {
-	// 	  sessionKey: response.data.sessionKey
-	//   }
-	//   data();
-	  console.log("TEST")
+	//   console.log("TEST")
+	//   console.log(response);
+	//   console.log(response.data.sessionKey)
+	  this.sessionKey = response.data.sessionKey
+	//   console.log(this.sessionKey)
+	//   console.log("TEST")
       // console.log({ response });
     //   window.location.href = `/jitsi?username=${this.loginForm.username}`;
       // this.$router.push("/overview");
-    },
+	},
+	async logout() {
+		console.log("LOGOUT")
+	
+      if (this.timeout) clearTimeout(this.timeout);
+      this.error = null;
+      if (!this.sessionKey) {
+        this.error = `No session key`;
+        this.handleTempError();
+        return;
+	  }	 
+	  console.log("logout1") 
+		// req.setRequestHeader('Authorization','Basic' + this.sessionKey);
+		console.log("logout2") 
+	  const response = await this.$axios.post("http://localhost:5000/logout", {
+        data: {
+          sessionKey: this.sessionKey,
+		},
+		headers: {
+			authorization: this.sessionKey
+		}
+	  })
+	  console.log("logout3") 
+	  this.sessionKey = "";
+	},
+	async debug() {
+		const response = await this.$axios.get("http://localhost:5000/allUsers")
+		console.log(response.data)
+	},
     handleTempError() {
       if (this.timeout) clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {

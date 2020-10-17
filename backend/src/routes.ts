@@ -7,7 +7,8 @@ import {verify, sign, decode} from "jsonwebtoken"
 import socketio, { Socket } from "socket.io";
 import randomstring from "randomstring";
 import crypto from "crypto"
-import { loginRequired } from "./index"
+import { Handler } from "express" // Importeer het type Handler
+// import { loginRequired } from "./index"
 
 
 const env = require('dotenv');
@@ -20,6 +21,22 @@ namespace Express {
 		user?: User;
 		}
 	}
+}
+
+// We maken een functie loginRequired
+const loginRequired: Handler = async (req, res, next) => {
+    // Pak de token van de Authorization header van de request
+    const sessionKey = req.headers.authorization
+    if (!sessionKey)
+        throw Error(`Session token missing in Authorization header`)
+    // Er van uitgaande dat de column met tokens sessionToken heet:
+    const authenticatedUser = await User.findOne({sessionKey: sessionKey})
+    if (!authenticatedUser)
+        throw Error(`User provided token did not match any existing tokens`)
+    // We zetten de uit de database verkregen User op het request object, zodat die beschikbaar
+    // is voor volgende Handler functies die de request afwerken:
+    req.user = authenticatedUser;
+    next();
 }
 
 export const app = express();
@@ -163,32 +180,20 @@ app.post('/login', json(), async (req, res, next) => {
     res.status(200).json({sessionKey: sessionKey})
 })
 
-app.post('/logout', json(), function(req, res, next){loginRequired}, async (req, res, next) => {
+app.post('/logout', json(), loginRequired, async (req, res, next) => {
 	
-    const {username, password} = req.body.data;
+    const {username} = req.body.data;
     const user = await User.findOne({username})
     if (!user) {
-        res.status(400).json({error: `No registered user for email ${username}`})
+        res.status(400).json({error: `There was an error loggin out`})
         return;
 	}
 	console.log("TEST1")
-    const passwordsMatch = compareSync(password, user.password)
-    if (!passwordsMatch) {
-        res.status(400).json({error: `Username or password incorrect`})
-        return;
-	}
-	
-	console.log("TEST2")
-    // TODO: use proper secret key
-	// or use sessions (with redis)
-
-	var sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
-	console.log(sessionKey);
-	user.loginStatus = true;
-	user.sessionKey = sessionKey;
+	user.loginStatus = false;
+	user.sessionKey = "";
 	await user.save();
     // const loginToken = sign({username}, `secret`)
-    res.status(200).json({sessionKey: sessionKey})
+    res.status(200).json("User logged out")
 })
 
 
