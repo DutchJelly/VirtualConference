@@ -6,15 +6,28 @@ import {compareSync} from "bcrypt"
 import {verify, sign, decode} from "jsonwebtoken"
 import socketio, { Socket } from "socket.io";
 import randomstring from "randomstring";
+import crypto from "crypto"
+import { loginRequired } from "./index"
+
 
 const env = require('dotenv');
 env.config();
+
+//credits naar Sjors Holstrop
+declare global {
+namespace Express {
+		interface Request {
+		user?: User;
+		}
+	}
+}
 
 export const app = express();
 export const socketPort = process.env.SOCKET_PORT;
 export const apiPort = process.env.API_PORT;
 export const server = require("http").createServer(app);
 const io = socketio(server);
+
 
 
 app.use(
@@ -34,7 +47,6 @@ var rooms = new Map<string, string[]>();
 
 //map username to the socket they're on
 var socketMapping = new Map<string, Socket>();
-
 
 //Handle socket connections
 io.on('connection', (socket) => {
@@ -66,15 +78,55 @@ app.get('/user/:email', async (req, res, next) => {
     res.json({data: user.toUserData()})
 })
 
+//Returns all users INCLUDING passwords and everything else
+app.get('/allUsers', async (req, res) => { //TODO: security???
+	const allUsers = await User.find();
+	console.log(allUsers);
+	res.json({data: allUsers})
+})
+
+//Returns 1 userObject corresponding to the given username
+app.post('/userObject', json(), async (req, res) => { //TODO: security???
+	const {username, password} = req.body.data;
+    const token = req.headers.authorization
+	const user = await User.findOne({username})
+	if (!user) {
+        res.status(400).json({error: `No registered user for email ${username}`})
+        return;
+	}
+	const userData = user.toUserData()
+	res.json({userData})
+	return;
+})
+
+//Returns the user status corrseponding to the given username
+app.post('/userStatus', json(), async (req, res) => { //TODO: security???
+	const {username, password} = req.body.data;
+    const token = req.headers.authorization
+	const user = await User.findOne({username})
+	if (!user) {
+        res.status(400).json({error: `No registered user for email ${username}`})
+        return;
+	}
+	const userData = user.toUserData()
+	const status = userData.loginStatus;
+	res.json({status})
+	return;
+})
+
 app.post('/create_user', json(), async (req, res, next) => {
-    const {username, password} = req.body;
+	const isOnline = false;
+    const {username, password} = req.body.data;
     if (!username)
         res.status(400).json({error: 'No username in post body'})
     if (!password)
         res.status(400).json({error: 'No password in post body'})
     if (!username || !password)
-        return;
-    const user = User.create({username, password})
+		return;
+
+	const temp = {username, password, isOnline} //Without this it crashes??????????
+	const user = User.create(temp)
+	user.loginStatus = false;
     const errors = await validate(user);
     const error = errors[0]
     if (error){
@@ -87,22 +139,56 @@ app.post('/create_user', json(), async (req, res, next) => {
 })
 
 app.post('/login', json(), async (req, res, next) => {
-    const {username, password} = req.body;
+	
+    const {username, password} = req.body.data;
     const user = await User.findOne({username})
     if (!user) {
         res.status(400).json({error: `No registered user for email ${username}`})
         return;
-    }
+	}
     const passwordsMatch = compareSync(password, user.password)
     if (!passwordsMatch) {
         res.status(400).json({error: `Username or password incorrect`})
         return;
-    }
+	}
     // TODO: use proper secret key
-    // or use sessions (with redis)
+	// or use sessions (with redis)
 
-    const loginToken = sign({username}, `secret`)
-    res.status(200).json({token: loginToken})
+	var sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
+	console.log(sessionKey);
+	user.loginStatus = true;
+	user.sessionKey = sessionKey;
+	await user.save();
+    // const loginToken = sign({username}, `secret`)
+    res.status(200).json({sessionKey: sessionKey})
+})
+
+app.post('/logout', json(), function(req, res, next){loginRequired}, async (req, res, next) => {
+	
+    const {username, password} = req.body.data;
+    const user = await User.findOne({username})
+    if (!user) {
+        res.status(400).json({error: `No registered user for email ${username}`})
+        return;
+	}
+	console.log("TEST1")
+    const passwordsMatch = compareSync(password, user.password)
+    if (!passwordsMatch) {
+        res.status(400).json({error: `Username or password incorrect`})
+        return;
+	}
+	
+	console.log("TEST2")
+    // TODO: use proper secret key
+	// or use sessions (with redis)
+
+	var sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
+	console.log(sessionKey);
+	user.loginStatus = true;
+	user.sessionKey = sessionKey;
+	await user.save();
+    // const loginToken = sign({username}, `secret`)
+    res.status(200).json({sessionKey: sessionKey})
 })
 
 

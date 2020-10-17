@@ -1,3 +1,5 @@
+var sessionKey = "";
+
 <template>
   <main class="login-page">
     
@@ -50,7 +52,11 @@ export default {
         password: "",
       },
       error: null,
-    };
+	};
+	return {
+		sessionKey: ""
+	};
+	
   },
   created: function(){
   
@@ -68,10 +74,26 @@ export default {
         this.error = `Please fill in your password`;
         this.handleTempError();
         return;
-      }
-      // const response = await this.$axios("http://localhost:5000");
+	  }
+	  
+  
+	  const response = await this.$axios.post("http://localhost:5000/login", {
+        data: {
+          username: this.loginForm.username,
+		  password: this.loginForm.password
+        }
+	  })
+	  console.log("TEST")
+	  console.log(response);
+	  sessionKey = response.data.sessionKey;
+	  console.log(sessionKey);
+	//   data: {
+	// 	  sessionKey: response.data.sessionKey
+	//   }
+	//   data();
+	  console.log("TEST")
       // console.log({ response });
-      window.location.href = `/jitsi?username=${this.loginForm.username}`;
+    //   window.location.href = `/jitsi?username=${this.loginForm.username}`;
       // this.$router.push("/overview");
     },
     handleTempError() {
