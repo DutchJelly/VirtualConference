@@ -13,7 +13,7 @@
 
     <Conference
         class="absolute-center"
-        v-show="conversation.room !== ''"
+        v-if="conversation.room !== ''"
         :user="this.username"
         :withWho="conversation.user"
         :room="conversation.room"
@@ -33,16 +33,13 @@
 <script>
 import moment from 'moment';
 
-
 export default {
     name: 'Jitsi',
     data(){
         return{
             username: this.$route.query.username,
             info: "", //when updating info the timed message box will automatically update
-            users: [
-                
-            ],
+            users: [],
             socket: null,
 
             conversation: {
@@ -110,7 +107,6 @@ export default {
         }
     },
     methods: {
-
         //Nested functions are not possible. This is the next best thing.
         conversations: function(){
             //We have to save the 'this' in a variable because the context
@@ -175,10 +171,8 @@ export default {
                     //     }else{
                     //         self.info = "something went wrong";
                     //     }
-                    // }
-                    
-                },
-                
+                    // }                    
+                },                
             }
         }
     }

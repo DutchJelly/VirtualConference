@@ -35,7 +35,6 @@ var rooms = new Map<string, string[]>();
 //map username to the socket they're on
 var socketMapping = new Map<string, Socket>();
 
-
 //Handle socket connections
 io.on('connection', (socket) => {
     console.log(`[SocketIO:connection] A client with socket id ${socket.id} was connected.`);
@@ -64,7 +63,7 @@ app.get('/user/:email', async (req, res, next) => {
     }
     const claims = verify(token, `secret`)
     res.json({data: user.toUserData()})
-})
+});
 
 app.post('/create_user', json(), async (req, res, next) => {
     const {username, password} = req.body;
@@ -84,7 +83,7 @@ app.post('/create_user', json(), async (req, res, next) => {
     await user.save();
     res.status(201).json({message: `Created new user with username ${username}`})
     next()
-})
+});
 
 app.post('/login', json(), async (req, res, next) => {
     const {username, password} = req.body;
@@ -103,11 +102,9 @@ app.post('/login', json(), async (req, res, next) => {
 
     const loginToken = sign({username}, `secret`)
     res.status(200).json({token: loginToken})
-})
+});
 
-
-
-
+// Test login
 app.get('/testlogin/:username', json(), async (req, res, next) => {
     var username = req.params.username;
     console.log(`a user logged in: ${username}`);
@@ -119,7 +116,7 @@ app.get('/testlogin/:username', json(), async (req, res, next) => {
     res.status(200).json({message: `you logged in`, online: onlineUsers});
 
     io.emit('testlogin', {online: onlineUsers});
-})
+});
 
 app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) => {
     var user = req.params.name;
@@ -138,7 +135,7 @@ app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) =>
     console.log('sent a socket event of requestConversation');
     socketMapping.get(withwho)?.emit("requestConversation", {user});
     res.status(200).json({message: `sent a request to ${withwho}`});
-})
+});
 
 app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => {
     var user = req.params.name;
@@ -188,7 +185,7 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 
     //Return the room name to user.
     res.status(200).json({user: withwho, room: roomName});
-})
+});
 
 app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) => {
     var user = req.params.name;
@@ -210,7 +207,20 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
     requested.delete(withwho);
     socketMapping.get(withwho)?.emit("requestDeclined", {user});
     res.status(200).json({message: "request was declined"});
-})
+});
+
+app.get('/leaveconversation/:name', json(), async (req, res, next) => {
+    var user = req.params.name;
+
+    console.log(`${user} leaves conversation`);
+
+    for(var room of rooms.keys()){
+        if(rooms.get(room)?.includes(user)){
+            rooms.delete(user);
+        }
+    }
+    console.log(`${user} is left the conversaton`)
+});
 
 app.get('/')
 
