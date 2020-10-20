@@ -29,8 +29,11 @@ var onlineUsers:string[] = [];
 //map user to a user that he requested
 var requested = new Map<string, string>();
 
-//map room to list of users
-var rooms = new Map<string, string[]>();
+//map room to a list of users
+//var rooms = new Map<string, string[]>();
+
+//map user to room
+var rooms = new Map<string, string>();
 
 //map username to the socket they're on
 var socketMapping = new Map<string, Socket>();
@@ -118,16 +121,34 @@ app.get('/testlogin/:username', json(), async (req, res, next) => {
     io.emit('testlogin', {online: onlineUsers});
 });
 
-app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) => {
+app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     var user = req.params.name;
     var withwho = req.params.withwho;
-    console.log(`request conversation user: ${user}, withWho: ${withwho}`);
+    console.log("chose conversation type");
     
     if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
         res.status(400).json({message: "error, one of the users is not online"});
         console.log("withwho or user wasn't logged in");
         return;
     }
+
+    //requested.set(user, withwho);
+    //withwho gets request with socketio
+
+    console.log('sent a socket event of requestConversation');
+    socketMapping.get(user)?.emit("typeConversation", {withwho});
+});
+
+app.get('/requestconversation/:name/:withwho', json(), async (req, res, next) => {
+    var user = req.params.name;
+    var withwho = req.params.withwho;
+    console.log(`request conversation user: ${user}, withWho: ${withwho}`);
+    
+    // if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
+    //     res.status(400).json({message: "error, one of the users is not online"});
+    //     console.log("withwho or user wasn't logged in");
+    //     return;
+    // }
 
     requested.set(user, withwho);
     //withwho gets request with socketio
@@ -143,45 +164,66 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     console.log(`accept conversation user: ${user}, withWho: ${withwho}`);
 
     if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
+        console.log("error, one of the users is not online");
         res.status(400).json({message: "error, one of the users is not online"});
         return;
     }
 
     if(requested.get(withwho) !== user){
+        console.log("no request is opened");
         res.status(400).json({message: "no request is opened"});
         return;
     }
 
-    for(var value of rooms.values()){
-        if(value.includes(withwho)){
-            res.status(400).json({message: "user is already in conversation"});
-            return;
-        }
+    // for(var value of rooms.values()){
+    //     if(value.includes(withwho)){
+    //         console.log("user is already in conversation");
+    //         res.status(400).json({message: "user is already in conversation"});
+    //         return;
+    //     }
+    // }
+
+    if(rooms.has(withwho)){
+        console.log("user is already in conversation");
+        res.status(400).json({message: "user is already in conversation"});
+        return;
     }
 
     var userIsInRoom = false;
     var roomName = "";
-    for(var room of rooms.keys()){
-        if(rooms.get(room)?.includes(user)){
-            userIsInRoom = true;
-            roomName = room;
-        }
+    // for(var room of rooms.keys()){
+    //     if(rooms.get(room)?.includes(user)){
+    //         userIsInRoom = true;
+    //         roomName = room;
+    //     }
+    // }
+    if(rooms.has(user)){
+        userIsInRoom = true;
+        roomName = rooms.get(user) || "";
     }
 
     if(userIsInRoom){
         //If user is in room already, add withwho to it.
-        rooms.get(roomName)?.push(withwho);
+        //rooms.get(roomName)?.push(withwho);
+        rooms.set(withwho, roomName);
+        console.log(`${user} is already in room`);
     }else{
         //If not, create a new room with the two users.
         roomName = randomstring.generate();
-        rooms.set(roomName, [user, withwho]);
+        //rooms.set(roomName, [user, withwho]);
+        rooms.set(user, roomName);
+        rooms.set(withwho, roomName);
+        console.log(`${user} start a new conversation with ${withwho} in room: ${roomName}`);
     }
     
     //Delete withwho from requested mapping because request is answered.
     requested.delete(withwho);
     
     //Notify withWho that user has accepted the conversation.
-    socketMapping.get(withwho)?.emit("requestAccepted", {user, room: roomName});
+    socketMapping.get(withwho)?.emit("requestAcceptedTo", {user, room: roomName});
+
+    //Notify user that he/she has accepted the conversation.
+    socketMapping.get(user)?.emit("requestAcceptedFrom", {withwho, room: roomName});
 
     //Return the room name to user.
     res.status(200).json({user: withwho, room: roomName});
@@ -211,15 +253,21 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
 
 app.get('/leaveconversation/:name', json(), async (req, res, next) => {
     var user = req.params.name;
-
-    console.log(`${user} leaves conversation`);
-
-    for(var room of rooms.keys()){
-        if(rooms.get(room)?.includes(user)){
-            rooms.delete(user);
+    var roomName = "";
+    if(rooms.has(user)){
+        roomName = rooms.get(user) || "";
+        console.log(`${user} leaves room`)
+        rooms.delete(user);
+    };
+    // if(rooms.has(user)){
+    //     console.log(`${user} is still in map rooms`)
+    // };
+    socketMapping.get(user)?.emit("leaveCoversation", {user});
+    for (let [key, value] of rooms){
+        if(value === roomName){
+            socketMapping.get(key)?.emit("leaveCoversation", {user});
         }
     }
-    console.log(`${user} is left the conversaton`)
 });
 
 app.get('/')

@@ -1,11 +1,12 @@
 <template>
   <main class="conformation-window">
     <div class="message">
-      <span class="user">{{user}}</span> wants to start a <span class="type">{{typeConversation}}</span> conversation with you
+      Which type conversation do you want?
     </div>
     <div class="buttons">
-      <button id="accept" @click.prevent="onAccept(user);">Accept</button>
-      <button id="decline" @click.prevent="onDecline(user);">Decline</button>
+      <button id="closedCoversation" @click.prevent="onClosedCoversation();">Closed</button>
+      <button id="openConversation" @click.prevent="onOpenConversation();">Open</button>
+      <button id="privateConversation" @click.prevent="onPrivateConversation();">Private</button>
     </div>
   </main>
 </template>
@@ -13,12 +14,11 @@
 <script>
 
 export default {
-  name: 'ConformationPrompt',
+  name: 'TypeConversationPrompt',
   props: {
-    user: String,
-    onAccept: Function,
-    onDecline: Function,
-    typeConversation: String,
+    onClosedCoversation: Function,
+    onOpenConversation: Function,
+    onPrivateConversation: Function,
   },
 
   data() {
@@ -33,7 +33,6 @@ export default {
 </script>
 
 <style scoped>
-
 .conformation-window{
   @apply p-5 bg-gray-800 rounded flex flex-col items-center;
 }
@@ -47,10 +46,6 @@ export default {
   color: rgb(97, 156, 8);
 }
 
-.message .type{
-  color: rgb(7, 132, 204);
-}
-
 .conformation-window .buttons {
   @apply w-full mt-5 flex flex-row;
 }
@@ -61,11 +56,15 @@ export default {
   flex: 1;
 }
 
-#accept{
-  background-color: rgb(97, 139, 89);
+#closedCoversation{
+  background-color: rgb(57, 128, 168);
 }
 
-#decline{
-  background-color: rgb(185, 64, 64);
+#openConversation{
+  background-color: rgb(38, 148, 175);
+}
+
+#privateConversation{
+  background-color: rgb(35, 139, 143);
 }
 </style>

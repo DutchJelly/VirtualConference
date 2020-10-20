@@ -1,54 +1,72 @@
 <template>
-  <div class="main kamerpage">
-    
+    <div class="main kamerpage">
+        <div class="kamer">
+            <TimedInfoMessageBox v-if="info" :message="info" time="2"/>
+            <UserIcon 
+                :items="users" 
+                :onUserClick="conversations().sendRequest"
+            />
+        </div>
+        <Sidebar roomName="templateRoom01" :items="users"/>
+        
+        <Conference
+            class="absolute-center"
+            :user="this.username"
+            :withWho="conversation.user"
+            :room="conversation.room"
+            :open_conference="active_conference"
+            :typeConversation="conversation.type"
+        />
 
-    <TimedInfoMessageBox v-if="info" :message="info" time="2"/>
-    <div class="kamer">
-      <UserIcon 
-        :items="users" 
-        :onUserClick="conversations().sendRequest"
-      />
+        <ConformationPrompt 
+            class="absolute-center" 
+            v-show="conversationRequest.pending === true"
+            :onAccept="conversations().acceptRequest"
+            :onDecline="conversations().declineRequest"
+            :user="conversationRequest.user" 
+            :typeConversation="conversation.type"
+        />
+
+        <TypeConversationPrompt 
+            class="absolute-center" 
+            v-show="conversationRequest.active === true"
+            :onClosedCoversation="closedConversation"
+            :onOpenConversation="openCoversation"
+            :onPrivateConversation="privateConversation" 
+        />
+        
+        
     </div>
-    <Sidebar roomName="templateRoom01" :items="users"/>
-
-    <Conference
-        class="absolute-center"
-        v-if="conversation.room !== ''"
-        :user="this.username"
-        :withWho="conversation.user"
-        :room="conversation.room"
-    />
-
-    <ConformationPrompt 
-        class="absolute-center" 
-        v-show="conversationRequest.pending"
-        :onAccept="conversations().acceptRequest"
-        :onDecline="conversations().declineRequest"
-        :user="conversationRequest.user" 
-    />
-      
-  </div>
 </template>
 
 <script>
 import moment from 'moment';
+import TypeConversationPrompt from '../components/typeCoversationPrompt.vue';
 
 export default {
     name: 'Jitsi',
+    components: {
+        TypeConversationPrompt,
+    },
     data(){
         return{
             username: this.$route.query.username,
             info: "", //when updating info the timed message box will automatically update
             users: [],
             socket: null,
+            active_conference: false,
+            other_username: "",
+            typeConversationUser: "",
 
             conversation: {
                 room: "",
                 user: "",
+                type: "",
             },
             
             conversationRequest: {
                 pending: false,
+                active: false,
                 user: "none",
                 pendingUsers: []
             }
@@ -61,6 +79,14 @@ export default {
 
         this.socket = this.$nuxtSocket({
             name: "home",
+        });
+
+        this.socket.on("typeConversation", (data) => {
+            if(!data || !data.withwho) return;
+
+            this.conversationRequest.active = true;
+            this.typeConversationUser = data.withwho;
+            this.info = `You can chose which type conversation you want to start with ${data.withwho}`;
         });
 
         //Incoming socket events:
@@ -89,14 +115,31 @@ export default {
             }
         });
 
-        this.socket.on("requestAccepted", (data) => {
+        this.socket.on("requestAcceptedTo", (data) => {
             this.info = `${data.user} accepted your conversation request`;
             this.conversation.user = data.user;
             this.conversation.room = data.room;
+            this.active_conference = true;
+        });
+
+        this.socket.on("requestAcceptedFrom", (data) => {
+            this.info = `You accepted conversation request from ${data.user}`;
+            this.conversation.user = data.user;
+            this.conversation.room = data.room;
+            this.active_conference = true;
         });
 
         this.socket.on("requestDeclined", (data) => {
             this.info = `${data.user} declined your conversation request`;
+        });
+
+        this.socket.on("leaveCoversation", (data) => {
+            this.info = `${data.user} leaves conversation`;
+            if(data.user === this.username){
+                this.conversation.user = "";
+                this.conversation.room = "";
+                this.active_conference = false;
+            }
         });
 
         //The server doesn't know what user is using this socket, tell the server.
@@ -120,9 +163,10 @@ export default {
                     if(self.username === withWho.user){
                         self.info = "you cannot invite yourself to a conversation";
                         return;
-                    }
+                    };
+                    self.conversationRequest.active = true;
                     self.message = "";
-                    await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${withWho.user}`);
+                    await self.$axios(`http://localhost:5000/typeconversation/${self.username}/${withWho.user}`);
                 },
                 
                 acceptRequest: async function(withWho){
@@ -172,9 +216,24 @@ export default {
                     //         self.info = "something went wrong";
                     //     }
                     // }                    
-                },                
+                }       
             }
-        }
+        },
+        closedConversation: async function(){
+            this.conversation.type = "closed";
+            this.conversationRequest.active = false;
+            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}`);
+        },
+        openCoversation: async function(){
+            this.conversation.type = "open";
+            this.conversationRequest.active = false;
+            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}`);
+        },
+        privateConversation: async function(){
+            this.conversation.type = "private";
+            this.conversationRequest.active = false;
+            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}`);
+        },  
     }
 };
 </script>
