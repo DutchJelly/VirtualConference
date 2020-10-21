@@ -18,15 +18,17 @@ env.config();
 declare global {
 namespace Express {
 		interface Request {
-		user?: User;
+			user?: User;
 		}
 	}
 }
 
 // We maken een functie loginRequired
 const loginRequired: Handler = async (req, res, next) => {
-    // Pak de token van de Authorization header van de request
-    const sessionKey = req.headers.authorization
+	// Pak de token van de Authorization header van de request
+	// const sessionKey = req.headers.authorization
+	const {sessionKey} = req.body.data;
+	console.log(sessionKey)
     if (!sessionKey)
         throw Error(`Session token missing in Authorization header`)
     // Er van uitgaande dat de column met tokens sessionToken heet:
@@ -35,7 +37,7 @@ const loginRequired: Handler = async (req, res, next) => {
         throw Error(`User provided token did not match any existing tokens`)
     // We zetten de uit de database verkregen User op het request object, zodat die beschikbaar
     // is voor volgende Handler functies die de request afwerken:
-    req.user = authenticatedUser;
+	req.user = authenticatedUser;
     next();
 }
 
@@ -122,7 +124,7 @@ app.post('/userStatus', json(), async (req, res) => { //TODO: security???
     const token = req.headers.authorization
 	const user = await User.findOne({username})
 	if (!user) {
-        res.status(400).json({error: `No registered user for email ${username}`})
+        res.status(400).json({error: `No registered user for email ${username}.`})
         return;
 	}
 	const userData = user.toUserData()
@@ -140,9 +142,13 @@ app.post('/create_user', json(), async (req, res, next) => {
         res.status(400).json({error: 'No password in post body'})
     if (!username || !password)
 		return;
-
+	let user = await User.findOne({username})
+	if(username){
+		res.status(400).json({error: `User: ${username} already exists.`})
+		return;
+	}
 	const temp = {username, password, isOnline} //Without this it crashes??????????
-	const user = User.create(temp)
+	user = User.create(temp)
 	user.loginStatus = false;
     const errors = await validate(user);
     const error = errors[0]
@@ -181,14 +187,12 @@ app.post('/login', json(), async (req, res, next) => {
 })
 
 app.post('/logout', json(), loginRequired, async (req, res, next) => {
-	
-    const {username} = req.body.data;
-    const user = await User.findOne({username})
+	const user = req.user;
+	console.log(user)
     if (!user) {
         res.status(400).json({error: `There was an error loggin out`})
         return;
 	}
-	console.log("TEST1")
 	user.loginStatus = false;
 	user.sessionKey = "";
 	await user.save();

@@ -7,6 +7,7 @@ export class User extends BaseEntity {
 
     @BeforeInsert()
     private hashPassword() {
+		console.log("test")
         this.password = hashSync(this.password, genSaltSync())
 	}
 	
@@ -20,10 +21,10 @@ export class User extends BaseEntity {
     @Length(8)
 	password!: string;
 	
-	@Column()
+	@Column({default: ""})
 	sessionKey!: string ;
 
-	@Column()
+	@Column({default: false})
     loginStatus!: boolean;
 
     toUserData() {
@@ -31,10 +32,5 @@ export class User extends BaseEntity {
 			username: this.username,
 			loginStatus: this.loginStatus
         }
-	}
-	
-	constructor() {
-		super()
-		this.sessionKey = "";
-	  }
+	}	
 }

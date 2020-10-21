@@ -31,7 +31,9 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 	  <button class="login-button" @click.prevent="logout">logout</button>
+	  <button class="login-button" @click.prevent="create_user">create_user</button>
 		<button class="login-button" @click.prevent="debug">debug</button>
+		
 
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
@@ -90,8 +92,29 @@ export default {
     //   window.location.href = `/jitsi?username=${this.loginForm.username}`;
       // this.$router.push("/overview");
 	},
+	async create_user() {
+      if (this.timeout) clearTimeout(this.timeout);
+      this.error = null;
+      if (!this.loginForm.username) {
+        this.error = `Please fill in a username`;
+        this.handleTempError();
+        return;
+      }
+      if (!this.loginForm.password) {
+        this.error = `Please fill in your password`;
+        this.handleTempError();
+        return;
+	  }
+	  
+  
+	  const response = await this.$axios.post("http://localhost:5000/create_user", {
+        data: {
+          username: this.loginForm.username,
+		  password: this.loginForm.password
+        }
+	  })
+	},
 	async logout() {
-		console.log("LOGOUT")
 	
       if (this.timeout) clearTimeout(this.timeout);
       this.error = null;
@@ -99,19 +122,13 @@ export default {
         this.error = `No session key`;
         this.handleTempError();
         return;
-	  }	 
-	  console.log("logout1") 
-		// req.setRequestHeader('Authorization','Basic' + this.sessionKey);
-		console.log("logout2") 
+	  }
+
 	  const response = await this.$axios.post("http://localhost:5000/logout", {
-        data: {
-          sessionKey: this.sessionKey,
-		},
-		headers: {
-			authorization: this.sessionKey
-		}
+		data: {
+			sessionKey: this.sessionKey
+        }
 	  })
-	  console.log("logout3") 
 	  this.sessionKey = "";
 	},
 	async debug() {
