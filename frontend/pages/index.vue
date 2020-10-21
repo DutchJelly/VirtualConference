@@ -31,6 +31,8 @@
 
       <button class="login-button" @click.prevent="login">Login</button>
 
+      <router-link to='registreer' class="register-button" tag="button">Nog geen account? registreer je hier</router-link>
+
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
       </div>
@@ -165,11 +167,21 @@ body{
 
 .login-button {
   outline: none;
-  @apply shadow bg-green-600 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
   height: 60px;
 }
 .login-button:hover,
 .login-button:focus {
-  @apply  bg-green-500;
+  @apply  bg-green-600;
+}
+
+.register-button {
+  outline: none;
+  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  height: 60px;
+}
+.register-button:hover,
+.register-button:focus {
+  @apply  bg-green-600;
 }
 </style>
