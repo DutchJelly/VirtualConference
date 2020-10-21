@@ -82,15 +82,10 @@ export default {
 		  password: this.loginForm.password
         }
 	  })
-	//   console.log("TEST")
-	//   console.log(response);
-	//   console.log(response.data.sessionKey)
+
 	  this.sessionKey = response.data.sessionKey
-	//   console.log(this.sessionKey)
-	//   console.log("TEST")
-      // console.log({ response });
-    //   window.location.href = `/jitsi?username=${this.loginForm.username}`;
-      // this.$router.push("/overview");
+      window.location.href = `/jitsi?username=${this.loginForm.username}`;
+    //   this.$router.push("/kamerview");
 	},
 	async create_user() {
       if (this.timeout) clearTimeout(this.timeout);
@@ -132,7 +127,7 @@ export default {
 	  this.sessionKey = "";
 	},
 	async debug() {
-		const response = await this.$axios.get("http://localhost:5000/allUsers")
+		const response = await this.$axios.get("http://localhost:5000/debug")
 		console.log(response.data)
 	},
     handleTempError() {

@@ -1,6 +1,8 @@
 import express, {json} from "express"
 import cors from "cors"
 import { User } from "./entity/User";
+import { Rooms } from "./entity/Rooms";
+import { Calls } from "./entity/Calls";
 import { validate} from "class-validator"
 import {compareSync} from "bcrypt"
 import {verify, sign, decode} from "jsonwebtoken"
@@ -10,10 +12,6 @@ import crypto from "crypto"
 import { Handler } from "express" // Importeer het type Handler
 // import { loginRequired } from "./index"
 
-
-const env = require('dotenv');
-env.config();
-
 //credits naar Sjors Holstrop
 declare global {
 namespace Express {
@@ -22,24 +20,28 @@ namespace Express {
 		}
 	}
 }
-
-// We maken een functie loginRequired
+	
+// Checks if sessionKey exists.
 const loginRequired: Handler = async (req, res, next) => {
 	// Pak de token van de Authorization header van de request
 	// const sessionKey = req.headers.authorization
 	const {sessionKey} = req.body.data;
 	console.log(sessionKey)
-    if (!sessionKey)
-        throw Error(`Session token missing in Authorization header`)
-    // Er van uitgaande dat de column met tokens sessionToken heet:
-    const authenticatedUser = await User.findOne({sessionKey: sessionKey})
-    if (!authenticatedUser)
-        throw Error(`User provided token did not match any existing tokens`)
-    // We zetten de uit de database verkregen User op het request object, zodat die beschikbaar
-    // is voor volgende Handler functies die de request afwerken:
+	if (!sessionKey)
+		throw Error(`Session token missing in Authorization header`)
+	// Er van uitgaande dat de column met tokens sessionToken heet:
+	const authenticatedUser = await User.findOne({sessionKey: sessionKey})
+	if (!authenticatedUser)
+		throw Error(`User provided token did not match any existing tokens`)
+	// We zetten de uit de database verkregen User op het request object, zodat die beschikbaar
+	// is voor volgende Handler functies die de request afwerken:
 	req.user = authenticatedUser;
-    next();
+	next();
 }
+
+
+const env = require('dotenv');
+env.config();
 
 export const app = express();
 export const socketPort = process.env.SOCKET_PORT;
@@ -104,6 +106,16 @@ app.get('/allUsers', async (req, res) => { //TODO: security???
 	res.json({data: allUsers})
 })
 
+app.get('/debug', async (req, res) => { //TODO: security???
+	const allUsers = await User.find();
+	const allRooms = await Rooms.find();
+	const allCalls = await Calls.find();
+	console.log(allUsers);
+	console.log(allRooms);
+	console.log(allCalls);
+	res.json({data: allUsers, allRooms, allCalls})
+})
+
 //Returns 1 userObject corresponding to the given username
 app.post('/userObject', json(), async (req, res) => { //TODO: security???
 	const {username, password} = req.body.data;
@@ -135,15 +147,19 @@ app.post('/userStatus', json(), async (req, res) => { //TODO: security???
 
 app.post('/create_user', json(), async (req, res, next) => {
 	const isOnline = false;
-    const {username, password} = req.body.data;
+	const {username, password} = req.body.data;
+	console.log("1")
     if (!username)
-        res.status(400).json({error: 'No username in post body'})
+		res.status(400).json({error: 'No username in post body'})
+		console.log("2")
     if (!password)
         res.status(400).json({error: 'No password in post body'})
     if (!username || !password)
 		return;
+	console.log("3")
 	let user = await User.findOne({username})
-	if(username){
+	if(user){
+		console.log("4")
 		res.status(400).json({error: `User: ${username} already exists.`})
 		return;
 	}
@@ -151,7 +167,8 @@ app.post('/create_user', json(), async (req, res, next) => {
 	user = User.create(temp)
 	user.loginStatus = false;
     const errors = await validate(user);
-    const error = errors[0]
+	const error = errors[0]
+	console.log("5")
     if (error){
         res.status(400).json({error: error.constraints})
         return;
@@ -271,8 +288,24 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         rooms.get(roomName)?.push(withwho);
     }else{
         //If not, create a new room with the two users.
-        roomName = randomstring.generate();
-        rooms.set(roomName, [user, withwho]);
+		roomName = randomstring.generate();
+		const room = new Rooms()
+		room.roomCode = roomName
+		rooms.set(roomName, [user, withwho]);
+		await room.save()
+
+		
+		//Put the users in the call table
+		const roomObject = await Rooms.findOne({roomCode: roomName}) //want to find roomID created for the roomName
+		if(!roomObject)
+			return;
+		const call = new Calls()
+		call.roomID = roomObject.roomID
+		call.username = user;
+		await call.save()
+		call.username = withwho
+		await call.save()
+
     }
     
     //Delete withwho from requested mapping because request is answered.

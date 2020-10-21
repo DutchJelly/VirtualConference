@@ -1,6 +1,6 @@
 import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert} from "typeorm"
 import { genSaltSync, hashSync} from "bcrypt"
-import {IsEmail, Length,  } from "class-validator"
+import {IsBoolean, IsEmail, Length } from "class-validator"
 
 @Entity()
 export class User extends BaseEntity {
@@ -25,6 +25,7 @@ export class User extends BaseEntity {
 	sessionKey!: string ;
 
 	@Column({default: false})
+	@IsBoolean()
     loginStatus!: boolean;
 
     toUserData() {
