@@ -1,7 +1,7 @@
 <template>
     <div class="main kamerpage">
         <div class="kamer">
-            <TimedInfoMessageBox v-if="info" :message="info" time="2"/>
+            <TimedInfoMessageBox v-if="info" :message="info" time="5"/>
             <UserIcon 
                 :items="users" 
                 :onUserClick="conversations().sendRequest"
@@ -15,27 +15,26 @@
             :withWho="conversation.user"
             :room="conversation.room"
             :open_conference="active_conference"
-            :typeConversation="conversation.type"
+            :typeConversation="this.conversation.type"
+            :role="user.role"
         />
 
         <ConformationPrompt 
             class="absolute-center" 
-            v-show="conversationRequest.pending === true"
+            v-if="conversationRequest.pending === true"
             :onAccept="conversations().acceptRequest"
             :onDecline="conversations().declineRequest"
             :user="conversationRequest.user" 
-            :typeConversation="conversation.type"
+            :typeConversation="this.conversation.type"
         />
 
         <TypeConversationPrompt 
             class="absolute-center" 
-            v-show="conversationRequest.active === true"
+            v-if="conversationRequest.active === true"
             :onClosedCoversation="closedConversation"
-            :onOpenConversation="openCoversation"
+            :onOpenConversation="openConversation"
             :onPrivateConversation="privateConversation" 
-        />
-        
-        
+        />          
     </div>
 </template>
 
@@ -55,8 +54,8 @@ export default {
             users: [],
             socket: null,
             active_conference: false,
-            other_username: "",
             typeConversationUser: "",
+            user_role: "participant",
 
             conversation: {
                 room: "",
@@ -84,9 +83,26 @@ export default {
         this.socket.on("typeConversation", (data) => {
             if(!data || !data.withwho) return;
 
-            this.conversationRequest.active = true;
-            this.typeConversationUser = data.withwho;
-            this.info = `You can chose which type conversation you want to start with ${data.withwho}`;
+            if(data.type === "private"){
+                this.info = `${data.withwho} is already in a private conversation, you cannot join`;
+            }
+            else if(data.type === "open"){
+                this.info = "It is an open conversation, you can join";
+                this.typeConversationUser = data.withwho;
+                this.conversation.type = data.type;
+                this.joinOpenConversation();
+            }
+            else if(data.type === "closed"){
+                this.info = "It is a closed conversation, you are asking permission to join";
+                this.conversation.type = data.type;
+                this.typeConversationUser = data.withwho;
+                this.joinClosedConversation();
+            }
+            else if(data.type === "none"){
+                this.conversationRequest.active = true;
+                this.typeConversationUser = data.withwho;
+                this.info = `You can chose which type conversation you want to start with ${data.withwho}`;
+            }
         });
 
         //Incoming socket events:
@@ -100,6 +116,7 @@ export default {
                 }
                 return;
             }
+            this.conversation.type = data.type;
             this.conversationRequest.user = data.user;
             this.conversationRequest.pending = true;
             this.info = `You received an conversation request from ${data.user}.`;
@@ -116,18 +133,25 @@ export default {
         });
 
         this.socket.on("requestAcceptedTo", (data) => {
-            this.info = `${data.user} accepted your conversation request`;
             this.conversation.user = data.user;
             this.conversation.room = data.room;
             this.active_conference = true;
+            this.info = `${data.user} accepted your conversation request`;
         });
 
         this.socket.on("requestAcceptedFrom", (data) => {
-            this.info = `You accepted conversation request from ${data.user}`;
+            this.conversation.user = data.withwho;
+            this.conversation.room = data.room;
+            this.active_conference = true;
+            this.info = `You accepted conversation request from ${data.withwho}`;
+        });
+
+        this.socket.on("joinOpenConversation", (data) => {
             this.conversation.user = data.user;
             this.conversation.room = data.room;
             this.active_conference = true;
-        });
+            this.info = `You joined open conversation`;
+        })
 
         this.socket.on("requestDeclined", (data) => {
             this.info = `${data.user} declined your conversation request`;
@@ -136,8 +160,6 @@ export default {
         this.socket.on("leaveCoversation", (data) => {
             this.info = `${data.user} leaves conversation`;
             if(data.user === this.username){
-                this.conversation.user = "";
-                this.conversation.room = "";
                 this.active_conference = false;
             }
         });
@@ -164,7 +186,6 @@ export default {
                         self.info = "you cannot invite yourself to a conversation";
                         return;
                     };
-                    self.conversationRequest.active = true;
                     self.message = "";
                     await self.$axios(`http://localhost:5000/typeconversation/${self.username}/${withWho.user}`);
                 },
@@ -181,7 +202,6 @@ export default {
                         self.conversation.room = response.data.room;
 
                         //Automatically decline all other requests that were sent after the accepted one.
-
                         for(var pendingUser in self.conversationRequest.pendingUsers){
                             this.declineRequest(pendingUser);
                         }
@@ -222,18 +242,42 @@ export default {
         closedConversation: async function(){
             this.conversation.type = "closed";
             this.conversationRequest.active = false;
-            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}`);
+            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
         },
-        openCoversation: async function(){
+        openConversation: async function(){
             this.conversation.type = "open";
             this.conversationRequest.active = false;
-            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}`);
+            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
         },
         privateConversation: async function(){
             this.conversation.type = "private";
             this.conversationRequest.active = false;
-            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}`);
-        },  
+            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
+        },
+        joinOpenConversation: async function(){
+            await this.$axios(`http://localhost:5000/joinopenconversation/${this.username}/${this.typeConversationUser}`);
+        },
+        joinClosedConversation: async function(){
+            var response = undefined;
+            response = await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
+
+            this.conversationRequest.pending = false;
+            this.conversationRequest.user = "none";
+
+            this.conversation.user = withWho;
+            this.conversation.room = response.data.room;
+
+            //Automatically decline all other requests that were sent after the accepted one.
+
+            for(var pendingUser in this.conversationRequest.pendingUsers){
+                this.declineRequest(pendingUser);
+            }
+            // self.conversationRequest.pendingUsers.forEach(element => {
+            //     this.declineRequest(element);
+            // });
+            this.conversationRequest.pendingUsers = [];
+        }
+
     }
 };
 </script>

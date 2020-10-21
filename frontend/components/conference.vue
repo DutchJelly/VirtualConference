@@ -42,6 +42,7 @@ export default {
         room: String,
         open_conference: Boolean,
         typeConversation: String,
+        role: String,
     },
     computed: {
         jitsiOptions () {
@@ -74,6 +75,7 @@ export default {
                 onload: this.onIFrameLoad
             };
         },
+        toolbar_buttons
     },
     methods: {
         onIFrameLoad () {
@@ -94,12 +96,12 @@ export default {
         onLeaveRoom: async function(e) {
             this.open_conference = false;
             var response = undefined;
-            response = await this.$axios(`http://localhost:5000/leaveconversation/${this.user}`);
+            response = await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
         }, 
         onCloseRoom: async function(e) {
             this.open_conference = false;
             var response = undefined;
-            response = await this.$axios(`http://localhost:5000/leaveconversation/${this.user}`);
+            response = await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
         },     
     },
 };
