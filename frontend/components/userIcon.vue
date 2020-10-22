@@ -1,17 +1,7 @@
 <template>
     <main class="iconShape">
         <ul v-for="item in items" :key="item.user">
-            <div v-if="item.user.toLowerCase().includes(contains.toLowerCase())">
-                <button class="user" @click.prevent="onUserClick(item)">
-                    <div class="popupBox">
-                        <span>
-                            Gebruikersnaam: {{ item.user }}
-                            Status: Beschikbaar
-                        </span>
-                    </div>
-                </button>
-            </div>
-            <div v-else class="not-included">
+            <div :class="item.user.toLowerCase().includes(contains.toLowerCase()) ? '' : 'not-included'">
                 <button class="user" @click.prevent="onUserClick(item)">
                     <div class="popupBox">
                         <span>
