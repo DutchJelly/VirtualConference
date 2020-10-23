@@ -3,7 +3,7 @@
     <div class="kamer">
       <UserIcon v-bind:items="items"></UserIcon>
     </div>
-    <Sidebar roomName="Relaxation Room" v-bind:items="items"></Sidebar>
+    <Sidebar roomName="Conference Room" v-bind:items="items"></Sidebar>
   </main>
 </template>
 

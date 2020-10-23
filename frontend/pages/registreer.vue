@@ -1,109 +1,104 @@
 <template>
   <main class="register-page">
-    
     <div class="banner">Virtual Conference App</div>
-
     <form class="register-prompt">
 
-      <div class="register-prompt-item">
-        <input
-          v-model="registerForm.newUsername"
-          type="text"
-          placeholder="Username"
-          name="newUsername"
-        />
-        <div class="icon-container">
-          <img class="icon" src="../static/icons/user.svg" alt="" srcset="">
-        </div>
+    <div class="register-prompt-item">
+      <input
+        v-model="registerForm.newUsername"
+        type="text"
+        placeholder="Username"
+        name="newUsername"
+      />
+      <div class="icon-container">
+        <img class="icon" src="../static/icons/user.svg" alt="" srcset="">
       </div>
+    </div>
 
-      <div class="register-prompt-item">
-        <input
-          v-model="registerForm.newPassword"
-          type="password"
-          placeholder="Password"
-          name="newPassword"
-        />
-        <div class="icon-container">
-          <img src="../static/icons/password.svg" alt="" srcset="" class="icon">
-        </div>
+    <div class="register-prompt-item">
+      <input
+        v-model="registerForm.newPassword"
+        type="password"
+        placeholder="Password"
+        name="newPassword"
+      />
+      <div class="icon-container">
+        <img src="../static/icons/password.svg" alt="" srcset="" class="icon">
       </div>
+    </div>
 
-      <div class="register-prompt-item">
-        <input
-          v-model="registerForm.checkNewPassword"
-          type="password"
-          placeholder="Confirm password"
-          name="checkNewPassword"
-        />
-        <div class="icon-container">
-          <img src="../static/icons/password.svg" alt="" srcset="" class="icon">
-        </div>
+    <div class="register-prompt-item">
+      <input
+        v-model="registerForm.checkNewPassword"
+        type="password"
+        placeholder="Confirm password"
+        name="checkNewPassword"
+      />
+      <div class="icon-container">
+        <img src="../static/icons/password.svg" alt="" srcset="" class="icon">
       </div>
+    </div>
 
-      <button class="register-button" @click.prevent="register">Register</button>
+    <button class="register-button" @click.prevent="register">Register</button>
 
-      <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
-        {{ error }}
-      </div>
+    <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
+      {{ error }}
+    </div>
     </form>
   </main>
 </template>
 
 <script>
 
-
 export default {
 
-  data() {
+  data () {
     return {
       registerForm: {
         Username: "",
         NewPassword: "",
-        CheckNewPassword: "",
+        CheckNewPassword: ""
       },
-      error: null,
+      error: null
     };
   },
-  created: function(){
-  
-  },
+
   methods: {
-    async register() {
-      if (this.timeout) clearTimeout(this.timeout);
+    async register () {
+      if (this.timeout) { clearTimeout(this.timeout); }
       this.error = null;
       if (!this.registerForm.newUsername) {
-        this.error = `Please fill in a username`;
+        this.error = "Please fill in a username";
         this.handleTempError();
         return;
       }
       if (!this.registerForm.newPassword) {
-        this.error = `Please fill in your password`;
+        this.error = "Please fill in your password";
         this.handleTempError();
         return;
       }
       if (!this.registerForm.checkNewPassword) {
-        this.error = `Please confirm your password`;
+        this.error = "Please confirm your password";
         this.handleTempError();
         return;
       }
-      if (this.registerForm.newPassword != this.registerForm.checkNewPassword) {
-          this.error = `Your passwords do not match`;
+      if (this.registerForm.newPassword !== this.registerForm.checkNewPassword) {
+        this.error = "Your passwords do not match";
         this.handleTempError();
         return;
       }
-      // const response = await this.$axios("http://localhost:5000");
-      // console.log({ response });
+      const response = await this.$axios("http://localhost:5000");
+      console.log({ response });
       window.location.href = `/jitsi?username=${this.registerForm.newUsername}`;
       // this.$router.push("/overview");
     },
-    handleTempError() {
-      if (this.timeout) clearTimeout(this.timeout);
+    handleTempError () {
+      if (this.timeout) { clearTimeout(this.timeout); }
       this.timeout = setTimeout(() => {
         this.error = null;
       }, 5000);
-    },
-  },
+    }
+  }
 };
 </script>
 
@@ -136,9 +131,8 @@ body{
 }
 
 .register-prompt {
-
   /* @apply w-11/12 max-w-lg bg-white shadow-lg rounded flex flex-col items-center py-6; */
-  
+
   width: 500px;
   max-width: 90%;
   margin: 2rem;
@@ -158,7 +152,7 @@ body{
   background-color: rgba(0,0,0,0.35);
   color: white;
   padding-left: 70px;
-  
+
 }
 
 .register-prompt-item .icon-container {
@@ -167,8 +161,6 @@ body{
   position: absolute;
   bottom: 17.5%; /* (100-height)/2*/
   pointer-events: none;
-
-
 
   @apply flex flex-row justify-center items-center;
 }

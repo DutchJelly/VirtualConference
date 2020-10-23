@@ -15,7 +15,8 @@ module.exports = {
   ],
   // add your custom rules here
   rules: {
-    "quotes": ["error", "double"],
-    "semi": ["warning", "always"]
+    "quotes": 0,
+    "semi": 0,
+    "indentation": 0,
   }
 }
