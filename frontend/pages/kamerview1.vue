@@ -2,6 +2,7 @@
   <main class="kamerpage">
     <div class="kamer">
       <UserIcon v-bind:items="items"></UserIcon>
+      <router-link to='plattegrond' class="plattegrond-button" tag="button">Terug naar de plattegrond</router-link>
     </div>
     <Sidebar roomName="Coffee Room" v-bind:items="items"></Sidebar>
   </main>
@@ -38,6 +39,18 @@ export default {
   width: 82%;
   left: 3%;
   position: fixed;
+}
+
+.plattegrond-button {
+  outline: none;
+  @apply shadow bg-blue-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  height: 60px;
+  width: 25%;
+}
+
+.plattegrond-button:hover,
+.plattegrond-button:focus {
+  @apply  bg-blue-600;
 }
 
 </style>

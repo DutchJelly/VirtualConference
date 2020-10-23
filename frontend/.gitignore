@@ -88,6 +88,6 @@ sw.*
 
 # Vim swap files
 *.swp
-
+.eslintignore
 # node modules
 node_modules/*
