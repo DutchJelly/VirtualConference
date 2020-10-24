@@ -21,6 +21,7 @@
 |12-10-2020 | 13:30-15:00 | Snellius room 405 | Meeting 13 with TTC |
 |17-10-2020 | 09:00-10:45 | Discord | Meeting 14 with TTC (Luuk en Milou) |
 |21-10-2020 | 09:00-12:15 | Discord | Meeting 15 with TTC (Luuk en Milou) |
+|24-10-2020 | 10:00-11:39 | MS teams | Meeting 16 with TTC |
 
 ### Planned meetings
 | date | time | where | info |
