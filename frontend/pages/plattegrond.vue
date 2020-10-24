@@ -455,6 +455,8 @@ export default {
   position: fixed;
 }
 
-
+g:hover{
+    opacity: 60%;
+}
 
 </style>
