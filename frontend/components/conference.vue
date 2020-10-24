@@ -30,8 +30,8 @@ export default {
     components: {
         VueJitsiMeet: JitsiMeet
     },
-    data: function(){
-        return{
+    data: function() {
+        return {
             joined_room: false,
             close_room: true,
         };
@@ -42,43 +42,80 @@ export default {
         room: String,
         open_conference: Boolean,
         typeConversation: String,
-        role: String,
     },
     computed: {
-        jitsiOptions () {
-            return {
-                roomName: this.room,
-                width: 700,
-                height: 700,
-                noSSL: false,
-                userInfo: {
-                    email: function() {
-                        return this.user + '@email.com'
+        jitsiOptions() {
+            if(this.isModerator === true){
+                return {
+                    roomName: this.room,
+                    width: 700,
+                    height: 700,
+                    noSSL: false,
+                    userInfo: {
+                        email: function() {
+                            return this.user + '@email.com'
+                        },
+                        displayName: this.user,
                     },
-                    displayName: this.user,
-                },
-                configOverwrite: {
-                    enableNoisyMicDetection: false
-                },
-                interfaceConfigOverwrite: {
-                    SHOW_JITSI_WATERMARK: false,
-                    SHOW_WATERMARK_FOR_GUESTS: false,
-                    SHOW_CHROME_EXTENSION_BANNER: false,
-                    TOOLBAR_BUTTONS: [
-                        'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
-                        'fodeviceselection', 'profile', 'chat', 'recording',
-                        'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                        'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-                        'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone', 'security'
-                    ],
-                },
-                onload: this.onIFrameLoad
-            };
+                    configOverwrite: {
+                        enableNoisyMicDetection: false
+                    },
+                    interfaceConfigOverwrite: {
+                        SHOW_JITSI_WATERMARK: false,
+                        SHOW_WATERMARK_FOR_GUESTS: false,
+                        SHOW_CHROME_EXTENSION_BANNER: false,
+                        TOOLBAR_BUTTONS: [
+                            'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
+                            'fodeviceselection', 'profile', 'chat', 'recording',
+                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                            'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                            'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone', 'security'
+                        ],
+                    },
+                    onload: this.onIFrameLoad
+                };
+            } else {
+                return {
+                    roomName: this.room,
+                    width: 700,
+                    height: 700,
+                    noSSL: false,
+                    userInfo: {
+                        email: function() {
+                            return this.user + '@email.com'
+                        },
+                        displayName: this.user,
+                    },
+                    configOverwrite: {
+                        enableNoisyMicDetection: false
+                    },
+                    interfaceConfigOverwrite: {
+                        SHOW_JITSI_WATERMARK: false,
+                        SHOW_WATERMARK_FOR_GUESTS: false,
+                        SHOW_CHROME_EXTENSION_BANNER: false,
+                        TOOLBAR_BUTTONS: [
+                            'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
+                            'fodeviceselection', 'profile', 'chat',
+                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                            'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
+                            'tileview', 'videobackgroundblur', 'download', 'help', 'security'
+                        ],
+                    },
+                    onload: this.onIFrameLoad
+                };
+            }
         },
-        toolbar_buttons
+        isModerator() {
+            if(this.user === "A") {
+                
+                return true
+            } else {
+                return false
+            }     
+        },
     },
     methods: {
-        onIFrameLoad () {
+        onIFrameLoad() {
             //this.$refs.jitsiRef.addEventListener('participantJoined', this.onParticipantJoined);
             this.$refs.jitsiRef.addEventListener('videoConferenceJoined', this.onVideoConferenceJoined);
             this.$refs.jitsiRef.addEventListener('participantKickedOut', this.onParticipantKickedOut);
@@ -93,15 +130,15 @@ export default {
         onParticipantKickedOut(e) {
             // do stuff
         },
-        onLeaveRoom: async function(e) {
+        onLeaveRoom: async function() {
             this.open_conference = false;
-            var response = undefined;
-            response = await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
+            this.$refs.jitsiRef.removeJitsiWidget();
+            await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
         }, 
-        onCloseRoom: async function(e) {
+        onCloseRoom: async function() {
             this.open_conference = false;
-            var response = undefined;
-            response = await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
+            this.$refs.jitsiRef.removeJitsiWidget();
+            await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
         },     
     },
 };
