@@ -26,7 +26,7 @@
         :onDecline="conversations().declineRequest"
         :user="conversationRequest.user" 
     />
-      
+    
   </div>
 </template>
 
