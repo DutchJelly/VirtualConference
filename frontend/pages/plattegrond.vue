@@ -55,14 +55,14 @@
             id="layer1"
             style="display:inline" />
         
-        <a xlink:href="/kamerview1">
         <g
             inkscape:groupmode="layer"
             id="layer3"
+            @click.prevent="clickHandler('layer3', 'Coffee Room')"
             inkscape:label="Coffee Room"
             style="display:inline">
             <rect
-            style="fill:none;stroke:#000000;stroke-width:0.2"
+            style="fill:#FFFFFF;stroke:#000000;stroke-width:0.2"
             id="rect42"
             width="82.831207"
             height="131.93156"
@@ -151,11 +151,10 @@
             cx="157.42708"
             r="3.4939632" />
         </g>
-        </a>
-        <a xlink:href="/kamerview">
         <g
             inkscape:groupmode="layer"
             id="layer8"
+            @click.prevent="clickHandler('layer8', 'Relaxation Room')"
             inkscape:label="Relaxation Room"
             style="display:inline">
             <rect
@@ -177,10 +176,10 @@
                 y="112.99924"
                 style="font-size:7.05556px;stroke-width:0.264583">Relaxation Room</tspan></text>
         </g>
-        </a>
         <g
             inkscape:groupmode="layer"
             id="layer5"
+            @click.prevent="clickHandler('layer5', 'Toilets')"
             inkscape:label="Toilets"
             style="display:inline">
             <g
@@ -227,7 +226,6 @@
                 style="font-size:7.05556px;stroke-width:0.264583">Toilets</tspan></text>
             </g>
         </g>
-        <a xlink:href="/kamerview2">
         <g
             inkscape:groupmode="layer"
             id="layer6"
@@ -256,6 +254,7 @@
             inkscape:groupmode="layer"
             id="layer7"
             inkscape:label="Meeting Rooms Details"
+            @click.prevent="clickHandler('layer7', 'Meeting Rooms')"
             style="display:inline">
             <rect
             style="fill:none;stroke:#000000;stroke-width:0.2"
@@ -366,12 +365,11 @@
                 y="123.14555"
                 style="font-size:5.29167px;stroke-width:0.264583">Room 6</tspan></text>
         </g>
-        </a>
-        <a xlink:href="/kamerview3">
         <g
             inkscape:groupmode="layer"
             id="layer2"
             inkscape:label="Conference Room 1"
+            @click.prevent="clickHandler('layer2', 'Conference Room 1')"
             style="display:inline">
             <rect
             style="fill:#ffccaa;stroke:#000000;stroke-width:0.2"
@@ -396,6 +394,7 @@
             inkscape:groupmode="layer"
             id="g25"
             inkscape:label="Conference Room 2"
+            @click.prevent="clickHandler('g25', 'Conference Room 2')"
             style="display:inline">
             <g
             id="g34">
@@ -419,12 +418,21 @@
                 id="tspan27">Conference Room 2</tspan></text>
             </g>
         </g>
-        </a>
         </svg>
 
     </div>
   </main>
 </template>
+
+<script>
+export default {
+    methods: {
+        clickHandler(id, label) {
+            alert('onClick koffietafel roomnummer: ' + id + ' en label: ' + label)
+        }
+    }
+}
+</script>
 
 <style scoped>
 
@@ -446,5 +454,7 @@
   top: 3%;
   position: fixed;
 }
+
+
 
 </style>
