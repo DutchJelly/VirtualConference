@@ -31,7 +31,7 @@
 
       <button class="login-button" @click.prevent="login">Login</button>
 
-      <router-link to='registreer' class="register-button" tag="button">Nog geen account? registreer je hier</router-link>
+      <router-link to='registreer' class="register-button" tag="button">Nog geen account? klik hier</router-link>
 
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
