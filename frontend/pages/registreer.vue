@@ -1,37 +1,47 @@
 <template>
-  <main class="login-page">
+  <main class="register-page">
     
     <div class="banner">Virtual Conference App</div>
 
-    <form class="login-prompt">
+    <form class="register-prompt">
 
-      <div class="login-prompt-item">
+      <div class="register-prompt-item">
         <input
-          v-model="loginForm.username"
+          v-model="registerForm.newUsername"
           type="text"
           placeholder="Username"
-          name="currentUsername"
+          name="newUsername"
         />
         <div class="icon-container">
           <img class="icon" src="../static/icons/user.svg" alt="" srcset="">
         </div>
       </div>
 
-      <div class="login-prompt-item">
+      <div class="register-prompt-item">
         <input
-          v-model="loginForm.password"
+          v-model="registerForm.newPassword"
           type="password"
           placeholder="Password"
-          name="currentPassword"
+          name="newPassword"
         />
         <div class="icon-container">
           <img src="../static/icons/password.svg" alt="" srcset="" class="icon">
         </div>
       </div>
 
-      <button class="login-button" @click.prevent="login">Login</button>
+      <div class="register-prompt-item">
+        <input
+          v-model="registerForm.checkNewPassword"
+          type="password"
+          placeholder="Confirm password"
+          name="checkNewPassword"
+        />
+        <div class="icon-container">
+          <img src="../static/icons/password.svg" alt="" srcset="" class="icon">
+        </div>
+      </div>
 
-      <router-link to='registreer' class="register-button" tag="button">Nog geen account? klik hier</router-link>
+      <button class="register-button" @click.prevent="register">Register</button>
 
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
@@ -47,9 +57,10 @@ export default {
 
   data() {
     return {
-      loginForm: {
-        username: "",
-        password: "",
+      registerForm: {
+        Username: "",
+        NewPassword: "",
+        CheckNewPassword: "",
       },
       error: null,
     };
@@ -58,22 +69,32 @@ export default {
   
   },
   methods: {
-    async login() {
+    async register() {
       if (this.timeout) clearTimeout(this.timeout);
       this.error = null;
-      if (!this.loginForm.username) {
+      if (!this.registerForm.newUsername) {
         this.error = `Please fill in a username`;
         this.handleTempError();
         return;
       }
-      if (!this.loginForm.password) {
+      if (!this.registerForm.newPassword) {
         this.error = `Please fill in your password`;
+        this.handleTempError();
+        return;
+      }
+      if (!this.registerForm.checkNewPassword) {
+        this.error = `Please confirm your password`;
+        this.handleTempError();
+        return;
+      }
+      if (this.registerForm.newPassword != this.registerForm.checkNewPassword) {
+          this.error = `Your passwords do not match`;
         this.handleTempError();
         return;
       }
       // const response = await this.$axios("http://localhost:5000");
       // console.log({ response });
-      window.location.href = `/jitsi?username=${this.loginForm.username}`;
+      window.location.href = `/jitsi?username=${this.registerForm.newUsername}`;
       // this.$router.push("/overview");
     },
     handleTempError() {
@@ -92,7 +113,7 @@ body{
   background-color: black;
 }
 
-.login-page{
+.register-page{
   @apply w-full min-h-screen flex flex-col items-center justify-center;
   background: black url("../static/login_background.svg") no-repeat center center fixed;
   -webkit-background-size: cover;
@@ -114,7 +135,7 @@ body{
   }
 }
 
-.login-prompt {
+.register-prompt {
 
   /* @apply w-11/12 max-w-lg bg-white shadow-lg rounded flex flex-col items-center py-6; */
   
@@ -123,14 +144,14 @@ body{
   margin: 2rem;
 }
 
-.login-prompt-item{
+.register-prompt-item{
   position: relative;
   height: 60px;
   width: 100%;
   @apply mb-4 ;
 }
 
-.login-prompt-item input {
+.register-prompt-item input {
   @apply rounded block border-2 border-transparent border-gray-800 text-xl p-4;
   height: 100%;
   width: 100%;
@@ -140,7 +161,7 @@ body{
   
 }
 
-.login-prompt-item .icon-container {
+.register-prompt-item .icon-container {
   height: 65%;
   width: 70px;
   position: absolute;
@@ -152,36 +173,26 @@ body{
   @apply flex flex-row justify-center items-center;
 }
 
-.login-prompt-item .icon{
+.register-prompt-item .icon{
   height: 100%;
 }
 
-.login-prompt input:hover {
+.register-prompt input:hover {
   outline: none;
   @apply border-gray-700;
 }
-.login-prompt input:focus {
+.register-prompt input:focus {
   outline: none;
   @apply border-gray-500;
 }
 
-.login-button {
-  outline: none;
-  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
-  height: 60px;
-}
-.login-button:hover,
-.login-button:focus {
-  @apply  bg-green-600;
-}
-
 .register-button {
   outline: none;
-  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  @apply shadow bg-green-600 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
   height: 60px;
 }
 .register-button:hover,
 .register-button:focus {
-  @apply  bg-green-600;
+  @apply  bg-green-500;
 }
 </style>
