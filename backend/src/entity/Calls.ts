@@ -8,7 +8,7 @@ export class Calls extends BaseEntity {
 	@PrimaryColumn()
     roomID!: number;
 
-	@PrimaryColumn()
+	@PrimaryColumn() //linken naar user met foreign key met one-to-one relatie
     @IsEmail()
     username!: string;
 	
