@@ -3,7 +3,11 @@
         <div class="sidebar-header">{{roomName}}</div>
         <UserList :items="items" :contains="message" class="sidebar-content"></UserList>
         <div class="sidebar-search-bar">
-            <input v-model='message' type="text" placeholder="Search for users">
+            <input 
+              v-model='message'
+              type="text"
+              placeholder="Search for users"
+              v-on:input="(event) => this.$emit('inputChange', event)">
         </div>
     </main>
 </template>
