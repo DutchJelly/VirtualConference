@@ -1,15 +1,15 @@
 <template>
     <div>
-       <div class="user" v-for="(user,index) in users" :key="user">
-           <div :class="user.user.toLowerCase().includes(contains.toLowerCase()) ? '' : 'not-included'">
-                <button class="userIcon" @click.prevent="onUserClick(user)">
-                   <div class="popupBox">
-                        <span>
-                            Gebruikersnaam: {{ user.user }}
-                            indexnr: {{positionList[index]}}
-                        </span>
-                    </div>
-                </button>
+       <div class="user" v-for="(user,index) in users" :key="user" 
+            :style="`width: ${iconSize}%; padding-top: ${iconSize}%;`"
+            v-show="user.user.toLowerCase().includes(contains.toLowerCase())"
+            @click.prevent="onUserClick(user)">
+
+            <div class="popupBox" :style="`top: -${iconSize*1.5}%; left: ${iconSize}%`">
+                <span>
+                    Gebruikersnaam: {{ user.user }}
+                    indexnr: {{positionList[index]}}
+                </span>
             </div>
         </div>
        {{positionList}}
@@ -24,7 +24,14 @@ export default {
         users: Array, //username, id, image
         groups: Array, //Array<User>
         onUserClick: Function,
-        contains: String
+        contains: String,
+        gridCols: Number, //Grid contains squares, so no need for rows prop.
+        gridSpacing: Number, //Spacing in %
+    },
+    mounted(){
+        //Set the styling to match the count of rows and columns
+
+
     },
 
     data(){
@@ -45,7 +52,14 @@ export default {
             set: function(newPosition, index) {
                 
             }
-        }
+        },
+
+        /**
+         * @returns the size of icons in % of the page width
+         */
+        iconSize: function() {
+            return (100/this.gridCols) - this.gridSpacing;
+        },
     },
     methods: {
 
@@ -54,27 +68,27 @@ export default {
 </script>
 
 <style scoped>
-.userIcon{
-    margin-bottom: 1%;
-    width: 4%;
-    padding-top: 4%;
+
+.user{
     background-color: black;
     border-radius: 100%;
+    position: relative;
+    height: 0px;
 }
-.not-included .userIcon{
+
+.not-included .user{
     opacity: 30%;
 }
 
-.userIcon .popupBox{
+.user .popupBox{
   @apply bg-gray-400 rounded;
   width: 200px;
   position: relative;
   left: 55px;
-  top: 2px;
   visibility: hidden;
 }
 
-.userIcon:hover .popupBox{
+.user:hover .popupBox{
   visibility: visible;
 }
 

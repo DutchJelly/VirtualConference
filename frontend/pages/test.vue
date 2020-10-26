@@ -1,5 +1,12 @@
 <template>
-    <UserSpace class="userspace" :users="users" :groups="groups" contains=""/>
+    <UserSpace 
+        class="userspace" 
+        :users="users" 
+        :groups="groups" 
+        contains=""
+        gridCols="20"
+        gridSpacing="1"
+    />
 </template>
 
 <script>
