@@ -1,7 +1,9 @@
 <template>
   <main class="kamerpage">
-    <UserIcon v-bind:items="items"
-    v-bind:contains="value" v-bind:positionList="positionList"></UserIcon>
+    <UserSpace 
+      v-bind:users="items"
+      v-bind:contains="value"
+    />
     <Sidebar 
       roomName="templateRoom01"
       v-bind:items="items"
@@ -27,20 +29,6 @@ export default {
     handleChange(event) {
       const { value } = event.target;
       this.value = value;
-    }
-  },
-  computed: {
-    positionList: {
-      get: function() {
-        var list = [];
-        for (let index = 0; index < this.items.length; index++) {
-          list.push(index);
-        }
-        return list;
-      },
-      set: function(newPosition, index) {
-        
-      }
     }
   }
 }
