@@ -2,7 +2,7 @@
     <div>
        <div class="user" v-for="(user,index) in users" :key="user">
            <div :class="user.user.toLowerCase().includes(contains.toLowerCase()) ? '' : 'not-included'">
-                <button class="user" @click.prevent="onUserClick(user)">
+                <button class="userIcon" @click.prevent="onUserClick(user)">
                    <div class="popupBox">
                         <span>
                             Gebruikersnaam: {{ user.user }}
@@ -48,24 +48,24 @@ export default {
         }
     },
     methods: {
-        
+
     }
 }
 </script>
 
 <style scoped>
-.user{
+.userIcon{
     margin-bottom: 1%;
     width: 4%;
     padding-top: 4%;
     background-color: black;
     border-radius: 100%;
 }
-.not-included .user{
+.not-included .userIcon{
     opacity: 30%;
 }
 
-.user .popupBox{
+.userIcon .popupBox{
   @apply bg-gray-400 rounded;
   width: 200px;
   position: relative;
@@ -74,7 +74,7 @@ export default {
   visibility: hidden;
 }
 
-.user:hover .popupBox{
+.userIcon:hover .popupBox{
   visibility: visible;
 }
 
