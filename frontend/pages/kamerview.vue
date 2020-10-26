@@ -1,10 +1,7 @@
 <template>
   <main class="kamerpage">
-    <div class="kamer">
-      <UserIcon v-bind:items="items"
-      v-bind:contains="value"></UserIcon>
-      <router-link to='plattegrond' class="plattegrond-button" tag="button">Terug naar de plattegrond</router-link>
-    </div>
+    <UserIcon v-bind:items="items"
+    v-bind:contains="value" v-bind:positionList="positionList"></UserIcon>
     <Sidebar 
       roomName="templateRoom01"
       v-bind:items="items"
@@ -18,15 +15,24 @@ export default {
     return {
       items: [
         { user: "Richard" },
-        { user: "Wouter" }
+        { user: "Wouter" },
+        { user: "Joost" },
+        { user: "Damian" }
       ],
       value: '',
+
     }
   },
   methods: {
     handleChange(event) {
       const { value } = event.target;
       this.value = value;
+    }
+  },
+  computed: {
+    position: function(){
+    
+      return 
     }
   }
 }

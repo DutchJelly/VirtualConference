@@ -22,7 +22,8 @@ export default {
     props: {
         items: Array,
         onUserClick: Function,
-        contains: String
+        contains: String,
+        positionList: Array
     },
 }
 </script>
