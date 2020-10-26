@@ -1,11 +1,11 @@
 <template>
     <div>
        <div class="user" v-for="(user,index) in users" :key="user" 
-            :style="`width: ${iconSize}%; padding-top: ${iconSize}%;`"
+            :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="user.user.toLowerCase().includes(contains.toLowerCase())"
             @click.prevent="onUserClick(user)">
 
-            <div class="popupBox" :style="`top: -${iconSize*1.5}%; left: ${iconSize}%`">
+            <div class="popupBox" :style="`top: 20px; left: 100%`">
                 <span>
                     Gebruikersnaam: {{ user.user }}
                     indexnr: {{positionList[index]}}
@@ -84,8 +84,8 @@ export default {
   @apply bg-gray-400 rounded;
   width: 200px;
   position: relative;
-  left: 55px;
   visibility: hidden;
+  z-index: 1;
 }
 
 .user:hover .popupBox{
