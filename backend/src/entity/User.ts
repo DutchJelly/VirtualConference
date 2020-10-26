@@ -7,7 +7,6 @@ export class User extends BaseEntity {
 
     @BeforeInsert()
     private hashPassword() {
-		console.log("test")
         this.password = hashSync(this.password, genSaltSync())
 	}
 	

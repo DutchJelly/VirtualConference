@@ -29,11 +29,7 @@
         </div>
       </div>
 
-      <button class="login-button" @click.prevent="login">login</button>
-	  <button class="login-button" @click.prevent="logout">logout</button>
-	  <button class="login-button" @click.prevent="create_user">create_user</button>
-		<button class="login-button" @click.prevent="debug">debug</button>
-		
+      <button class="login-button" @click.prevent="login">login</button>		
 
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}

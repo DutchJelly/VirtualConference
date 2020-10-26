@@ -44,6 +44,11 @@ const env = require('dotenv');
 env.config();
 
 export const app = express();
+
+// const swaggerUi = require('swagger-ui-express'); //for api documentation
+// const swaggerDocument = require('./swagger.json'); //for api documentation
+// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); //for api documentation
+
 export const socketPort = process.env.SOCKET_PORT;
 export const apiPort = process.env.API_PORT;
 export const server = require("http").createServer(app);
@@ -102,7 +107,6 @@ app.get('/user/:email', async (req, res, next) => {
 //Returns all users INCLUDING passwords and everything else
 app.get('/allUsers', async (req, res) => { //TODO: security???
 	const allUsers = await User.find();
-	console.log(allUsers);
 	res.json({data: allUsers})
 })
 
@@ -148,18 +152,14 @@ app.post('/userStatus', json(), async (req, res) => { //TODO: security???
 app.post('/create_user', json(), async (req, res, next) => {
 	const isOnline = false;
 	const {username, password} = req.body.data;
-	console.log("1")
     if (!username)
 		res.status(400).json({error: 'No username in post body'})
-		console.log("2")
     if (!password)
         res.status(400).json({error: 'No password in post body'})
     if (!username || !password)
 		return;
-	console.log("3")
 	let user = await User.findOne({username})
 	if(user){
-		console.log("4")
 		res.status(400).json({error: `User: ${username} already exists.`})
 		return;
 	}
@@ -168,7 +168,6 @@ app.post('/create_user', json(), async (req, res, next) => {
 	user.loginStatus = false;
     const errors = await validate(user);
 	const error = errors[0]
-	console.log("5")
     if (error){
         res.status(400).json({error: error.constraints})
         return;
@@ -195,7 +194,6 @@ app.post('/login', json(), async (req, res, next) => {
 	// or use sessions (with redis)
 
 	var sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
-	console.log(sessionKey);
 	user.loginStatus = true;
 	user.sessionKey = sessionKey;
 	await user.save();
@@ -205,7 +203,6 @@ app.post('/login', json(), async (req, res, next) => {
 
 app.post('/logout', json(), loginRequired, async (req, res, next) => {
 	const user = req.user;
-	console.log(user)
     if (!user) {
         res.status(400).json({error: `There was an error loggin out`})
         return;
