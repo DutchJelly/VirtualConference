@@ -23,7 +23,7 @@
 |21-10-2020 | 09:00-12:15 | Discord | Meeting 15 with TTC (Luuk en Milou) |
 |24-10-2020 | 10:00-11:39 | MS teams | Meeting 16 with TTC |
 |24-10-2020 | 13:23-17:08 | MS teams | Meeting 17 with TTC (Jelle en Richard)|
-
+|26-10-2020 | 14:45-16:20 | Discord | Meeting 18 with TTC (Luuk en Milou) |
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
