@@ -7,9 +7,10 @@
       <UserIcon 
         :items="users" 
         :onUserClick="conversations().sendRequest"
+        v-bind:contains="value"
       />
     </div>
-    <Sidebar roomName="templateRoom01" :items="users"/>
+    <Sidebar roomName="templateRoom01" :items="users" v-on:inputChange="handleChange"/>
 
     <Conference
         class="absolute-center"
@@ -54,7 +55,9 @@ export default {
                 pending: false,
                 user: "none",
                 pendingUsers: []
-            }
+            },
+
+            value: ""
         };
     },
     async mounted(){
@@ -110,6 +113,11 @@ export default {
         }
     },
     methods: {
+        
+        handleChange(event) {
+            const { value } = event.target;
+            this.value = value;
+        },
 
         //Nested functions are not possible. This is the next best thing.
         conversations: function(){
