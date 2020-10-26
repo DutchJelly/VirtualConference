@@ -1,6 +1,7 @@
 <template>
     <main class="iconShape">
-        <ul v-for="item in items" :key="item.user">
+        <ul v-for="(item,index) in items" :key="item.user">
+            {{positionList[index]}}
             <div :class="item.user.toLowerCase().includes(contains.toLowerCase()) ? '' : 'not-included'">
                 <button class="user" @click.prevent="onUserClick(item)">
                     <div class="popupBox">

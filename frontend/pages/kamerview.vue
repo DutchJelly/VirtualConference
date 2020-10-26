@@ -19,7 +19,7 @@ export default {
         { user: "Joost" },
         { user: "Damian" }
       ],
-      value: '',
+      value: ''
 
     }
   },
@@ -30,9 +30,17 @@ export default {
     }
   },
   computed: {
-    position: function(){
-    
-      return 
+    positionList: {
+      get: function() {
+        var list = [];
+        for (let index = 0; index < this.items.length; index++) {
+          list.push(index);
+        }
+        return list;
+      },
+      set: function(newPosition, index) {
+        
+      }
     }
   }
 }
