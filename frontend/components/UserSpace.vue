@@ -1,7 +1,7 @@
 <template>
     <div ref="userspace">
         <div class="group" v-for="(group,index) in groups" :key="index"
-            :style="`width: ${1.2*iconSize}%; padding-bottom: ${1.2*iconSize}%;`"
+            :style="`width: ${groupSize(group.members)*iconSize}%; padding-bottom: ${groupSize(group.members)*iconSize}%;`"
         > 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
@@ -165,6 +165,11 @@ export default {
             var htmlElement = document.querySelector(`#user${userId}`);
             htmlElement.style.top = position.y * this.squareSize + 'px';
             htmlElement.style.left = (position.x * this.iconSize + this.gridSpacing) + '%';
+        },
+        groupSize(group) {
+            console.log("De grootte is: " + group.length);
+            if (group.length < 9) return (group.length*0.05)+1;
+            else {return 1.5;}
         }
     }
 }
