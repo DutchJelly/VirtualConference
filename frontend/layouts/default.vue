@@ -1,6 +1,6 @@
 <template>
-<div class="main-container">
-    <Nuxt />
+<div class="main-container" ref="main">
+    <Nuxt ref="nuxt" />
 </div>
 
   
@@ -8,7 +8,7 @@
 
 <style>
 .main-container {
-  @apply bg-gray-200 min-h-screen w-full flex flex-col items-center;
+  @apply bg-gray-200 min-h-screen h-screen w-full flex flex-col items-center;
   overflow-x: hidden;
   overflow-y: hidden;
 }
@@ -19,9 +19,8 @@
 
 
 export default {
-  mounted(){
-    
-  }
+    mounted(){
+    }
   
 }
 </script>

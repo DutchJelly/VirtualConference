@@ -2,10 +2,10 @@
     <UserSpace 
         class="userspace" 
         :users="users" 
-        :groups="groups" 
-        contains=""
-        gridCols="20"
-        gridSpacing="1"
+        :gridCols=20
+        :gridSpacing=1
+        filter=""
+        ref="userspace"
     />
 </template>
 
@@ -31,27 +31,6 @@ export default {
             },{
                 user: "Richard",
                 id: 5
-            },{
-                user: "Richard",
-                id: 6
-            },{
-                user: "Richard",
-                id: 7
-            },{
-                user: "Richard",
-                id: 8
-            },{
-                user: "Richard",
-                id: 9
-            },{
-                user: "Richard",
-                id: 10
-            },{
-                user: "Richard",
-                id: 11
-            },{
-                user: "Richard",
-                id: 12
             }],
 
             groups: [{
@@ -63,7 +42,6 @@ export default {
         };
     },
     methods: {
-
     }
 };
 </script>
