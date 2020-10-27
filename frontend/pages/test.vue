@@ -1,7 +1,8 @@
 <template>
     <UserSpace 
         class="userspace" 
-        :users="users" 
+        :users="users"
+        :groups="groups" 
         :gridCols=20
         :gridSpacing=1
         filter=""

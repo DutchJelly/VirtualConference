@@ -1,6 +1,15 @@
 <template>
     <div ref="userspace">
-       <div class="user" v-for="(user,index) in users" :key="user.id" :id="`user${user.id}`" 
+        <div class="group" v-for="(group,index) in groups" :key="index"
+            :style="`width: ${1.2*iconSize}%; padding-bottom: ${1.2*iconSize}%;`"
+        > 
+            <div class="popupBox" :style="`top: 20px; left: 110%`">
+                <span>
+                    In groep {{index}} zitten: {{group.members}}
+                </span>
+            </div>
+        </div>
+       <div class="user" v-for="user in users" :key="user.id" :id="`user${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned)"
             @click.prevent="onUserClick(user)">
@@ -9,7 +18,6 @@
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
                     Gebruikersnaam: {{ user.user }}
-                    indexnr: {{positionList[index]}}
                 </span>
             </div>
         </div>
@@ -27,6 +35,7 @@ export default {
         users: Array, //username, id, image, group id
         onUserClick: Function,
         filter: String,
+        groups: Array, //Array of all groups with their respective members.
         gridCols: Number, //Grid contains squares, so no need for rows prop.
         gridSpacing: Number, //Spacing in %
     },
@@ -65,19 +74,6 @@ export default {
         }
     },
     computed: {
-        positionList: {
-            get: function() {
-                var list = [];
-                for (let index = 0; index < this.users.length; index++) {
-                    list.push(index);
-                }
-                return list;
-            },
-            set: function(newPosition, index) {
-                
-            }
-        },
-
         /**
          * @returns the size of icons in % of the page width
          */
@@ -199,6 +195,28 @@ export default {
 }
 
 .user:hover .popupBox{
+  visibility: visible;
+}
+
+.group{
+    background-color: black;
+    border-radius: 100%;
+    position: absolute;
+    height: 0px;
+
+    /* this is not working :( */
+    transition: all 400ms linear;
+}
+
+.group .popupBox{
+  @apply bg-gray-400 rounded;
+  width: 200px;
+  position: relative;
+  visibility: hidden;
+  z-index: 1;
+}
+
+.group:hover .popupBox{
   visibility: visible;
 }
 
