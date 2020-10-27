@@ -1,23 +1,32 @@
 <template>
   <main class="kamerpage">
     <div class="kamer">
-      <UserIcon v-bind:items="items"></UserIcon>
+      <UserIcon v-bind:items="items"
+      v-bind:contains="value"></UserIcon>
+      <router-link to='plattegrond' class="plattegrond-button" tag="button">Terug naar de plattegrond</router-link>
     </div>
-    <Sidebar roomName="templateRoom01" v-bind:items="items"></Sidebar>
+    <Sidebar 
+      roomName="templateRoom01"
+      v-bind:items="items"
+      v-on:inputChange="handleChange"></Sidebar>
   </main>
 </template>
 
 <script>
-
 export default {
-
-  data() {
-    
-    return { 
+  data () {
+    return {
       items: [
-        { user: 'Richard' },
-        { user: 'Wouter' }
-      ]
+        { user: "Richard" },
+        { user: "Wouter" }
+      ],
+      value: '',
+    }
+  },
+  methods: {
+    handleChange(event) {
+      const { value } = event.target;
+      this.value = value;
     }
   }
 }
@@ -41,6 +50,18 @@ export default {
   width: 82%;
   left: 3%;
   position: fixed;
+}
+
+.plattegrond-button {
+  outline: none;
+  @apply shadow bg-blue-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  height: 60px;
+  width: 25%;
+}
+
+.plattegrond-button:hover,
+.plattegrond-button:focus {
+  @apply  bg-blue-600;
 }
 
 </style>

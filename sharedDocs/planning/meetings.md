@@ -20,6 +20,7 @@
 |12-10-2020 | 10:00-10:30 | Snellius room 405 | Meeting 3 with H. Basold |
 |12-10-2020 | 13:30-15:00 | Snellius room 405 | Meeting 13 with TTC |
 |14-10-2020 | 14:00-14:34 | MS teams | Meeting 14 with TTC |
+|22-10-2020 | 13:10-13:50 | Discord | Meeting 15 with TTC (Jelle en Richard)|
 
 ### Planned meetings
 | date | time | where | info |
