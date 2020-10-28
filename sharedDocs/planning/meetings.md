@@ -1,3 +1,8 @@
+### Planned meetings
+| date | time | where | info |
+|:-:|:-:|---|---|
+|28-10-2020 | 15:00-? | MS teams | Meeting 4 with H. Basold |
+
 ### Previous meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
@@ -26,7 +31,3 @@
 |26-10-2020 | 14:45-16:20 | Discord | Meeting 18 with TTC (Luuk en Milou) |
 |28-10-2020 | 15:00-16:25 | MS teams | Meeting 19 with TTC |
 
-### Planned meetings
-| date | time | where | info |
-|:-:|:-:|---|---|
-|28-10-2020 | 15:00-? | MS teams | Meeting 4 with H. Basold |
