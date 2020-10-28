@@ -35,8 +35,10 @@ export default {
             }],
 
             groups: [{
+                id: 0,
                 members: [1,2,3]
             }, {
+                id: 1,
                 members: [8,10,8,12]
             }]
 

@@ -1,6 +1,6 @@
 <template>
     <div ref="userspace">
-        <div class="group" v-for="(group,index) in groups" :key="index" :id="`group${group.id}`"
+        <div class="group" v-for="(group,index) in groups" :key="index" :id="`g${group.id}`"
             :style="`width: ${groupSize(group.members)*iconSize}%; padding-bottom: ${groupSize(group.members)*iconSize}%;`"
             @click.prevent="onGroupClick(group)"> 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
@@ -9,7 +9,7 @@
                 </span>
             </div>
         </div>
-        <div class="user" v-for="user in users" :key="user.id" :id="`user${user.id}`" 
+        <div class="user" v-for="user in users" :key="user.id" :id="`u${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned)"
             @click.prevent="onUserClick(user)">
@@ -52,18 +52,21 @@ export default {
 
             //Position a random user in the center, as a starting point.
             var randomUser = this.users[Math.floor(Math.random() * this.users.length)];
-            this.positionMapping.set(randomUser.id, {x: Math.floor(this.gridCols/2), y: Math.floor(this.visibleRows/2)});
-            window.console.log(this.positionMapping.get(randomUser.id));
-            this.positionUser(randomUser.id);
+            this.positionMapping.set(`u${randomUser.id}`, {
+                x: Math.floor(this.gridCols/2), 
+                y: Math.floor(this.visibleRows/2),
+                minDistance: 2,
+            });
+            this.position('u' + randomUser.id);
 
             // Position all the users that are not positioned yet.
             this.users.forEach(user => {
-                if(!this.positionMapping.get(user.id)){
+                if(!this.positionMapping.get(`u${user.id}`)){
                     var rSpotInfo = this.getRandomFreeSpot(2,5);
                     rSpotInfo.minDistance = 2;
-                    this.positionMapping.set(user.id, rSpotInfo);
+                    this.positionMapping.set(`u${user.id}`, rSpotInfo);
                 }
-                this.positionUser(user.id);
+                this.position('u' + user.id);
             });
 
             this.positioned = true;
@@ -93,7 +96,7 @@ export default {
         handleResize(){
             this.refreshPixelSizeReferences();
 
-            this.users.forEach(user => this.positionUser(user.id));
+            this.users.forEach(user => this.position('u' + user.id));
         },
 
         //We work with percentages, which means that its hard to work with positioning. To counter this, we 
@@ -120,7 +123,10 @@ export default {
         isValidSpot(x, y, minDistance, maxDistance){
             // Look if there are no elements in the positionmapping that are closer than minDistance to x,y.
             var values = Array.from(this.positionMapping.values());
-            var validMinDistance = values.filter(pos => Math.abs(pos.x - x) + Math.abs(pos.y - y) < minDistance).length === 0;
+            var validMinDistance = values.filter(pos => {
+                var distance = Math.abs(pos.x - x) + Math.abs(pos.y - y);
+                return distance < minDistance && distance < pos.minDistance;
+            }).length === 0;
 
             // Look if there is at least one element in positionmapping that's closer to x,y than maxDistance. 
             var validMaxDistance = values.filter(pos => Math.abs(pos.x - x) + Math.abs(pos.y - y) <= maxDistance).length >= 1;
@@ -195,20 +201,20 @@ export default {
         },
 
         /**
-         * Position a user visually in the html from a position in memory.
-         * @param {Number} userId id of the user that is being positioned
+         * Position an element in positionMapping visually in the html.
+         * @param {String} id id of the user that is being positioned
          */
-        positionUser(userId){
-            var position = this.positionMapping.get(userId);
+        position(id){
+            var position = this.positionMapping.get(id);
             if(!position) 
-                throw new Error(`Could not position user ${userId} because it's not present in the positionMapping.`);
+                throw new Error(`Could not position ${id} because it's not present in the positionMapping.`);
             if(Number.isNaN(position.x) || Number.isNaN(position.y))
                 throw new Error(`Either x[${position.x}] or y${position.y} is NaN (probably divided by 0 somewhere)`);
 
-            console.log(`positioning user ${userId} to ${position.x},${position.y}`)
+            console.log(`positioning user ${id} to ${position.x},${position.y}`)
 
             //Selected user without vue refs because those were not allowing me to add styling.
-            var htmlElement = document.querySelector(`#user${userId}`);
+            var htmlElement = document.querySelector(`#${id}`);
             var positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';
             htmlElement.style.marginLeft = (position.x * this.iconSize + this.gridSpacing) + '%';
