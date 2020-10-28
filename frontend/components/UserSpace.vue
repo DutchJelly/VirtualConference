@@ -1,7 +1,8 @@
 <template>
     <div ref="userspace">
+        <!-- I temporarely removed the group size because it's really difficult to implement with the current position mapping -->
         <div class="group" v-for="(group,index) in groups" :key="index" :id="`g${group.id}`"
-            :style="`width: ${groupSize(group.members)*iconSize}%; padding-bottom: ${groupSize(group.members)*iconSize}%;`"
+            :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             @click.prevent="onGroupClick(group)"> 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
@@ -50,21 +51,53 @@ export default {
             //Set the styling to match the count of rows and columns
             this.refreshPixelSizeReferences();
 
-            //Position a random user in the center, as a starting point.
-            var randomUser = this.users[Math.floor(Math.random() * this.users.length)];
-            this.positionMapping.set(`u${randomUser.id}`, {
-                x: Math.floor(this.gridCols/2), 
-                y: Math.floor(this.visibleRows/2),
-                minDistance: 2,
-            });
-            this.position('u' + randomUser.id);
+
+            //TODO cleanup!
+            if(this.groups.length > 0){
+                //Position a random group in the center, as a starting point.
+                var randomGroup = this.groups[Math.floor(Math.random() * this.groups.length)];
+                this.positionMapping.set(`g${randomGroup.id}`, {
+                    x: Math.floor(this.gridCols/2), 
+                    y: Math.floor(this.visibleRows/2),
+                    minDistance: 3,
+                });
+                this.position('g' + randomGroup.id);
+            }else {
+                //Position a random user in the center, as a starting point.
+                var randomUser = this.users[Math.floor(Math.random() * this.users.length)];
+                this.positionMapping.set(`u${randomUser.id}`, {
+                    x: Math.floor(this.gridCols/2), 
+                    y: Math.floor(this.visibleRows/2),
+                    minDistance: 2,
+                });
+                this.position('u' + randomUser.id);
+            }
+            
+            //Position all the groups
+            this.groups.forEach(group => {
+                if(!this.positionMapping.get(`g${group.id}`)){
+                    var rSpotInfo = this.getRandomFreeSpot(3,5);
+                    rSpotInfo.minDistance = 3;
+                    this.positionMapping.set(`g${group.id}`, rSpotInfo);
+                }
+                this.position('g' + group.id);
+            })
 
             // Position all the users that are not positioned yet.
             this.users.forEach(user => {
                 if(!this.positionMapping.get(`u${user.id}`)){
-                    var rSpotInfo = this.getRandomFreeSpot(2,5);
-                    rSpotInfo.minDistance = 2;
-                    this.positionMapping.set(`u${user.id}`, rSpotInfo);
+                    
+                    //If the user is in a group, set the position of the user to the position of the group
+                    var group = this.getUserGroup(user.id);
+                    if(group){
+                        this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.id));
+                    }else{
+                        var rSpotInfo = this.getRandomFreeSpot(2,5);
+                        rSpotInfo.minDistance = 2;
+                        this.positionMapping.set(`u${user.id}`, rSpotInfo);
+                    }
+
+                    
                 }
                 this.position('u' + user.id);
             });
@@ -92,6 +125,10 @@ export default {
         },
     },
     methods: {
+        
+        getUserGroup(userId){
+            return this.groups.find(group => group.members.includes(userId));
+        },
 
         handleResize(){
             this.refreshPixelSizeReferences();
@@ -218,12 +255,6 @@ export default {
             var positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';
             htmlElement.style.marginLeft = (position.x * this.iconSize + this.gridSpacing) + '%';
-
-            //If something is absolutely positioned outside the height of the element, we need to make it larger.
-            //TODO support making it smaller
-            // if(positionHeight + this.iconSize >= this.screenHeight){
-            //     this.$refs.userspace.style.height = (positionHeight + this.iconSize) + 'px';
-            // }
         },
         groupSize(group) {
             console.log("De grootte is: " + group.length);
