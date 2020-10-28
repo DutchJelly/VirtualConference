@@ -3,7 +3,7 @@
         class="userspace" 
         :users="users"
         :groups="groups" 
-        :gridCols=20
+        :gridCols=10
         :gridSpacing=1
         filter=""
         ref="userspace"
@@ -49,7 +49,8 @@ export default {
 
 <style>
 .userspace{
-    height: 100%;
+    @apply my-10;
+    min-height: 100%;
     width: 100%;
 }
 </style>

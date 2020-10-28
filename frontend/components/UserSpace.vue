@@ -1,15 +1,15 @@
 <template>
     <div ref="userspace">
-        <div class="group" v-for="(group,index) in groups" :key="index"
+        <div class="group" v-for="(group,index) in groups" :key="index" :id="`group${group.id}`"
             :style="`width: ${groupSize(group.members)*iconSize}%; padding-bottom: ${groupSize(group.members)*iconSize}%;`"
-        > 
+            @click.prevent="onGroupClick(group)"> 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
                     In groep {{index}} zitten: {{group.members}}
                 </span>
             </div>
         </div>
-       <div class="user" v-for="user in users" :key="user.id" :id="`user${user.id}`" 
+        <div class="user" v-for="user in users" :key="user.id" :id="`user${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned)"
             @click.prevent="onUserClick(user)">
@@ -40,21 +40,28 @@ export default {
         gridSpacing: Number, //Spacing in %
     },
     mounted(){
+
+        window.addEventListener('resize', this.handleResize)
+
+
         //We can only read the size of the element by using this Vue.nextTick callback.
         this.$nextTick(() => {
+
             //Set the styling to match the count of rows and columns
             this.refreshPixelSizeReferences();
 
             //Position a random user in the center, as a starting point.
             var randomUser = this.users[Math.floor(Math.random() * this.users.length)];
-            this.positionMapping.set(randomUser.id, {x: this.gridCols/2, y: this.gridRows/2});
+            this.positionMapping.set(randomUser.id, {x: Math.floor(this.gridCols/2), y: Math.floor(this.visibleRows/2)});
             window.console.log(this.positionMapping.get(randomUser.id));
             this.positionUser(randomUser.id);
 
             // Position all the users that are not positioned yet.
             this.users.forEach(user => {
                 if(!this.positionMapping.get(user.id)){
-                    this.positionMapping.set(user.id, this.getRandomFreeSpot(2,5));
+                    var rSpotInfo = this.getRandomFreeSpot(2,5);
+                    rSpotInfo.minDistance = 2;
+                    this.positionMapping.set(user.id, rSpotInfo);
                 }
                 this.positionUser(user.id);
             });
@@ -83,6 +90,12 @@ export default {
     },
     methods: {
 
+        handleResize(){
+            this.refreshPixelSizeReferences();
+
+            this.users.forEach(user => this.positionUser(user.id));
+        },
+
         //We work with percentages, which means that its hard to work with positioning. To counter this, we 
         //find the exact pixel sizes of the grid here.
         refreshPixelSizeReferences(){
@@ -91,9 +104,9 @@ export default {
             this.squareSize = this.screenWidth/this.gridCols; + this.screenWidth*(this.gridSpacing/100);
             //The amount of rows is determined by the amount of squares that fit.
             
-            this.gridRows = Math.floor(this.screenHeight/this.squareSize);
+            this.visibleRows = Math.floor(this.screenHeight/this.squareSize);
 
-            console.log(`height: ${this.screenHeight}, width: ${this.screenWidth}, squareSize: ${this.squareSize}, grid rows: ${this.gridRows}`);
+            console.log(`height: ${this.screenHeight}, width: ${this.screenWidth}, squareSize: ${this.squareSize}, visible rows: ${this.visibleRows}`);
         },
 
         /**
@@ -116,14 +129,15 @@ export default {
         },
 
         /**
-         * Looks if there is a spot available in the grid.
+         * Looks if there is a spot available in the grid that's in the view.
          * @param {Number} minDistance
          * @param {Number} maxDistance
+         * @param {Number} rows the rows the function considers as valid spots
          * @returns {Boolean}
          */
-        containsFreeSpot(minDistance, maxDistance){
+        containsFreeSpot(minDistance, maxDistance, rows){
             // Loop through all spots in the grid to see if there's any valid spot.
-            for(var i = 0; i < this.gridRows; i++){
+            for(var i = 0; i < rows; i++){
                 for(var j = 0; j < this.gridCols; j++){
                     if(this.isValidSpot(j, i, minDistance, maxDistance)) 
                         return true;
@@ -133,19 +147,49 @@ export default {
         },
 
         /**
-         * Iterates over random spots until it's a valid spot.
+         * @returns {Number} the y value of the lowest positioned element on the page in positionMapping.
+         */
+        getLowestPosition(){
+            var lowestPosition = 0;
+            this.positionMapping.forEach((value, index, map) => {
+                if(value.y > lowestPosition)
+                    lowestPosition = value.y;
+            });
+            console.log(`lowest position: ${lowestPosition}`);
+            return lowestPosition;
+        },
+
+        /**
+         * Iterates over random spots until finding a valid spot.
          * @param {Number} minDistance
          * @param {Number} maxDistance
          * @returns {x: Number, y: Number} A random valid spot.
          */
         getRandomFreeSpot(minDistance, maxDistance){
-            if(!this.containsFreeSpot(minDistance, maxDistance))
-                throw new Error("there's no spot for the user and we didn't implement a solution to this");
-            
+            var tryVisible = this.containsFreeSpot(minDistance, maxDistance, this.visibleRows);
+            var yLimit;
+
+            //TODO this can probably be simplified a bunch if visibleRows changes when we place an element outside of the view.
+
+            //We try to find spots in a visible area, and if that's not possible we'll just extend
+            //the amount of rows we use (the yLimit).
+            if(tryVisible) yLimit = this.visibleRows;
+            else{
+                var lowest = this.getLowestPosition();
+                //Keep raising the y limit while there is no free spot.
+                yLimit = lowest;
+                while(!this.containsFreeSpot(minDistance, maxDistance, yLimit)){
+                    //A safe guard for infinite looping.
+                    if(yLimit >= lowest + maxDistance) throw new Error(`Can't find a free spot (yLim=${yLimit})`);
+                    yLimit++;
+                }
+            }
+
+            //Keep trying random combinations until (x,y) is a valid spot.
             var x, y;
             do{
                 x = Math.floor(Math.random() * this.gridCols);
-                y = Math.floor(Math.random() * this.gridRows);
+                y = Math.floor(Math.random() * yLimit);
             }while(!this.isValidSpot(x,y, minDistance, maxDistance));
             return {x, y}; //json object with {x: value, y: value}
         },
@@ -157,14 +201,23 @@ export default {
         positionUser(userId){
             var position = this.positionMapping.get(userId);
             if(!position) 
-                throw new Error(`Could not position user ${userId} because it's not properly present in the positionMapping`);
+                throw new Error(`Could not position user ${userId} because it's not present in the positionMapping.`);
+            if(Number.isNaN(position.x) || Number.isNaN(position.y))
+                throw new Error(`Either x[${position.x}] or y${position.y} is NaN (probably divided by 0 somewhere)`);
 
             console.log(`positioning user ${userId} to ${position.x},${position.y}`)
 
             //Selected user without vue refs because those were not allowing me to add styling.
             var htmlElement = document.querySelector(`#user${userId}`);
-            htmlElement.style.top = position.y * this.squareSize + 'px';
-            htmlElement.style.left = (position.x * this.iconSize + this.gridSpacing) + '%';
+            var positionHeight = position.y * this.squareSize;
+            htmlElement.style.marginTop = positionHeight + 'px';
+            htmlElement.style.marginLeft = (position.x * this.iconSize + this.gridSpacing) + '%';
+
+            //If something is absolutely positioned outside the height of the element, we need to make it larger.
+            //TODO support making it smaller
+            // if(positionHeight + this.iconSize >= this.screenHeight){
+            //     this.$refs.userspace.style.height = (positionHeight + this.iconSize) + 'px';
+            // }
         },
         groupSize(group) {
             console.log("De grootte is: " + group.length);
@@ -177,13 +230,24 @@ export default {
 
 <style scoped>
 
+.userspace{
+    display: grid;
+    overflow-y: auto;
+}
+
+.userspace > * {
+    grid-area: 1/1;
+}
+
 .user{
-    background-color: black;
-    border-radius: 100%;
-    position: absolute;
+    background-image: url("../static/small.jpg");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 50%;
+    /* position: absolute; */
     height: 0px;
 
-    /* this is not working :( */
     transition: all 400ms linear;
 }
 
