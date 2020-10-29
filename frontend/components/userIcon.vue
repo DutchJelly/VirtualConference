@@ -1,7 +1,6 @@
 <template>
     <main class="iconShape">
         <ul v-for="item in items" :key="item.user">
-            <div :class="item.user.toLowerCase().includes(contains.toLowerCase()) ? '' : 'not-included'">
                 <button class="user" @click.prevent="onUserClick(item)">
                     <div class="popupBox">
                         <span>
@@ -22,7 +21,6 @@ export default {
     props: {
         items: Array,
         onUserClick: Function,
-        contains: String
     },
 }
 </script>

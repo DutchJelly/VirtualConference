@@ -174,7 +174,6 @@ export default {
             //Return all functions as json.
             return {
                 sendRequest: async function(withWho) {
-                    console.log("hello world");
                     console.log("send request");
                     if(self.username === withWho.user) {
                         self.info = "you cannot invite yourself to a conversation";
