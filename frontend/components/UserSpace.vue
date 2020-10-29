@@ -29,8 +29,25 @@
 
 <script>
 export default {
+    mounted(){
 
-    //TODO make everything work with pixels instead of percentages. Or we can handle page resizing instead.
+        window.addEventListener('resize', this.handleResize)
+
+        //We can only read the size of the element by using this Vue.nextTick callback.
+        this.$nextTick(() => {
+            this.refreshPixelSizeReferences();
+            this.mapPositions();
+            this.positionAll();
+            this.positioned = true;
+        });
+    },
+
+    data(){
+        return{
+            positioned: false,
+            positionMapping: new Map(),
+        }
+    },
 
     props: {
         users: Array, //username, id, image, group id
@@ -40,47 +57,65 @@ export default {
         gridCols: Number, //Grid contains squares, so no need for rows prop.
         gridSpacing: Number, //Spacing in %
     },
-    mounted(){
+    
+    watch: {
+        //The entire positioning needs to be remapped to fit the new column amount.
+        gridCols: function(newVal, oldVal){
+            this.mapPositions();
+        }
+    },
 
-        window.addEventListener('resize', this.handleResize)
+    computed: {
+        /**
+         * @return the size of icons in % of the page width
+         */
+        iconSize: function() {
+            return (100/this.gridCols) - this.gridSpacing;
+        },
+    },
 
-
-        //We can only read the size of the element by using this Vue.nextTick callback.
-        this.$nextTick(() => {
-
-            //Set the styling to match the count of rows and columns
+    methods: {
+        
+        handleResize(){
+            //We need to do this for the y positioning, because we can't use percentages of the width for that.
             this.refreshPixelSizeReferences();
+            this.positionAll();
+        },
 
+        /**
+         * TODO cleanup... this function is too long and contains a bunch of repetitive blocks
+         * 
+         * Creates and sets all positions in positionMapping
+         */
+        mapPositions(){
+            // First clear the old positioning.
+            this.positionMapping = new Map();
 
-            //TODO cleanup!
             if(this.groups.length > 0){
-                //Position a random group in the center, as a starting point.
+                // Position a random group in the center, as a starting point for min/max distance.
                 var randomGroup = this.groups[Math.floor(Math.random() * this.groups.length)];
                 this.positionMapping.set(`g${randomGroup.id}`, {
                     x: Math.floor(this.gridCols/2), 
                     y: Math.floor(this.visibleRows/2),
                     minDistance: 3,
                 });
-                this.position('g' + randomGroup.id);
             }else {
-                //Position a random user in the center, as a starting point.
+                // Position a random user in the center, as a starting point for min/max distance.
                 var randomUser = this.users[Math.floor(Math.random() * this.users.length)];
                 this.positionMapping.set(`u${randomUser.id}`, {
                     x: Math.floor(this.gridCols/2), 
                     y: Math.floor(this.visibleRows/2),
                     minDistance: 2,
                 });
-                this.position('u' + randomUser.id);
             }
             
-            //Position all the groups
+            // Position all the groups
             this.groups.forEach(group => {
                 if(!this.positionMapping.get(`g${group.id}`)){
                     var rSpotInfo = this.getRandomFreeSpot(3,5);
                     rSpotInfo.minDistance = 3;
                     this.positionMapping.set(`g${group.id}`, rSpotInfo);
                 }
-                this.position('g' + group.id);
             })
 
             // Position all the users that are not positioned yet.
@@ -99,51 +134,26 @@ export default {
 
                     
                 }
-                this.position('u' + user.id);
             });
-
-            this.positioned = true;
-        })
-        
-        
-    },
-
-    
-
-    data(){
-        return{
-            positioned: false,
-            positionMapping: new Map(),
-        }
-    },
-    computed: {
-        /**
-         * @returns the size of icons in % of the page width
-         */
-        iconSize: function() {
-            return (100/this.gridCols) - this.gridSpacing;
         },
-    },
-    methods: {
-        
+
+        /**
+         * @param {Number} userId
+         * @returns {{members: Array<Number>, id: Number}} group that contains the user with id userId (or undefined) 
+         */
         getUserGroup(userId){
             return this.groups.find(group => group.members.includes(userId));
         },
 
-        handleResize(){
-            this.refreshPixelSizeReferences();
-
-            this.users.forEach(user => this.position('u' + user.id));
-        },
-
-        //We work with percentages, which means that its hard to work with positioning. To counter this, we 
-        //find the exact pixel sizes of the grid here.
+        /**
+         * Find the exact width of the userspace element to be able to position the icons properly
+         */
         refreshPixelSizeReferences(){
             this.screenWidth = this.$refs.userspace.clientWidth;
             this.screenHeight = this.$refs.userspace.clientHeight;
-            this.squareSize = this.screenWidth/this.gridCols; + this.screenWidth*(this.gridSpacing/100);
-            //The amount of rows is determined by the amount of squares that fit.
+            this.squareSize = this.screenWidth/this.gridCols; //Size of grid squares including the spacing around them.
             
+            //TODO: This value seems to never change... remove this line?
             this.visibleRows = Math.floor(this.screenHeight/this.squareSize);
 
             console.log(`height: ${this.screenHeight}, width: ${this.screenWidth}, squareSize: ${this.squareSize}, visible rows: ${this.visibleRows}`);
@@ -206,13 +216,13 @@ export default {
          * Iterates over random spots until finding a valid spot.
          * @param {Number} minDistance
          * @param {Number} maxDistance
-         * @returns {x: Number, y: Number} A random valid spot.
+         * @returns {{x: Number, y: Number}} A random valid spot.
          */
         getRandomFreeSpot(minDistance, maxDistance){
             var tryVisible = this.containsFreeSpot(minDistance, maxDistance, this.visibleRows);
             var yLimit;
-
-            //TODO this can probably be simplified a bunch if visibleRows changes when we place an element outside of the view.
+            //To find the max y we can also use max(lowest + maxDistance, this.visibleRows), but that'd allow
+            //users to spread more toward the bottom of the page.
 
             //We try to find spots in a visible area, and if that's not possible we'll just extend
             //the amount of rows we use (the yLimit).
@@ -237,6 +247,13 @@ export default {
             return {x, y}; //json object with {x: value, y: value}
         },
 
+        /**
+         * Position the users and groups like mapped in positionMapping.
+         */
+        positionAll(){
+            this.groups.forEach(group => this.position('g' + group.id));
+            this.users.forEach(user => this.position('u' + user.id));
+        },
         /**
          * Position an element in positionMapping visually in the html.
          * @param {String} id id of the user that is being positioned
