@@ -1,23 +1,28 @@
 <template>
     <div ref="userspace">
         <!-- I temporarely removed the group size because it's really difficult to implement with the current position mapping -->
-        <div class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
+        <div 
+            class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
-            @click.prevent="clickedGroup(group.id)"> 
+            @click.prevent="clickedGroup(group.id)"
+            > 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
                     In groep {{group.id}} zitten: {{group.members}}
                 </span>
             </div>
-            <div v-if="visibleGroup == group.id" class="text-gray-800">
+            <div v-if="visibleGroup == group.id"
+                class="text-gray-800">
                 asdf
             </div>
         </div>
-        <div class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
+
+        <div 
+            class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned)"
-            @click.prevent="onUserClick(user)">
-
+            @click.prevent="onUserClick(user)"
+        >
             <!-- This break the formatting if it overflows on the right of the page -->
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
@@ -25,15 +30,16 @@
                 </span>
             </div>
         </div>
+
     </div>
 </template>
 
 
 
 <script>
-export default {
-    mounted(){
 
+export default {
+    mounted() {
         window.addEventListener('resize', this.handleResize)
 
         //We can only read the size of the element by using this Vue.nextTick callback.
@@ -45,12 +51,13 @@ export default {
         });
     },
 
-    data(){
-        return{
+    data() {
+        
+        return {  
             positioned: false,
             visibleGroup: -1,
             positionMapping: new Map(),
-            usersCopy: [...this.users], //We need this because we also want watch to work if we push to the user prop from outside the component.
+            usersCopy: [...this.users] //We need this because we also want watch to work if we push to the user prop from outside the component.
         }
     },
 
@@ -60,24 +67,24 @@ export default {
         filter: String,
         groups: Array, //Array of all groups with their respective members.
         gridCols: Number, //Grid contains squares, so no need for rows prop.
-        gridSpacing: Number, //Spacing in %
+        gridSpacing: Number //Spacing in %
     },
     
     watch: {
         //The entire positioning needs to be remapped to fit the new column amount.
-        gridCols: function(newVal, oldVal){
+        gridCols: function(newVal, oldVal) {
             this.mapPositions();
         },
 
-        users: function(newVal, oldVal){
+        users: function(newVal, oldVal) {
             //Don't use oldVal because, if the users reference doesn't change, they both point to the same array.
 
-            var joinedUsers = newVal.filter(user => !this.usersCopy.find(x => x.id === user.id));
-            var leftUsers = this.usersCopy.filter(user => !newVal.find(x => x.id === user.id));
+            let joinedUsers = newVal.filter(user => !this.usersCopy.find(x => x.id === user.id));
+            let leftUsers = this.usersCopy.filter(user => !newVal.find(x => x.id === user.id));
 
             //Check if there are no 2 of the same users in the array.
-            var ambiguousUsers = newVal.filter(user => newVal.filter(user2 => user2.id === user.id).length >= 2);
-            if(ambiguousUsers.length){
+            let ambiguousUsers = newVal.filter(user => newVal.filter(user2 => user2.id === user.id).length >= 2);
+            if(ambiguousUsers.length) {
                 throw new Error(`Error: ambiguous users found: ${ambiguousUsers.map(x => `id: ${x.id} user: ${x.user}`).join(', ')}`);
             }
 
@@ -88,8 +95,8 @@ export default {
 
             leftUsers.forEach(user => this.positionMapping.delete('u' + user.id));
 
-            if (!this.positionMapping.size && joinedUsers.length) {
-                var randomUser = joinedUsers[Math.floor(Math.random() * joinedUsers.length)];
+            if(!this.positionMapping.size && joinedUsers.length) {
+                let randomUser = joinedUsers[Math.floor(Math.random() * joinedUsers.length)];
                 this.positionMapping.set(`u${randomUser.id}`, {
                     x: Math.floor(this.gridCols/2), 
                     y: Math.floor(this.visibleRows/2),
@@ -98,23 +105,20 @@ export default {
             }
 
             joinedUsers.forEach(user => {
-                if(!this.positionMapping.get(`u${user.id}`)){
+                if(!this.positionMapping.get(`u${user.id}`)) {
                     
                     //If the user is in a group, set the position of the user to the position of the group
-                    var group = this.getUserGroup(user.id);
+                    let group = this.getUserGroup(user.id);
 
-
-                    if(group){
+                    if(group) {
                         this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.id));
-                    }else{
-                        var rSpotInfo = this.getRandomFreeSpot(2,5);
+                    } else {
+                        let rSpotInfo = this.getRandomFreeSpot(2,5);
                         rSpotInfo.minDistance = 2;
                         this.positionMapping.set(`u${user.id}`, rSpotInfo);
                     }
                 }
             });
-
-            
 
             this.$nextTick(() => {
                 this.positionAll();
@@ -136,14 +140,14 @@ export default {
     methods: {
 
         clickedGroup(groupId) {
-            if (this.visibleGroup == groupId) {
+            if(this.visibleGroup == groupId) {
                 this.visibleGroup = -1;
             } else {
                 this.visibleGroup = groupId;
             }
         },
         
-        handleResize(){
+        handleResize() {
             //We need to do this for the y positioning, because we can't use percentages of the width for that.
             this.refreshPixelSizeReferences();
             this.positionAll();
@@ -154,21 +158,21 @@ export default {
          * 
          * Creates and sets all positions in positionMapping
          */
-        mapPositions(){
+        mapPositions() {
             // First clear the old positioning.
             this.positionMapping = new Map();
 
-            if (this.groups.length > 0) {
+            if(this.groups.length > 0) {
                 // Position a random group in the center, as a starting point for min/max distance.
-                var randomGroup = this.groups[Math.floor(Math.random() * this.groups.length)];
+                let randomGroup = this.groups[Math.floor(Math.random() * this.groups.length)];
                 this.positionMapping.set(`g${randomGroup.id}`, {
                     x: Math.floor(this.gridCols/2), 
                     y: Math.floor(this.visibleRows/2),
                     minDistance: 3,
                 });
-            }else {
+            } else {
                 // Position a random user in the center, as a starting point for min/max distance.
-                var randomUser = this.users[Math.floor(Math.random() * this.users.length)];
+                let randomUser = this.users[Math.floor(Math.random() * this.users.length)];
                 this.positionMapping.set(`u${randomUser.id}`, {
                     x: Math.floor(this.gridCols/2), 
                     y: Math.floor(this.visibleRows/2),
@@ -178,8 +182,8 @@ export default {
             
             // Position all the groups
             this.groups.forEach(group => {
-                if(!this.positionMapping.get(`g${group.id}`)){
-                    var rSpotInfo = this.getRandomFreeSpot(3,5);
+                if(!this.positionMapping.get(`g${group.id}`)) {
+                    let rSpotInfo = this.getRandomFreeSpot(3,5);
                     rSpotInfo.minDistance = 3;
                     this.positionMapping.set(`g${group.id}`, rSpotInfo);
                 }
@@ -187,18 +191,17 @@ export default {
 
             // Position all the users that are not positioned yet.
             this.users.forEach(user => {
-                if(!this.positionMapping.get(`u${user.id}`)){
+                if(!this.positionMapping.get(`u${user.id}`)) {
                     
                     //If the user is in a group, set the position of the user to the position of the group
-                    var group = this.getUserGroup(user.id);
-                    if(group){
+                    let group = this.getUserGroup(user.id);
+                    if(group) {
                         this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.id));
-                    }else{
-                        var rSpotInfo = this.getRandomFreeSpot(2,5);
+                    } else {
+                        let rSpotInfo = this.getRandomFreeSpot(2,5);
                         rSpotInfo.minDistance = 2;
                         this.positionMapping.set(`u${user.id}`, rSpotInfo);
                     }
-
                     
                 }
             });
@@ -208,14 +211,14 @@ export default {
          * @param {Number} userId
          * @returns {{members: Array<Number>, id: Number}} group that contains the user with id userId (or undefined) 
          */
-        getUserGroup(userId){
+        getUserGroup(userId) {
             return this.groups.find(group => group.members.includes(userId));
         },
 
         /**
          * Find the exact width of the userspace element to be able to position the icons properly
          */
-        refreshPixelSizeReferences(){
+        refreshPixelSizeReferences() {
             this.screenWidth = this.$refs.userspace.clientWidth;
             this.screenHeight = this.$refs.userspace.clientHeight;
             this.squareSize = this.screenWidth/this.gridCols; //Size of grid squares including the spacing around them.
@@ -234,16 +237,16 @@ export default {
          * @param {Number} maxDistance
          * @returns {Boolean}
          */
-        isValidSpot(x, y, minDistance, maxDistance){
+        isValidSpot(x, y, minDistance, maxDistance) {
             // Look if there are no elements in the positionmapping that are closer than minDistance to x,y.
-            var values = Array.from(this.positionMapping.values());
-            var validMinDistance = values.filter(pos => {
-                var distance = Math.abs(pos.x - x) + Math.abs(pos.y - y);
+            let values = Array.from(this.positionMapping.values());
+            let validMinDistance = values.filter(pos => {
+                let distance = Math.abs(pos.x - x) + Math.abs(pos.y - y);
                 return distance < minDistance && distance < pos.minDistance;
             }).length === 0;
 
             // Look if there is at least one element in positionmapping that's closer to x,y than maxDistance. 
-            var validMaxDistance = values.filter(pos => Math.abs(pos.x - x) + Math.abs(pos.y - y) <= maxDistance).length >= 1;
+            let validMaxDistance = values.filter(pos => Math.abs(pos.x - x) + Math.abs(pos.y - y) <= maxDistance).length >= 1;
 
             return validMinDistance && validMaxDistance;
         },
@@ -255,10 +258,10 @@ export default {
          * @param {Number} rows the rows the function considers as valid spots
          * @returns {Boolean}
          */
-        containsFreeSpot(minDistance, maxDistance, rows){
+        containsFreeSpot(minDistance, maxDistance, rows) {
             // Loop through all spots in the grid to see if there's any valid spot.
-            for(var i = 0; i < rows; i++){
-                for(var j = 0; j < this.gridCols; j++){
+            for(let i = 0; i < rows; i++) {
+                for(let j = 0; j < this.gridCols; j++) {
                     if(this.isValidSpot(j, i, minDistance, maxDistance)) 
                         return true;
                 }
@@ -269,8 +272,8 @@ export default {
         /**
          * @returns {Number} the y value of the lowest positioned element on the page in positionMapping.
          */
-        getLowestPosition(){
-            var lowestPosition = 0;
+        getLowestPosition() {
+            let lowestPosition = 0;
             this.positionMapping.forEach((value, index, map) => {
                 if(value.y > lowestPosition)
                     lowestPosition = value.y;
@@ -285,20 +288,21 @@ export default {
          * @param {Number} maxDistance
          * @returns {{x: Number, y: Number}} A random valid spot.
          */
-        getRandomFreeSpot(minDistance, maxDistance){
-            var tryVisible = this.containsFreeSpot(minDistance, maxDistance, this.visibleRows);
-            var yLimit;
+        getRandomFreeSpot(minDistance, maxDistance) {
+            let tryVisible = this.containsFreeSpot(minDistance, maxDistance, this.visibleRows);
+            let yLimit;
             //To find the max y we can also use max(lowest + maxDistance, this.visibleRows), but that'd allow
             //users to spread more toward the bottom of the page.
 
             //We try to find spots in a visible area, and if that's not possible we'll just extend
             //the amount of rows we use (the yLimit).
-            if(tryVisible) yLimit = this.visibleRows;
-            else{
-                var lowest = this.getLowestPosition();
+            if(tryVisible) {
+                yLimit = this.visibleRows;
+            } else {
+                let lowest = this.getLowestPosition();
                 //Keep raising the y limit while there is no free spot.
                 yLimit = lowest;
-                while(!this.containsFreeSpot(minDistance, maxDistance, yLimit)){
+                while (!this.containsFreeSpot(minDistance, maxDistance, yLimit)) {
                     //A safe guard for infinite looping.
                     if(yLimit >= lowest + maxDistance) throw new Error(`Can't find a free spot (yLim=${yLimit})`);
                     yLimit++;
@@ -306,18 +310,18 @@ export default {
             }
 
             //Keep trying random combinations until (x,y) is a valid spot.
-            var x, y;
-            do{
+            let x, y;
+            do {
                 x = Math.floor(Math.random() * this.gridCols);
                 y = Math.floor(Math.random() * yLimit);
-            }while(!this.isValidSpot(x,y, minDistance, maxDistance));
+            } while(!this.isValidSpot(x,y, minDistance, maxDistance));
             return {x, y}; //json object with {x: value, y: value}
         },
 
         /**
          * Position the users and groups like mapped in positionMapping.
          */
-        positionAll(){
+        positionAll() {
             this.groups.forEach(group => this.position('g' + group.id));
             this.users.forEach(user => this.position('u' + user.id));
         },
@@ -325,8 +329,8 @@ export default {
          * Position an element in positionMapping visually in the html.
          * @param {String} id id of the user that is being positioned
          */
-        position(id){
-            var position = this.positionMapping.get(id);
+        position(id) {
+            let position = this.positionMapping.get(id);
             if(!position) 
                 throw new Error(`Could not position ${id} because it's not present in the positionMapping.`);
             if(Number.isNaN(position.x) || Number.isNaN(position.y))
@@ -335,22 +339,16 @@ export default {
             console.log(`positioning user ${id} to ${position.x},${position.y}`)
 
             //Selected user without vue refs because those were not allowing me to add styling.
-            var htmlElement = document.querySelector(`#${id}`);
-            var positionHeight = position.y * this.squareSize;
+            let htmlElement = document.querySelector(`#${id}`);
+            let positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';
             htmlElement.style.marginLeft = (position.x * this.iconSize + this.gridSpacing) + '%';
-        },
-        groupSize(group) {
-            console.log("De grootte is: " + group.length);
-            if (group.length < 9) return (group.length*0.05)+1;
-            else {return 1.5;}
         }
     }
 }
 </script>
 
 <style scoped>
-
 .userspace{
     display: grid;
     overflow-y: auto;
@@ -377,15 +375,15 @@ export default {
 }
 
 .user .popupBox{
-  @apply bg-gray-400 rounded;
-  width: 200px;
-  position: relative;
-  visibility: hidden;
-  z-index: 1;
+    @apply bg-gray-400 rounded;
+    width: 200px;
+    position: relative;
+    visibility: hidden;
+    z-index: 1;
 }
 
 .user:hover .popupBox{
-  visibility: visible;
+    visibility: visible;
 }
 
 .group{
@@ -400,15 +398,14 @@ export default {
 }
 
 .group .popupBox{
-  @apply bg-gray-400 rounded;
-  width: 200px;
-  position: relative;
-  visibility: hidden;
-  z-index: 1;
+    @apply bg-gray-400 rounded;
+    width: 200px;
+    position: relative;
+    visibility: hidden;
+    z-index: 1;
 }
 
 .group:hover .popupBox{
-  visibility: visible;
+    visibility: visible;
 }
-
 </style>
