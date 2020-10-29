@@ -1,16 +1,16 @@
 <template>
     <div ref="userspace">
         <!-- I temporarely removed the group size because it's really difficult to implement with the current position mapping -->
-        <div class="group" v-for="(group,index) in groups" :key="index" :id="`g${group.id}`"
+        <div class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             @click.prevent="onGroupClick(group)"> 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
-                    In groep {{index}} zitten: {{group.members}}
+                    In groep {{group.id}} zitten: {{group.members}}
                 </span>
             </div>
         </div>
-        <div class="user" v-for="user in users" :key="user.id" :id="`u${user.id}`" 
+        <div class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned)"
             @click.prevent="onUserClick(user)">
@@ -46,6 +46,7 @@ export default {
         return{
             positioned: false,
             positionMapping: new Map(),
+            usersCopy: [...this.users], //We need this because we also want watch to work if we push to the user prop from outside the component.
         }
     },
 
@@ -62,6 +63,59 @@ export default {
         //The entire positioning needs to be remapped to fit the new column amount.
         gridCols: function(newVal, oldVal){
             this.mapPositions();
+        },
+
+        users: function(newVal, oldVal){
+            //Don't use oldVal because, if the users reference doesn't change, they both point to the same array.
+
+            var joinedUsers = newVal.filter(user => !this.usersCopy.find(x => x.id === user.id));
+            var leftUsers = this.usersCopy.filter(user => !newVal.find(x => x.id === user.id));
+
+            //Check if there are no 2 of the same users in the array.
+            var ambiguousUsers = newVal.filter(user => newVal.filter(user2 => user2.id === user.id).length >= 2);
+            if(ambiguousUsers.length){
+                throw new Error(`Error: ambiguous users found: ${ambiguousUsers.map(x => `id: ${x.id} user: ${x.user}`).join(', ')}`);
+            }
+
+            this.usersCopy = [...newVal]; //Keep track of the current values in users.
+
+            console.log("joined: " + joinedUsers.length);
+            console.log("left: " + leftUsers.length);
+
+            leftUsers.forEach(user => this.positionMapping.delete('u' + user.id));
+
+            if (!this.positionMapping.size && joinedUsers.length) {
+                var randomUser = joinedUsers[Math.floor(Math.random() * joinedUsers.length)];
+                this.positionMapping.set(`u${randomUser.id}`, {
+                    x: Math.floor(this.gridCols/2), 
+                    y: Math.floor(this.visibleRows/2),
+                    minDistance: 2,
+                });
+            }
+
+            joinedUsers.forEach(user => {
+                if(!this.positionMapping.get(`u${user.id}`)){
+                    
+                    //If the user is in a group, set the position of the user to the position of the group
+                    var group = this.getUserGroup(user.id);
+
+
+                    if(group){
+                        this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.id));
+                    }else{
+                        var rSpotInfo = this.getRandomFreeSpot(2,5);
+                        rSpotInfo.minDistance = 2;
+                        this.positionMapping.set(`u${user.id}`, rSpotInfo);
+                    }
+                }
+            });
+
+            
+
+            this.$nextTick(() => {
+                this.positionAll();
+            });
+            
         }
     },
 
@@ -71,7 +125,8 @@ export default {
          */
         iconSize: function() {
             return (100/this.gridCols) - this.gridSpacing;
-        },
+        }
+
     },
 
     methods: {
@@ -91,7 +146,7 @@ export default {
             // First clear the old positioning.
             this.positionMapping = new Map();
 
-            if(this.groups.length > 0){
+            if (this.groups.length > 0) {
                 // Position a random group in the center, as a starting point for min/max distance.
                 var randomGroup = this.groups[Math.floor(Math.random() * this.groups.length)];
                 this.positionMapping.set(`g${randomGroup.id}`, {
@@ -324,8 +379,9 @@ export default {
 .group{
     background-color: black;
     border-radius: 100%;
-    position: absolute;
     height: 0px;
+    position: relative;
+    z-index: 1;
 
     /* this is not working :( */
     transition: all 400ms linear;
