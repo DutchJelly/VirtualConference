@@ -3,11 +3,14 @@
         <!-- I temporarely removed the group size because it's really difficult to implement with the current position mapping -->
         <div class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
-            @click.prevent="onGroupClick(group)"> 
+            @click.prevent="clickedGroup(group.id)"> 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
                     In groep {{group.id}} zitten: {{group.members}}
                 </span>
+            </div>
+            <div v-if="visibleGroup == group.id" class="text-gray-800">
+                asdf
             </div>
         </div>
         <div class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
@@ -45,6 +48,7 @@ export default {
     data(){
         return{
             positioned: false,
+            visibleGroup: -1,
             positionMapping: new Map(),
             usersCopy: [...this.users], //We need this because we also want watch to work if we push to the user prop from outside the component.
         }
@@ -130,6 +134,14 @@ export default {
     },
 
     methods: {
+
+        clickedGroup(groupId) {
+            if (this.visibleGroup == groupId) {
+                this.visibleGroup = -1;
+            } else {
+                this.visibleGroup = groupId;
+            }
+        },
         
         handleResize(){
             //We need to do this for the y positioning, because we can't use percentages of the width for that.
