@@ -14,6 +14,7 @@
             <button @click.prevent="userTest2">User test 2</button>
             <button @click.prevent="userTest3">User test 3</button>
             <button @click.prevent="groupTest1">Group test 1</button>
+            <button @click.prevent="groupTest2">Group test 2</button>
             <div class="testresult">{{testresult}}</div>
         </div>
     </div>
@@ -101,7 +102,7 @@ export default {
                 user: "Richard",
                 id: 4
             },{
-                user: "Richard",
+                user: "User 8",
                 id: 8
             }];
 
@@ -123,7 +124,38 @@ export default {
                     id: 1,
                     members: [10,12]
                 }];
-                this.testresult = "User 8 should have moved to the other group."
+                this.testresult = "User 8 should have moved to group 0."
+            }, 1000);
+        },
+
+        groupTest2(){
+            this.users = [{
+                user: "Richard",
+                id: 1
+            },{
+                user: "Richard",
+                id: 2
+            },{
+                user: "Jelle",
+                id: 3
+            },{
+                user: "Richard",
+                id: 4
+            },{
+                user: "Richard",
+                id: 8
+            }];
+
+            this.groups = [];
+
+            this.testresult = "Test in progress...";
+
+            setTimeout(() => {
+                this.groups = [{
+                    id: 0,
+                    members: [1,2,3,4,8]
+                }];
+                this.testresult = "All users should have moved into a new group."
             }, 1000);
         },
     }

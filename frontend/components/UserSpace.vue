@@ -45,7 +45,8 @@ export default {
         //We can only read the size of the element by using this Vue.nextTick callback.
         this.$nextTick(() => {
             this.refreshPixelSizeReferences();
-            this.mapPositions();
+            this.positionMapping = new Map();
+            this.mapPositions(this.users, this.groups);
             this.positionAll();
             this.positioned = true;
         });
@@ -57,7 +58,8 @@ export default {
             positioned: false,
             visibleGroup: -1,
             positionMapping: new Map(),
-            usersCopy: [...this.users] //We need this because we also want watch to work if we push to the user prop from outside the component.
+            usersCopy: [...this.users], //We need this because we also want watch to work if we push to the user prop from outside the component.
+            groupsCopy: this.getGroupsArrayCopy(this.groups)
         }
     },
 
@@ -73,7 +75,8 @@ export default {
     watch: {
         //The entire positioning needs to be remapped to fit the new column amount.
         gridCols: function(newVal, oldVal) {
-            this.mapPositions();
+            this.positionMapping = new Map();
+            this.mapPositions(this.users, this.groups);
         },
 
         users: function(newVal, oldVal) {
@@ -95,35 +98,93 @@ export default {
 
             leftUsers.forEach(user => this.positionMapping.delete('u' + user.id));
 
-            if(!this.positionMapping.size && joinedUsers.length) {
-                let randomUser = joinedUsers[Math.floor(Math.random() * joinedUsers.length)];
-                this.positionMapping.set(`u${randomUser.id}`, {
-                    x: Math.floor(this.gridCols/2), 
-                    y: Math.floor(this.visibleRows/2),
-                    minDistance: 2,
-                });
-            }
-
-            joinedUsers.forEach(user => {
-                if(!this.positionMapping.get(`u${user.id}`)) {
-                    
-                    //If the user is in a group, set the position of the user to the position of the group
-                    let group = this.getUserGroup(user.id);
-
-                    if(group) {
-                        this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.id));
-                    } else {
-                        let rSpotInfo = this.getRandomFreeSpot(2,5);
-                        rSpotInfo.minDistance = 2;
-                        this.positionMapping.set(`u${user.id}`, rSpotInfo);
-                    }
-                }
-            });
+            this.ensurePivot(joinedUsers, []);
+            this.mapUserPositions(joinedUsers);
 
             this.$nextTick(() => {
                 this.positionAll();
             });
             
+        },
+
+        groups: function(newVal, oldVal){
+            /**
+             * Corner cases:
+             * 1) users are added to group that don't exist
+             * 2) all groups are removed, no users are outside of groups and 1 or more groups are added
+             * 3) all groups are removed and there are no users outside of the group
+             * 4) user gets removed from group
+             * 5) user gets added to group
+             * 6) user moves from group to group
+             * 7) a group is created from existing users
+             */
+            //Users changed? on join: move user to group, on leave move user to own spot
+
+            let newGroups = this.getIdDifference(newVal, this.groupsCopy);
+            let removedGroups = this.getIdDifference(this.groupsCopy, newVal);
+
+            //Map old version of group to new version of group
+            let possiblyChangedGroupMapping = new Map();
+            this.groupsCopy.forEach(group => {
+                let otherVersion = newVal.find(x => x.id === group.id);
+                if(otherVersion){
+                    possiblyChangedGroupMapping.set(group, otherVersion);
+                }
+            });
+
+
+            let nonPositionedMembers = [];
+
+            //Remove all removed groups from the position mapping, and also register their users as non positioned.
+            removedGroups.forEach(group => {
+                this.positionMapping.delete('g' + group.id);
+                group.members.forEach(memberId => {
+                    let member = this.users.find(u => u.id === memberId);
+                    if(member) {
+                        nonPositionedMembers.push(member);
+                        this.positionMapping.delete('u' + memberId);
+                    }
+                });
+            });
+
+            //Register all members of new groups as non positioned.
+            newGroups.forEach(group => {
+                group.members.forEach(memberId => {
+                    let member = this.users.find(u => u.id === memberId);
+                    if(member) {
+                        nonPositionedMembers.push(member);
+                        this.positionMapping.delete('u' + memberId);
+                    }
+                });
+            });
+
+
+            //Check for removed and added users from possibly changed groups
+            possiblyChangedGroupMapping.forEach((newVersion, oldVersion) => {
+                let changedMemberIds = [];
+                let addedUsers = newVersion.members.filter(x => !oldVersion.members.includes(x));
+                let removedUsers = oldVersion.members.filter(x => !newVersion.members.includes(x));
+                if(addedUsers?.length) changedMemberIds.push(...addedUsers);
+                if(removedUsers?.length) changedMemberIds.push(...removedUsers); 
+
+                console.log(`for group ${newVersion.id} the changed list is [${changedMemberIds.join(', ')}] (length ${changedMemberIds.length})`);
+
+                changedMemberIds.forEach(changedMemberId => {
+                    let changedMember = this.users.find(u => u.id === changedMemberId);
+                    if(changedMember && !nonPositionedMembers.includes(changedMember)){
+                        nonPositionedMembers.push(changedMember);
+                        this.positionMapping.delete('u' + changedMemberId);
+                    }
+                });
+            });
+
+            this.mapPositions(nonPositionedMembers, newGroups);
+
+            this.groupsCopy = this.getGroupsArrayCopy(newVal);
+
+            this.$nextTick(() => {
+                this.positionAll();
+            });
         }
     },
 
@@ -139,58 +200,57 @@ export default {
 
     methods: {
 
-        clickedGroup(groupId) {
-            if(this.visibleGroup == groupId) {
-                this.visibleGroup = -1;
-            } else {
-                this.visibleGroup = groupId;
-            }
-        },
-        
-        handleResize() {
-            //We need to do this for the y positioning, because we can't use percentages of the width for that.
-            this.refreshPixelSizeReferences();
-            this.positionAll();
-        },
-
         /**
-         * TODO cleanup... this function is too long and contains a bunch of repetitive blocks
          * 
-         * Creates and sets all positions in positionMapping
          */
-        mapPositions() {
-            // First clear the old positioning.
-            this.positionMapping = new Map();
+        mapPositions(users, groups) {
+            this.ensurePivot(users, groups);
 
-            if(this.groups.length > 0) {
-                // Position a random group in the center, as a starting point for min/max distance.
-                let randomGroup = this.groups[Math.floor(Math.random() * this.groups.length)];
-                this.positionMapping.set(`g${randomGroup.id}`, {
-                    x: Math.floor(this.gridCols/2), 
-                    y: Math.floor(this.visibleRows/2),
-                    minDistance: 3,
-                });
-            } else {
-                // Position a random user in the center, as a starting point for min/max distance.
-                let randomUser = this.users[Math.floor(Math.random() * this.users.length)];
-                this.positionMapping.set(`u${randomUser.id}`, {
-                    x: Math.floor(this.gridCols/2), 
-                    y: Math.floor(this.visibleRows/2),
-                    minDistance: 2,
-                });
-            }
-            
             // Position all the groups
-            this.groups.forEach(group => {
-                if(!this.positionMapping.get(`g${group.id}`)) {
-                    let rSpotInfo = this.getRandomFreeSpot(3,5);
-                    rSpotInfo.minDistance = 3;
-                    this.positionMapping.set(`g${group.id}`, rSpotInfo);
-                }
-            })
+            this.mapGroupPositions(this.groups);
 
             // Position all the users that are not positioned yet.
-            this.users.forEach(user => {
+            this.mapUserPositions(this.users);
+        },
+
+        ensurePivot(users, groups){
+            if(!this.positionMapping.size) {
+                if(groups && groups.length){
+                    //Set a random group's position to some pivot position.
+                    let randomGroup = groups[Math.floor(Math.random() * groups.length)];
+                    this.positionMapping.set('g' + randomGroup.id, {
+                        x: Math.floor(this.gridCols/2), 
+                        y: Math.floor(this.visibleRows/2),
+                        minDistance: 3,
+                    });
+                }else if(users && users.length){ 
+
+                    //Note that this can't be reached if there's any groups, so we don't have to check if the user
+                    //is party of any groups.
+
+                    //Set a random user's position as pivot if there are no groups left and if there are just stray users.
+                    let randomUser = users[Math.floor(Math.random() * users.length)];
+                    this.positionMapping.set('u' + randomUser.id, {
+                        x: Math.floor(this.gridCols/2), 
+                        y: Math.floor(this.visibleRows/2),
+                        minDistance: 2,
+                    });
+                }
+            }
+        },
+
+        mapGroupPositions(groups){
+            groups.forEach(group => {
+                if(!this.positionMapping.get('g' + group.id)) {
+                    let rSpotInfo = this.getRandomFreeSpot(3,5);
+                    rSpotInfo.minDistance = 3;
+                    this.positionMapping.set('g' + group.id, rSpotInfo);
+                }
+            });
+        },
+
+        mapUserPositions(users){
+            users.forEach(user => {
                 if(!this.positionMapping.get(`u${user.id}`)) {
                     
                     //If the user is in a group, set the position of the user to the position of the group
@@ -207,12 +267,47 @@ export default {
             });
         },
 
+        getGroupsArrayCopy(groups){
+            let groupsCopy = [...groups];
+            groupsCopy.forEach(x => {
+                x.members = [...x.members];
+            });
+            return groupsCopy;
+        },
+
+        clickedGroup(groupId) {
+            if(this.visibleGroup == groupId) {
+                this.visibleGroup = -1;
+            } else {
+                this.visibleGroup = groupId;
+            }
+        },
+        
+        handleResize() {
+            //We need to do this for the y positioning, because we can't use percentages of the width for that.
+            this.refreshPixelSizeReferences();
+            this.positionAll();
+        },
+
+        
+
         /**
          * @param {Number} userId
          * @returns {{members: Array<Number>, id: Number}} group that contains the user with id userId (or undefined) 
          */
         getUserGroup(userId) {
             return this.groups.find(group => group.members.includes(userId));
+        },
+
+        /**
+         * Compares a and b with their id, and subtracts all overlapping elements from a.
+         * In english: get all elements of a that are not part of b.
+         * @param {Array<{id: String}>} a
+         * @param {Array<{id: String}>} b
+         * @returns a - b
+         */
+        getIdDifference(a, b){
+            return a.filter(x => !b.find(y => y.id === x.id));
         },
 
         /**
