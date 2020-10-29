@@ -4,23 +4,25 @@
         <div 
             class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
-            @click.prevent="clickedGroup(group.id)"
-            > 
+            v-show="!visibleGroup || visibleGroup === group"
+            @click.prevent="onGroupClick(group)"
+        > 
+            <div class="group-text" :style="`font-size: ${squareSize/2}px; line-height: ${squareSize}px; top: -${squareSize/10}px;`">
+                {{groupText(group)}}
+            </div>
+            
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
                     In groep {{group.id}} zitten: {{group.members}}
                 </span>
             </div>
-            <div v-if="visibleGroup == group.id"
-                class="text-gray-800">
-                asdf
-            </div>
+            
         </div>
 
         <div 
             class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
-            v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned)"
+            v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.members.includes(user.id))"
             @click.prevent="onUserClick(user)"
         >
             <!-- This break the formatting if it overflows on the right of the page -->
@@ -56,10 +58,11 @@ export default {
         
         return {  
             positioned: false,
-            visibleGroup: -1,
+            visibleGroup: undefined,
             positionMapping: new Map(),
             usersCopy: [...this.users], //We need this because we also want watch to work if we push to the user prop from outside the component.
-            groupsCopy: this.getGroupsArrayCopy(this.groups)
+            groupsCopy: this.getGroupsArrayCopy(this.groups),
+            squareSize: 0
         }
     },
 
@@ -194,11 +197,85 @@ export default {
          */
         iconSize: function() {
             return (100/this.gridCols) - this.gridSpacing;
-        }
+        },
+
+        
 
     },
 
     methods: {
+
+        onGroupClick: function(group){
+            if(this.visibleGroup === group || (this.visibleGroup && this.visibleGroup !== group)){
+                
+                // Move all the users back to the group.
+                let members = this.getGroupMembers(this.visibleGroup);
+                members.forEach(member => {
+                    this.positionMapping.set('u' + member.id, this.positionMapping.get('g' + group.id));
+                    this.positionAll();
+                });
+
+                //Return if we click the same group twice, no new group needs to be opened.
+                if(this.visibleGroup === group){
+                    this.visibleGroup = undefined;
+                    return;
+                }
+            }
+
+            //We need to fan out the users of group.
+            //The idea is to 'flood' around the group position.
+            this.visibleGroup = group; 
+            this.mapFanOut(group);
+            this.positionAll();
+        },
+
+        mapFanOut(group){
+            let toPlace = [...this.getGroupMembers(group)];
+            let sideLength = 1;
+            //Walk over all the 'sides'
+            let pos = this.positionMapping.get('g' + group.id);
+            let x = pos.x;
+            let y = pos.y;
+            while(toPlace.length){
+                //Jump to top left square, and walk around in clockwise direction.
+                sideLength += 2;
+                x--;
+                y--;
+
+                for(let i = 0; i < 4; i++){
+                    let dy = 0, dx = 0;
+                    if(i === 0) dx = 1;
+                    if(i === 1) dy = 1;
+                    if(i === 2) dx = -1;
+                    if(i === 3) dy = -1;
+                    for(let j = 0; j < sideLength-1; j++){
+                        //Look if the point is valid.
+                        if(x < this.gridCols && x >= 0 && y >= 0){
+                            let user = toPlace.shift();
+                            this.positionMapping.set('u' + user.id, {x, y: y, minDistance: 0});
+                            if(!toPlace.length) return;
+                        }
+                        x += dx;
+                        y += dy;
+                    }
+                    //Check one more point after adding dx and dy to x and y.
+                    if(x < this.gridCols && x >= 0 && y >= 0){
+                        let user = toPlace.shift();
+                        this.positionMapping.set('u' + user.id, {x, y, minDistance: 0});
+                        if(!toPlace.length) return;
+                    }
+                }
+            }
+        },
+
+        groupText: function(group){
+            if(!group?.members?.length) return "0";
+
+            let memberCount = group.members.length;
+            if(memberCount > 9) return "9+";
+
+            return memberCount;
+        },
 
         /**
          * 
@@ -289,14 +366,23 @@ export default {
             this.positionAll();
         },
 
-        
-
         /**
          * @param {Number} userId
          * @returns {{members: Array<Number>, id: Number}} group that contains the user with id userId (or undefined) 
          */
         getUserGroup(userId) {
             return this.groups.find(group => group.members.includes(userId));
+        },
+
+        getGroupMembers(group){
+            let members = [];
+            group.members.forEach(memberId => {
+                let member = this.users.find(u => u.id === memberId);
+                if(member) {
+                    members.push(member);
+                }
+            });
+            return members;
         },
 
         /**
@@ -431,9 +517,11 @@ export default {
             if(Number.isNaN(position.x) || Number.isNaN(position.y))
                 throw new Error(`Either x[${position.x}] or y${position.y} is NaN (probably divided by 0 somewhere)`);
 
-            console.log(`positioning user ${id} to ${position.x},${position.y}`)
+            // console.log(`positioning user ${id} to ${position.x},${position.y}`)
 
             //Selected user without vue refs because those were not allowing me to add styling.
+
+            //This could also be done in the template, but this is just a bit more modulair.
             let htmlElement = document.querySelector(`#${id}`);
             let positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';
@@ -492,15 +580,22 @@ export default {
     transition: all 400ms linear;
 }
 
+
 .group .popupBox{
     @apply bg-gray-400 rounded;
     width: 200px;
     position: relative;
+    top: 0;
     visibility: hidden;
-    z-index: 1;
+    z-index: 3;
 }
 
 .group:hover .popupBox{
     visibility: visible;
+}
+
+.group-text{
+    @apply text-white text-center;
+    z-index: 2;
 }
 </style>
