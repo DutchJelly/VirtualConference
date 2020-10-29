@@ -5,15 +5,16 @@
             class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             @click.prevent="clickedGroup(group.id)"
-            > 
+        > 
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
                     In groep {{group.id}} zitten: {{group.members}}
                 </span>
             </div>
-            <div v-if="visibleGroup == group.id"
-                class="text-gray-800">
-                asdf
+            <div v-if="visibleGroup == group.id" class="text-gray-800">
+                <div v-for="member in group.members" :key="member" class="rounded-full w-20 h-20 bg-gray-800 relative">
+                    Dit is {{member}} van de group.
+                </div>
             </div>
         </div>
 
@@ -407,5 +408,11 @@ export default {
 
 .group:hover .popupBox{
     visibility: visible;
+}
+
+.groupMember {
+    @apply bg-gray-400 rounded;
+    position: relative;
+    z-index: 1;
 }
 </style>
