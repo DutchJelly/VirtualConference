@@ -63,24 +63,21 @@ app.use(
 );
 
 //testing jitsi rooms
-var onlineUsers:string[] = [];
+let onlineUsers:string[] = [];
 
 //map user to a user that he requested
-var requested = new Map<string, string>();
-
-//map room to a list of users
-//var rooms = new Map<string, string[]>();
+let requested = new Map<string, string>();
 
 //map user to room
-var rooms = new Map<string, string>();
+let rooms = new Map<string, string>();
 
 //map username to the socket they're on
-var socketMapping = new Map<string, Socket>();
+let socketMapping = new Map<string, Socket>();
 
 //OUDE VERSIE kan in de database gezet worden
 //map username to conversation type
-var conversation = new Map<string, string>();
-var typeConversation = "";
+let conversation = new Map<string, string>();
+let typeConversation = "";
 
 //Handle socket connections
 io.on('connection', (socket) => {
@@ -201,7 +198,7 @@ app.post('/login', json(), async (req, res, next) => {
     // TODO: use proper secret key
 	// or use sessions (with redis)
 
-	var sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
+	let sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
 	user.loginStatus = true;
 	user.sessionKey = sessionKey;
 	await user.save();
@@ -224,7 +221,7 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
 
 // Test login
 app.get('/testlogin/:username', json(), async (req, res, next) => {
-    var username = req.params.username;
+    let username = req.params.username;
     console.log(`a user logged in: ${username}`);
     if(onlineUsers.includes(username)){
         res.status(200).json({message: `you logged in`, online: onlineUsers});
@@ -237,9 +234,10 @@ app.get('/testlogin/:username', json(), async (req, res, next) => {
 });
 
 app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
-    var user = req.params.name;
-    var withwho = req.params.withwho;
-    console.log("Typeconversation");
+    let user = req.params.name;
+    let withwho = req.params.withwho;
+    let type = 'none';
+    console.log(`Typeconversation, user: ${user}, withwho: ${withwho}`);
     
     if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
         res.status(400).json({message: "error, one of the users is not online"});
@@ -250,31 +248,29 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     //if conversation type is private, no one else can join the conversation
     if(conversation.get(withwho) === "private"){
         console.log('it is a private conversation');
-        socketMapping.get(user)?.emit("typeConversation", {withwho, type: "private"});
-        return;
+        type = "private";
     }
-
     //if conversation type is open, any user can join the conversation without any permission
-    if(conversation.get(withwho) === "open"){
+    else if(conversation.get(withwho) === "open"){
         console.log('it is an open conversation');
-        socketMapping.get(user)?.emit("typeConversation", {withwho, type: "open"});
-        return;
+        type = "open";
     }
-
     //if conversation type is closed, any user who want to join the conversation must ask for permission
-    if(conversation.get(withwho) === "closed"){
+    else if(conversation.get(withwho) === "closed"){
         console.log('it is a closed conversation');
-        socketMapping.get(user)?.emit("typeConversation", {withwho, type: "closed"});
-        return;
+        type = "closed";
     }
 
     console.log("chose conversation type");
-    socketMapping.get(user)?.emit("typeConversation", {withwho, type: "none"});
+    socketMapping.get(user)?.emit("typeConversation", {withwho, type});
+
+    //Return the type to user.
+    res.status(200).json({withwho, type});
 });
 
 app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, next) => {
-    var user = req.params.name;
-    var withwho = req.params.withwho;
+    let user = req.params.name;
+    let withwho = req.params.withwho;
     typeConversation = req.params.type;
 
     console.log(`request conversation user: ${user}, withWho: ${withwho}`);
@@ -294,8 +290,8 @@ app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, ne
 });
 
 app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => {
-    var user = req.params.name;
-    var withwho = req.params.withwho;
+    let user = req.params.name;
+    let withwho = req.params.withwho;
     console.log(`accept conversation user: ${user}, withWho: ${withwho}`);
 
     if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
@@ -310,14 +306,6 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         return;
     }
 
-    // for(var value of rooms.values()){
-    //     if(value.includes(withwho)){
-    //         console.log("user is already in conversation");
-    //         res.status(400).json({message: "user is already in conversation"});
-    //         return;
-    //     }
-    // }
-
     if(rooms.has(withwho)){
         console.log("user is already in conversation");
         res.status(400).json({message: "user is already in conversation"});
@@ -327,14 +315,9 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     conversation.set(user, typeConversation);
     conversation.set(withwho, typeConversation);
 
-    var userIsInRoom = false;
-    var roomName = "";
-    // for(var room of rooms.keys()){
-    //     if(rooms.get(room)?.includes(user)){
-    //         userIsInRoom = true;
-    //         roomName = room;
-    //     }
-    // }
+    let userIsInRoom = false;
+    let roomName = "";
+
     if(rooms.has(user)){
         userIsInRoom = true;
         roomName = rooms.get(user) || "";
@@ -342,10 +325,9 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 
     if(userIsInRoom){
         //If user is in room already, add withwho to it.
-        //rooms.get(roomName)?.push(withwho);
         rooms.set(withwho, roomName);
         console.log(`${user} is already in room`);
-    }else{
+    } else{
         //If not, create a new room with the two users.
         roomName = randomstring.generate();
         const room = new Rooms()
@@ -357,7 +339,6 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         console.log(`${user} start a new conversation with ${withwho} in room: ${roomName}`);
         room.roomCode = roomName
         await room.save()
-
 
         //Put the users in the call table
         const roomObject = await Rooms.findOne({roomCode: roomName}) //want to find roomID created for the roomName
@@ -385,8 +366,8 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 });
 
 app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) => {
-    var user = req.params.name;
-    var withwho = req.params.withwho;
+    let user = req.params.name;
+    let withwho = req.params.withwho;
     console.log(`${user} joined open conversation with ${withwho}`);
 
     if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
@@ -404,7 +385,7 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
     conversation.set(user, "open");
     conversation.set(withwho, "open");
 
-    var roomName = rooms.get(withwho) || "";
+    let roomName = rooms.get(withwho) || "";
 
     rooms.set(user, roomName);
 
@@ -415,8 +396,8 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
 });
 
 app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) => {
-    var user = req.params.name;
-    var withwho = req.params.withwho;
+    let user = req.params.name;
+    let withwho = req.params.withwho;
 
     console.log(`decline conversation user: ${user}, withWho: ${withwho}`);
 
@@ -437,8 +418,8 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
 });
 
 app.get('/leaveconversation/:name', json(), async (req, res, next) => {
-    var user = req.params.name;
-    var roomName = "";
+    let user = req.params.name;
+    let roomName = "";
     if(rooms.has(user)){
         roomName = rooms.get(user) || "";
         rooms.delete(user);
