@@ -1,0 +1,14 @@
+[
+  {
+    "name": "overview",
+    "path": "/overview",
+    "component": "/home/luuk2175355/SoftwareEngineering/VirtualConference/loginvoorbeeld/frontend/pages/overview.vue",
+    "chunkName": "pages/overview"
+  },
+  {
+    "name": "index",
+    "path": "/",
+    "component": "/home/luuk2175355/SoftwareEngineering/VirtualConference/loginvoorbeeld/frontend/pages/index.vue",
+    "chunkName": "pages/index"
+  }
+]
