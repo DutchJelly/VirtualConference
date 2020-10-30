@@ -61,7 +61,7 @@ export default {
             visibleGroup: undefined,
             positionMapping: new Map(),
             usersCopy: [...this.users], //We need this because we also want watch to work if we push to the user prop from outside the component.
-            groupsCopy: this.getGroupsArrayCopy(this.groups),
+            groupsCopy: this.getGroupsArrayCopy(this.groups), //Use a function that also copies sub-member-arrays.
             squareSize: 0
         }
     },
