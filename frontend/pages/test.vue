@@ -53,7 +53,7 @@ export default {
                 members: [1,2]
             }, {
                 id: 1,
-                members: [8,10,8,12]
+                members: [8,10,11,12]
             }],
 
             testresult: ""

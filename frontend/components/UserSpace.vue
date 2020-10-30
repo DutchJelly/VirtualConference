@@ -17,6 +17,11 @@
                 </span>
             </div>
             
+            <!-- <div v-if="visibleGroup == group.id" class="text-gray-800">
+                <div v-for="member in group.members" :key="member" class="rounded-full w-20 h-20 bg-gray-800 relative">
+                    Dit is {{member}} van de group.
+                </div>
+            </div> -->
         </div>
 
         <div 
