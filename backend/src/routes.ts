@@ -239,7 +239,7 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     let type = 'none';
     console.log(`Typeconversation, user: ${user}, withwho: ${withwho}`);
     
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
+    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ //TODO check sessionkey voor users
         res.status(400).json({message: "error, one of the users is not online"});
         console.log("withwho or user wasn't logged in");
         return;
@@ -294,7 +294,7 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     let withwho = req.params.withwho;
     console.log(`accept conversation user: ${user}, withWho: ${withwho}`);
 
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
+    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ //TODO check sessionkey van users
         console.log("error, one of the users is not online");
         res.status(400).json({message: "error, one of the users is not online"});
         return;
@@ -305,52 +305,65 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         res.status(400).json({message: "no request is opened"});
         return;
     }
-
-    if(rooms.has(withwho)){
+    
+    let ongoingConversation = await Calls.findOne({username:user})
+    if(ongoingConversation){
         console.log("user is already in conversation");
         res.status(400).json({message: "user is already in conversation"});
         return;
     }
 
-    conversation.set(user, typeConversation);
+    conversation.set(user, typeConversation); //TODO zodra de database type opslaat, dit in rooms-table definieren
     conversation.set(withwho, typeConversation);
 
     let userIsInRoom = false;
     let roomName = "";
 
-    if(rooms.has(user)){
+    let inConversation = await Calls.findOne({username:user})
+    let callObject = null
+    if (inConversation != undefined)
+        callObject = inConversation.allCalls();
+    if(inConversation){
         userIsInRoom = true;
-        roomName = rooms.get(user) || "";
     }
 
     if(userIsInRoom){
-        //If user is in room already, add withwho to it.
-        rooms.set(withwho, roomName);
+        //User is in room already
         console.log(`${user} is already in room`);
     } else{
         //If not, create a new room with the two users.
         roomName = randomstring.generate();
         const room = new Rooms()
 
-        // OUDE VERSIE Opgeslagen in een Map => omzetten naar database
-        rooms.set(user, roomName);
-        rooms.set(withwho, roomName);
-
-        console.log(`${user} start a new conversation with ${withwho} in room: ${roomName}`);
-        room.roomCode = roomName
-        await room.save()
-
-        //Put the users in the call table
-        const roomObject = await Rooms.findOne({roomCode: roomName}) //want to find roomID created for the roomName
-        if(!roomObject)
-          return;
-        const call = new Calls()
-        call.roomID = roomObject.roomID
-        call.username = user;
-        await call.save()
-        call.username = withwho
-        await call.save()
+        // Add user to call
+        let call = Calls.create()
+        if (callObject != null)
+        call.roomID = roomName
+        call.username = user
+        const errors = await validate(call);
+        const error = errors[0]
+        if (error){
+            res.status(400).json({error: error.constraints})
+            return;
+        }
+        await call.save();
+        res.status(201).json({message: `Added user with name ${user} to new call`})
+        next()
     }
+    // Add witwho to call
+    let call = Calls.create()
+    if (callObject != null)
+    call.roomID = callObject.roomID
+    call.username = withwho
+    const errors = await validate(call);
+    const error = errors[0]
+    if (error){
+        res.status(400).json({error: error.constraints})
+        return;
+    }
+    await call.save();
+    res.status(201).json({message: `Added other user with name ${user} to call`})
+    next()
     
     //Delete withwho from requested mapping because request is answered.
     requested.delete(withwho);
@@ -370,24 +383,44 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
     let withwho = req.params.withwho;
     console.log(`${user} joined open conversation with ${withwho}`);
 
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
+    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ // TODO check sessionkey
         console.log("error, one of the users is not online");
         res.status(400).json({message: "error, one of the users is not online"});
         return;
     }
 
-    if(rooms.has(user)){
+    let inConversation = await Calls.findOne({username:user})
+    if(inConversation){
         console.log("user is already in conversation");
         res.status(400).json({message: "user is already in conversation"});
         return;
     }
 
-    conversation.set(user, "open");
+    conversation.set(user, "open"); //TODO Voeg types toe zodra mogelijk in rooms-table
     conversation.set(withwho, "open");
 
-    let roomName = rooms.get(withwho) || "";
+    let otherConversation = await Calls.findOne({username:withwho})
+    let callObject = null
+    if (otherConversation != undefined)
+        callObject = otherConversation.allCalls();
 
-    rooms.set(user, roomName);
+    let roomName = ""
+    // Add user to call
+    let call = Calls.create()
+    if (callObject != null) {
+        call.roomID = callObject.roomID
+        roomName = callObject.roomID
+    }
+    call.username = user
+    const errors = await validate(call);
+    const error = errors[0]
+    if (error){
+        res.status(400).json({error: error.constraints})
+        return;
+    }
+    await call.save();
+    res.status(201).json({message: `Added user with name ${user} to existing open call`})
+    next()
 
     socketMapping.get(user)?.emit("joinOpenConversation", {user, room: roomName});
 
@@ -401,7 +434,7 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
 
     console.log(`decline conversation user: ${user}, withWho: ${withwho}`);
 
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
+    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ // TODO check sessionkey
         console.log(`decline not successful because on of the users was not online. Passed user args: [${user}, ${withwho}]`);
         res.status(400).json({message: "error, one of the users is not online"});
         return;
@@ -420,11 +453,18 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
 app.get('/leaveconversation/:name', json(), async (req, res, next) => {
     let user = req.params.name;
     let roomName = "";
-    if(rooms.has(user)){
-        roomName = rooms.get(user) || "";
-        rooms.delete(user);
+
+    let inConversation = await Calls.findOne({username:user})
+    let callObject = null
+    if (inConversation != undefined)
+        callObject = inConversation.allCalls();
+    if(inConversation){
+        if (callObject != null)
+        roomName = callObject.roomID.toString()
+        rooms.delete(user); //TODO delete user uit Calls-table
         console.log(`${user} leaves room`)
-    };
+    }
+
     socketMapping.get(user)?.emit("leaveCoversation", {user});
     for (let [key, value] of rooms){
         if(value === roomName){
@@ -432,7 +472,7 @@ app.get('/leaveconversation/:name', json(), async (req, res, next) => {
         }
     }
 
-    if(conversation.has(user)){
+    if(conversation.has(user)){ // TODO kan weg als bovende TODO werkt
         conversation.delete(user);
         console.log(`${user} is deleted from map conversation`)
     }
