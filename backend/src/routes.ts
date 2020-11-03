@@ -69,15 +69,13 @@ let onlineUsers:string[] = [];
 let requested = new Map<string, string>();
 
 //map user to room
-let rooms = new Map<string, string>();
+//let rooms = new Map<string, string>();
 
 //map username to the socket they're on
 let socketMapping = new Map<string, Socket>();
 
-//OUDE VERSIE kan in de database gezet worden
-//map username to conversation type
-let conversation = new Map<string, string>();
-let typeConversation = "";
+// Keep type of call for request stored
+let typeConversation = ""
 
 //Handle socket connections
 io.on('connection', (socket) => {
@@ -238,30 +236,46 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     let withwho = req.params.withwho;
     let type = 'none';
     console.log(`Typeconversation, user: ${user}, withwho: ${withwho}`);
-    
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ //TODO check sessionkey voor users
+
+    let isUserOnline = await User.findOne({username:user})
+    let isWithwhoOnline = await User.findOne({username:withwho})
+
+    if (isUserOnline == undefined || isWithwhoOnline == undefined) {
+        res.status(400).json({message: "One of the users does not exist"});
+        return;
+    }
+
+    if(!isUserOnline?.loginStatus || !isWithwhoOnline?.loginStatus){ // Check if one of the two is online
         res.status(400).json({message: "error, one of the users is not online"});
         console.log("withwho or user wasn't logged in");
         return;
     }
     
+    let withwhoCall = await Calls.findOne({username:withwho})
+    let roomType = ""
+    if (withwhoCall != undefined) {
+        let roomID = withwhoCall.allCalls().roomID
+        let room = await Rooms.findOne({roomID:roomID})
+        if (room != undefined)
+            roomType = room.allRooms().roomType
+    }
     //if conversation type is private, no one else can join the conversation
-    if(conversation.get(withwho) === "private"){
+    if(roomType === "private"){
         console.log('it is a private conversation');
         type = "private";
     }
     //if conversation type is open, any user can join the conversation without any permission
-    else if(conversation.get(withwho) === "open"){
+    else if(roomType === "open"){
         console.log('it is an open conversation');
         type = "open";
     }
     //if conversation type is closed, any user who want to join the conversation must ask for permission
-    else if(conversation.get(withwho) === "closed"){
+    else if(roomType === "closed"){
         console.log('it is a closed conversation');
         type = "closed";
     }
 
-    console.log("chose conversation type");
+    console.log(`chose conversation type ${typeConversation} \n`);
     socketMapping.get(user)?.emit("typeConversation", {withwho, type});
 
     //Return the type to user.
@@ -275,11 +289,18 @@ app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, ne
 
     console.log(`request conversation user: ${user}, withWho: ${withwho}`);
     
-    // if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){
-    //     res.status(400).json({message: "error, one of the users is not online"});
-    //     console.log("withwho or user wasn't logged in");
-    //     return;
-    // }
+    let isUserOnline = await User.findOne({username:user})
+    let isWithwhoOnline = await User.findOne({username:withwho})
+    if (isUserOnline == undefined || isWithwhoOnline == undefined) {
+        console.log("One of the users does not exist");
+        res.status(400).json({message: "One of the users does not exist"});
+        return;
+    }
+    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
+        console.log("error, one of the users is not online");
+        res.status(400).json({message: "error, one of the users is not online"});
+        return;
+    }
 
     requested.set(user, withwho);
 
@@ -294,7 +315,14 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     let withwho = req.params.withwho;
     console.log(`accept conversation user: ${user}, withWho: ${withwho}`);
 
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ //TODO check sessionkey van users
+    let isUserOnline = await User.findOne({username:user})
+    let isWithwhoOnline = await User.findOne({username:withwho})
+    if (isUserOnline == undefined || isWithwhoOnline == undefined) {
+        console.log("One of the users does not exist");
+        res.status(400).json({message: "One of the users does not exist"});
+        return;
+    }
+    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
         console.log("error, one of the users is not online");
         res.status(400).json({message: "error, one of the users is not online"});
         return;
@@ -313,58 +341,77 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         return;
     }
 
-    conversation.set(user, typeConversation); //TODO zodra de database type opslaat, dit in rooms-table definieren
-    conversation.set(withwho, typeConversation);
-
     let userIsInRoom = false;
     let roomName = "";
 
     let inConversation = await Calls.findOne({username:user})
-    let callObject = null
-    if (inConversation != undefined)
-        callObject = inConversation.allCalls();
-    if(inConversation){
+    if(inConversation != undefined){
         userIsInRoom = true;
     }
-
+    
+    let call = Calls.create()
     if(userIsInRoom){
         //User is in room already
         console.log(`${user} is already in room`);
     } else{
         //If not, create a new room with the two users.
         roomName = randomstring.generate();
-        const room = new Rooms()
 
-        // Add user to call
-        let call = Calls.create()
-        if (callObject != null)
-        call.roomID = roomName
-        call.username = user
-        const errors = await validate(call);
-        const error = errors[0]
+        // Create new room in rooms-table
+        console.log(`\n Create new Jitsi Room for ${user} and ${withwho}`);
+        console.log(`roomName = ${roomName} | typeConversation = ${typeConversation}`)
+        let room = Rooms.create()
+        //room.roomID = "testwaarde" // roomID.toString()
+        room.roomCode = roomName.toString()
+        room.roomType = typeConversation.toString()
+        let errors = await validate(room);
+        let error = errors[0]
+        if (error){
+            res.status(400).json({error: error.constraints})
+            return;
+        }
+        await room.save();
+        //res.status(201).json({message: `Added room with name ${roomName} and type ${typeConversation} to database`})
+
+        console.log(`Room created \n`);
+
+        // Add user new call
+
+        let roomObject = await Rooms.findOne({roomCode: roomName})
+        if (roomObject != undefined)
+            console.log(`roomID: ${roomObject.roomID} | roomCode ${roomObject.roomCode} | roomType ${roomObject.roomType}`)
+
+        if (roomObject != undefined)
+            call.roomID = roomObject.roomID
+            call.username = user
+            console.log(`roomID: ${call.roomID} | username: ${user}`)
+            errors = await validate(call);
+            error = errors[0]
         if (error){
             res.status(400).json({error: error.constraints})
             return;
         }
         await call.save();
-        res.status(201).json({message: `Added user with name ${user} to new call`})
-        next()
+        console.log(`Eerste save voltooid`)
+        //res.status(201).json({message: `Added user with name ${user} to new call`})
+        console.log(`eerste status voltooid`)
     }
     // Add witwho to call
-    let call = Calls.create()
-    if (callObject != null)
-    call.roomID = callObject.roomID
+    console.log(`Call username?`)
     call.username = withwho
+    console.log(`Validate call`)
     const errors = await validate(call);
     const error = errors[0]
     if (error){
         res.status(400).json({error: error.constraints})
         return;
     }
+    console.log(`call.save`)
     await call.save();
-    res.status(201).json({message: `Added other user with name ${user} to call`})
-    next()
-    
+    console.log(`save gedaan`)
+
+    //res.status(201).json({message: `Added other user with name ${user} to call`})
+
     //Delete withwho from requested mapping because request is answered.
     requested.delete(withwho);
     
@@ -373,7 +420,7 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 
     //Notify user that he/she has accepted the conversation.
     socketMapping.get(user)?.emit("requestAcceptedFrom", {withwho, room: roomName});
-
+    console.log(`Wordt dit bereikt?`)
     //Return the room name to user.
     res.status(200).json({user: withwho, room: roomName});
 });
@@ -383,33 +430,38 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
     let withwho = req.params.withwho;
     console.log(`${user} joined open conversation with ${withwho}`);
 
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ // TODO check sessionkey
+    let isUserOnline = await User.findOne({username:user})
+    let isWithwhoOnline = await User.findOne({username:withwho})
+    if (isUserOnline == undefined || isWithwhoOnline == undefined) {
+        res.status(400).json({message: "One of the users does not exist"});
+        return;
+    }
+    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
         console.log("error, one of the users is not online");
         res.status(400).json({message: "error, one of the users is not online"});
         return;
     }
 
     let inConversation = await Calls.findOne({username:user})
-    if(inConversation){
+    if(inConversation != undefined){
         console.log("user is already in conversation");
         res.status(400).json({message: "user is already in conversation"});
         return;
     }
 
-    conversation.set(user, "open"); //TODO Voeg types toe zodra mogelijk in rooms-table
-    conversation.set(withwho, "open");
-
-    let otherConversation = await Calls.findOne({username:withwho})
-    let callObject = null
-    if (otherConversation != undefined)
-        callObject = otherConversation.allCalls();
-
+    let callObject = await Calls.findOne({username:withwho})
     let roomName = ""
     // Add user to call
     let call = Calls.create()
-    if (callObject != null) {
+    if (callObject != undefined) {
         call.roomID = callObject.roomID
-        roomName = callObject.roomID
+        let roomObject = await Rooms.findOne({roomID:callObject.roomID})
+        if (roomObject != undefined)
+            roomName = roomObject.roomCode
+    } else {
+        console.log("User is ");
+        res.status(400).json({message: "user is already in conversation"});
+        return;
     }
     call.username = user
     const errors = await validate(call);
@@ -419,8 +471,7 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
         return;
     }
     await call.save();
-    res.status(201).json({message: `Added user with name ${user} to existing open call`})
-    next()
+    //res.status(201).json({message: `Added user with name ${user} to existing open call`})
 
     socketMapping.get(user)?.emit("joinOpenConversation", {user, room: roomName});
 
@@ -434,7 +485,13 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
 
     console.log(`decline conversation user: ${user}, withWho: ${withwho}`);
 
-    if(!onlineUsers.includes(user) || !onlineUsers.includes(withwho)){ // TODO check sessionkey
+    let isUserOnline = await User.findOne({username:user})
+    let isWithwhoOnline = await User.findOne({username:withwho})
+    if (isUserOnline == undefined || isWithwhoOnline == undefined) {
+        res.status(400).json({message: "One of the users does not exist"});
+        return;
+    }
+    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
         console.log(`decline not successful because on of the users was not online. Passed user args: [${user}, ${withwho}]`);
         res.status(400).json({message: "error, one of the users is not online"});
         return;
@@ -452,30 +509,28 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
 
 app.get('/leaveconversation/:name', json(), async (req, res, next) => {
     let user = req.params.name;
-    let roomName = "";
+    let roomID = -1;
 
     let inConversation = await Calls.findOne({username:user})
-    let callObject = null
-    if (inConversation != undefined)
-        callObject = inConversation.allCalls();
-    if(inConversation){
-        if (callObject != null)
-        roomName = callObject.roomID.toString()
-        rooms.delete(user); //TODO delete user uit Calls-table
-        console.log(`${user} leaves room`)
+    if(inConversation != undefined){
+        roomID = inConversation.roomID
+        Calls.delete({username: user});
+
+        let thisRoomConversation = await Calls.find({roomID: roomID})
+
+        // Last user leaves a room, room gets deleted
+        if (thisRoomConversation.length == 0) {
+            await Rooms.delete({roomID: roomID});
+        }
     }
 
+    /*
     socketMapping.get(user)?.emit("leaveCoversation", {user});
     for (let [key, value] of rooms){
         if(value === roomName){
             socketMapping.get(key)?.emit("leaveCoversation", {user});
         }
-    }
-
-    if(conversation.has(user)){ // TODO kan weg als bovende TODO werkt
-        conversation.delete(user);
-        console.log(`${user} is deleted from map conversation`)
-    }
+    } */ // Dit werkt niet meer omdat de map niet meer bestaat
 });
 
 app.get('/')

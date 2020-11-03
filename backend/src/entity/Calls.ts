@@ -6,7 +6,7 @@ import {isEmail, IsEmail, Length,  } from "class-validator"
 export class Calls extends BaseEntity {
 
 	@PrimaryColumn()
-    roomID!: string;
+    roomID!: number;
 
 	@PrimaryColumn() //linken naar user met foreign key met one-to-one relatie
     @IsEmail()
