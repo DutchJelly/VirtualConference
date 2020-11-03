@@ -34,3 +34,4 @@
 |28-10-2020 | 15:00-16:25 | MS teams | Meeting 23 with TTC |
 |29-10-2020 | 13:42-14:42 | MS teams | Meeting 24 with TTC(Jelle en Richard) |
 |02-11-2020 | 10:00-10:30 | MS teams | Meeting 4 with H. Basold |
+|03-11-2020 | 9:30-12:00 | Discord | Meeting 25 with TTC (Wouter en Luuk)
