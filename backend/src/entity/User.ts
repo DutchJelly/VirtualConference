@@ -26,7 +26,10 @@ export class User extends BaseEntity {
 
 	@Column({default: false})
 	@IsBoolean()
-    loginStatus!: boolean;
+	loginStatus!: boolean;
+	
+	@Column()
+	profilePicture!: string; //TODO: Currently using string, should be changed later, but we didn't know how to fix it.
 
     toUserData() {
         return {
