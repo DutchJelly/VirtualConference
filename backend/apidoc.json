@@ -1,0 +1,7 @@
+{
+  "name": "Documentation Example",
+  "version": "0.1.0",
+  "description": "VirtualConference apiDoc basic example",
+  "title": "Example browser title",
+  "url" : "http://localhost:5000"
+}
