@@ -21,14 +21,26 @@ namespace Express {
 	}
 }
 	
-// Checks if sessionKey exists.
+
+ /**
+ * @api {Function} - LoginRequired
+ * @apiDescription Checks if the session key received from the frontend, exists in the database. If so, the user object will be set to the correct user. This function must be used in a pipeline.
+ * @apiName loginRequired
+ * @apiGroup Functions
+ * 
+ * @apiParam {NULL} NULL No parameters.
+ *
+ * @apiSuccess {object} userObject Sets userObject to user with the correct sessionkey.
+ *
+ * @apiError NoSessionTokenGiven There was no session token found in the body data.
+ * @apiError NoSessionTokenMatch No match was found with the given session token.
+ */
 const loginRequired: Handler = async (req, res, next) => {
-	// Pak de token van de Authorization header van de request
+	// Pak de token van de body data header van de request
 	// const sessionKey = req.headers.authorization
 	const {sessionKey} = req.body.data;
-	console.log(sessionKey)
 	if (!sessionKey)
-		throw Error(`Session token missing in Authorization header`)
+		throw Error(`Session token missing in data body`)
 	// Er van uitgaande dat de column met tokens sessionToken heet:
 	const authenticatedUser = await User.findOne({sessionKey: sessionKey})
 	if (!authenticatedUser)
@@ -100,7 +112,7 @@ io.on('connection', (socket) => {
 });
 
 //API requests
-app.get('/user/:email', async (req, res, next) => {
+app.get('/user/:email', async (req, res, next) => { //TODO: is this function even used????
     const email = req.params.email;
     const token = req.headers.authorization
     const user = await User.findOne({username: email})
@@ -112,40 +124,116 @@ app.get('/user/:email', async (req, res, next) => {
     res.json({data: user.toUserData()})
 });
 
-//Returns all users INCLUDING passwords and everything else
-app.get('/allUsers', async (req, res) => { //TODO: security???
-	const allUsers = await User.find();
-	res.json({data: allUsers})
+/**
+ * @api {get} /allUsers /allUsers
+ * @apiDescription Getting all users objects from the database
+ * @apiName allUsers
+ * @apiGroup User
+ * 
+ * @apiParam {NULL} NULL No parameters.
+ *
+ * @apiSuccess {array} allUsers All userObjects.
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "username: test@test.com"
+ * 			"password: dsbhdsfhyihi32h3rhbjdsnjdsfjkdsf"
+ * 			"sessionKey: dkdkjn3mmdfkfmnhsa"
+ * 			"loginStatus: True"
+ *      }
+ * @apiError UserDoesNotExist The user could not be found in the database.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No registered user for email test@test.com"
+ *      }
+ *
+ */
+app.get('/allUsers', loginRequired, async (req, res) => { //TODO: security??? SHOULD BE DELETEN ON PRODUCTION
+	if (process.env.NODE_ENV === 'development') {
+		const allUsers = await User.find();
+		res.status(200).json({data: allUsers})
+	} else {
+		res.status(400).json("NO PERMISSION")
+	}
 })
 
-app.get('/debug', async (req, res) => { //TODO: security???
-	const allUsers = await User.find();
-	const allRooms = await Rooms.find();
-	const allCalls = await Calls.find();
-	console.log(allUsers);
-	console.log(allRooms);
-	console.log(allCalls);
-	res.json({data: allUsers, allRooms, allCalls})
+
+app.get('/debug', async (req, res) => { //TODO: security??? AND DELETE ON PRODUCTION
+	if (process.env.NODE_ENV === 'development') {
+		const allUsers = await User.find();
+		const allRooms = await Rooms.find();
+		const allCalls = await Calls.find();
+		console.log(allUsers);
+		console.log(allRooms);
+		console.log(allCalls);
+		res.json({data: allUsers, allRooms, allCalls})
+	} else {
+		res.status(400).json("NO PERMISSION")
+	}
 })
 
-//Returns 1 userObject corresponding to the given username
-app.post('/userObject', json(), async (req, res) => { //TODO: security???
-	const {username, password} = req.body.data;
-    const token = req.headers.authorization
+/**
+ * @api {post} /userData /userData
+ * @apiDescription Getting the userData of a specific user (userData is defined in User.ts
+ * @apiName userData
+ * @apiGroup User
+ *
+ * @apiParam {string} username Username of which the userData needs to be returned.
+ *
+ * @apiSuccess {object} userData A userData object. (Defined in User.ts).
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "username: test@test.com"
+ * 			"loginStatus: True"
+ *      }
+ * @apiError UserDoesNotExist The user could not be found in the database.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No registered user for email test@test.com"
+ *      }
+ *
+ */
+app.post('/userData', loginRequired, json(), async (req, res) => { //TODO: security???
+	const {username} = req.body.data;
 	const user = await User.findOne({username})
 	if (!user) {
         res.status(400).json({error: `No registered user for email ${username}`})
         return;
 	}
 	const userData = user.toUserData()
-	res.json({userData})
+	res.status(200).json({userData})
 	return;
 })
 
-//Returns the user status corrseponding to the given username
+/**
+ * @api {post} /userStatus /userStatus
+ * @apiDescription Getting the status of a specific user
+ * @apiName userStatus
+ * @apiGroup User
+ *
+ * @apiParam {string} username Username of which the status needs to be returned.
+ *
+ * @apiSuccess {Boolean} loginStatus Login status of the user.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          True
+ *      }
+ * @apiError UserDoesNotExist The user could not be found in the database.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No registered user for email test@test.com."
+ *      }
+ *
+ */
 app.post('/userStatus', json(), async (req, res) => { //TODO: security???
-	const {username, password} = req.body.data;
-    const token = req.headers.authorization
+	const {username} = req.body.data;
 	const user = await User.findOne({username})
 	if (!user) {
         res.status(400).json({error: `No registered user for email ${username}.`})
@@ -153,12 +241,13 @@ app.post('/userStatus', json(), async (req, res) => { //TODO: security???
 	}
 	const userData = user.toUserData()
 	const status = userData.loginStatus;
-	res.json({status})
+	res.status(200).json({status})
 	return;
 })
 
 /**
- * @api {post} /create_user Create a new user for the database
+ * @api {post} /create_user /create_user
+ * @apiDescription Create a new user for the database.
  * @apiName Create user
  * @apiGroup User
  *
@@ -170,13 +259,13 @@ app.post('/userStatus', json(), async (req, res) => { //TODO: security???
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 201 OK
  *      {
- *          Created new user with username test@test.com
+ *          Created new user with username test@test.com.
  *      }
  * @apiError NoUsernameGiven No username was given to the backend.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "error": "No username in post body'"
+ *          "error": "No username in post body"
  *      }
  * @apiError NoPasswordGiven No password was given to the backend.
  * @apiErrorExample Error-Response:
@@ -228,32 +317,33 @@ app.post('/create_user', json(), async (req, res, next) => {
 });
 
 /**
- * @api {get} /login Make a login request
+ * @api {get} /login /login
+ * @apiDescription Make a login request.
  * @apiName Login
  * @apiGroup User
  *
- * @apiParam {String} username User who wants to login's email
- * @apiParam {String} password User who wants to login's password
+ * @apiParam {String} username User who wants to login's email.
+ * @apiParam {String} password User who wants to login's password.
  *
- * @apiSuccess {String} sessionKey A session token that can be used to make authenticated requests
+ * @apiSuccess {String} sessionKey A session token that can be used to make authenticated requests.
  *
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
  *      {
- *          "sessionToken": "ABCDEFGHIJ0123456789"
+ *          "sessionToken": "ABCDEFGHIJ0123456789".
  *      }
  * @apiError EmailNotFound The provided email address did not match any existing ones.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "error": "No registered user for email {provided email address}"
+ *          "error": "No registered user for email {provided email address}".
  *      }
  *
- * @apiError PasswordIncorrect The provided password was incorrect
+ * @apiError PasswordIncorrect The provided password was incorrect.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "error": "Username or password incorrect"
+ *          "error": "Username or password incorrect".
  *      }
  */
 app.post('/login', json(), async (req, res, next) => {
@@ -278,7 +368,8 @@ app.post('/login', json(), async (req, res, next) => {
 })
 
 /**
- * @api {post} /logout Logging out the user
+ * @api {post} /logout /logout
+ * @apiDescription Logging out the user. Set userStatus to false and sessionKey to "".
  * @apiName Logout
  * @apiGroup User
  *
@@ -295,7 +386,7 @@ app.post('/login', json(), async (req, res, next) => {
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "error": "There was an error loggin out"
+ *          "error": "There was an error loggin out."
  *      }
  *
  */
