@@ -157,6 +157,48 @@ app.post('/userStatus', json(), async (req, res) => { //TODO: security???
 	return;
 })
 
+/**
+ * @api {post} /create_user Create a new user for the database
+ * @apiName Create user
+ * @apiGroup User
+ *
+ * @apiParam {String} username Email with which the user wants to create an account.
+ * @apiParam {String} password Password with which the user wants to create an account.
+ *
+ * @apiSuccess {String} username The username with which an account has been created will be returned.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 201 OK
+ *      {
+ *          Created new user with username test@test.com
+ *      }
+ * @apiError NoUsernameGiven No username was given to the backend.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No username in post body'"
+ *      }
+ * @apiError NoPasswordGiven No password was given to the backend.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No password in post body'"
+ *      }
+ *
+ * @apiError UserAlreadyExists The username given to the backend already exists.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "User: {username} already exists"
+ *      }
+ * 
+ * @apiError validateUser The user could not be put in the database.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "Constraints that failed validation with error message"
+ *      }
+ */
 app.post('/create_user', json(), async (req, res, next) => {
 	const isOnline = false;
 	const {username, password} = req.body.data;
@@ -185,6 +227,35 @@ app.post('/create_user', json(), async (req, res, next) => {
     next()
 });
 
+/**
+ * @api {get} /login Make a login request
+ * @apiName Login
+ * @apiGroup User
+ *
+ * @apiParam {String} username User who wants to login's email
+ * @apiParam {String} password User who wants to login's password
+ *
+ * @apiSuccess {String} sessionKey A session token that can be used to make authenticated requests
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "sessionToken": "ABCDEFGHIJ0123456789"
+ *      }
+ * @apiError EmailNotFound The provided email address did not match any existing ones.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No registered user for email {provided email address}"
+ *      }
+ *
+ * @apiError PasswordIncorrect The provided password was incorrect
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "Username or password incorrect"
+ *      }
+ */
 app.post('/login', json(), async (req, res, next) => {
 	
     const {username, password} = req.body.data;
@@ -198,17 +269,36 @@ app.post('/login', json(), async (req, res, next) => {
         res.status(400).json({error: `Username or password incorrect`})
         return;
 	}
-    // TODO: use proper secret key
-	// or use sessions (with redis)
 
 	var sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
 	user.loginStatus = true;
 	user.sessionKey = sessionKey;
 	await user.save();
-    // const loginToken = sign({username}, `secret`)
     res.status(200).json({sessionKey: sessionKey})
 })
-  
+
+/**
+ * @api {post} /logout Logging out the user
+ * @apiName Logout
+ * @apiGroup User
+ *
+ * @apiParam {User} User object given from the loginRequired function.
+ *
+ * @apiSuccess {String} username The user that logged out.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "User Bob Smit logged out."
+ *      }
+ * @apiError ErrorLoggingOut The user object wasn't set in loginRequired.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "There was an error loggin out"
+ *      }
+ *
+ */
 app.post('/logout', json(), loginRequired, async (req, res, next) => {
 	const user = req.user;
     if (!user) {
@@ -218,8 +308,7 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
 	user.loginStatus = false;
 	user.sessionKey = "";
 	await user.save();
-    // const loginToken = sign({username}, `secret`)
-    res.status(200).json("User logged out")
+    res.status(200).json(`User ${user.username} logged out.`)
 })
 
 // Test login
