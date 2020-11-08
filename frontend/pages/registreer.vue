@@ -41,6 +41,8 @@
 
     <button class="register-button" @click.prevent="register">Register</button>
 
+    <router-link to='/' class="login-button" tag="button">Back to login</router-link>
+
     <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
       {{ error }}
     </div>
@@ -106,7 +108,6 @@ export default {
       });
       console.log("after");
       console.log({ response });
-      window.location.href = `/jitsi?username=${this.registerForm.newUsername}`;
       this.$router.push("/");
     },
     validNewUsername: function (newUsername) {
@@ -207,5 +208,15 @@ body{
 .register-button:hover,
 .register-button:focus {
   @apply  bg-green-500;
+}
+
+.login-button {
+  outline: none;
+  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  height: 60px;
+}
+.login-button:hover,
+.login-button:focus {
+  @apply  bg-green-600;
 }
 </style>
