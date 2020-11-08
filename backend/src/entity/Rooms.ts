@@ -20,7 +20,7 @@ export class Rooms extends BaseEntity {
     allRooms() {
         return {
 			roomID: this.roomID,
-			roomCode: this.roomCode
+			roomCode: this.roomCode,
 			roomType: this.roomType
         }
 	}	
