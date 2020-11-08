@@ -1,7 +1,7 @@
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
-|16-11-2020 | 10:00-??:?? | MS teams | Meeting 4 with H. Basold |
+|16-11-2020 | 10:00-??:?? | MS teams | Meeting 5 with H. Basold |
 
 ### Previous meetings
 | date | time | where | info |
