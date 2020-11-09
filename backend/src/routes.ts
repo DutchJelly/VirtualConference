@@ -317,7 +317,7 @@ app.post('/create_user', json(), async (req, res, next) => {
 });
 
 /**
- * @api {get} /login /login
+ * @api {post} /login /login
  * @apiDescription Make a login request.
  * @apiName Login
  * @apiGroup User
