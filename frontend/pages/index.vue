@@ -103,8 +103,8 @@ export default {
 	  this.sessionKey = response.data.sessionKey
     window.location.href = `/plattegrond`;
     //   this.$router.push("/kamerview");
-	},
-	async create_user() {
+	  },
+	  async create_user() {
       if (this.timeout) clearTimeout(this.timeout);
       this.error = null;
       if (!this.loginForm.username) {
@@ -118,35 +118,33 @@ export default {
         return;
 	  }
 	  
-  
 	  const response = await this.$axios.post("http://localhost:5000/create_user", {
         data: {
           username: this.loginForm.username,
 		      password: this.loginForm.password
         }
-	  })
-	},
-	async logout() {
-	
+	    })
+	  },
+	  async logout() {
       if (this.timeout) clearTimeout(this.timeout);
       this.error = null;
       if (!this.sessionKey) {
         this.error = `No session key`;
         this.handleTempError();
         return;
-	  }
+	    }
 
-	  const response = await this.$axios.post("http://localhost:5000/logout", {
-		data: {
-			sessionKey: this.sessionKey
-        }
-	  })
-	  this.sessionKey = "";
-	},
-	async debug() {
-		const response = await this.$axios.get("http://localhost:5000/debug")
-		console.log(response.data)
-	},
+      const response = await this.$axios.post("http://localhost:5000/logout", {
+      data: {
+        sessionKey: this.sessionKey
+          }
+      })
+      this.sessionKey = "";
+	  },
+    async debug() {
+      const response = await this.$axios.get("http://localhost:5000/debug")
+      console.log(response.data)
+    },
     handleTempError() {
       if (this.timeout) clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {
@@ -159,7 +157,7 @@ export default {
         this.message = null;
       }, 5000);
     }
-  },
+  }
 };
 </script>
 
