@@ -38,3 +38,5 @@
 |02-11-2020 | 10:00-10:30 | MS teams | Meeting 4 with H. Basold |
 |03-11-2020 | 9:30-12:00 | Discord | Meeting 25 with TTC (Wouter en Luuk) |
 |08-11-2020 | 9:00-11:45 | Discord | Meeting 26 with TTC (Milou en Luuk) |
+|08-11-2020 | 11:00-12:45 | Discord | Meeting 27 with TTC (Richard en Wouter) |
+|09-11-2020 | 17:00-18:10 | MS teams | Meeting 28 with TTC (Wouter, Jie, Richard, Milou en Luuk) |
