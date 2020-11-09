@@ -71,18 +71,30 @@ export default {
         this.error = `Please fill in your password`;
         this.handleTempError();
         return;
-	  }
-	  
-  
-	  const response = await this.$axios.post("http://localhost:5000/login", {
+    }
+    let response = null;
+    try {
+      response = await this.$axios.post("http://localhost:5000/login", {
         data: {
           username: this.loginForm.username,
-		  password: this.loginForm.password
+		      password: this.loginForm.password
         }
-	  })
-
+      })
+    } catch (error) {
+      if (error.response.status == 400) {
+        console.log(error.response.data.error);
+        this.error = error.response.data.error;
+        this.handleTempError();
+        return;
+      } else {
+        console.log("an undefined error occured.");
+        this.error = `an undefined error occured.`;
+        this.handleTempError();
+        return;
+      }
+    }
 	  this.sessionKey = response.data.sessionKey
-      window.location.href = `/jitsi?username=${this.loginForm.username}`;
+    window.location.href = `/plattegrond`;
     //   this.$router.push("/kamerview");
 	},
 	async create_user() {
@@ -103,7 +115,7 @@ export default {
 	  const response = await this.$axios.post("http://localhost:5000/create_user", {
         data: {
           username: this.loginForm.username,
-		  password: this.loginForm.password
+		      password: this.loginForm.password
         }
 	  })
 	},
