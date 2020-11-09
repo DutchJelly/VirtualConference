@@ -57,9 +57,9 @@ export default {
       sessionKey: "",
       message: "",
       error: null
-	};	
+	  };	
   },
-  created(){
+  created() {
     if (this.$route.query.message) {
        this.message = this.$route.query.message;
        this.handleTempMessage();
@@ -78,31 +78,30 @@ export default {
         this.error = `Please fill in your password`;
         this.handleTempError();
         return;
-    }
-    let response = null;
-    try {
-      response = await this.$axios.post("http://localhost:5000/login", {
-        data: {
-          username: this.loginForm.username,
-		      password: this.loginForm.password
-        }
-      })
-    } catch (error) {
-      if (error.response.status == 400) {
-        console.log(error.response.data.error);
-        this.error = error.response.data.error;
-        this.handleTempError();
-        return;
-      } else {
-        console.log("an undefined error occured.");
-        this.error = `an undefined error occured.`;
-        this.handleTempError();
-        return;
       }
-    }
-	  this.sessionKey = response.data.sessionKey
-    window.location.href = `/plattegrond`;
-    //   this.$router.push("/kamerview");
+      let response = null;
+      try {
+        response = await this.$axios.post("http://localhost:5000/login", {
+          data: {
+            username: this.loginForm.username,
+            password: this.loginForm.password
+          }
+        })
+      } catch (error) {
+        if (error.response.status == 400) {
+          console.log(error.response.data.error);
+          this.error = error.response.data.error;
+          this.handleTempError();
+          return;
+        } else {
+          console.log("an undefined error occured.");
+          this.error = `an undefined error occured.`;
+          this.handleTempError();
+          return;
+        }
+      }
+      this.sessionKey = response.data.sessionKey
+      window.location.href = `/plattegrond`;
 	  },
 	  async create_user() {
       if (this.timeout) clearTimeout(this.timeout);
@@ -116,9 +115,9 @@ export default {
         this.error = `Please fill in your password`;
         this.handleTempError();
         return;
-	  }
+	    }
 	  
-	  const response = await this.$axios.post("http://localhost:5000/create_user", {
+	    const response = await this.$axios.post("http://localhost:5000/create_user", {
         data: {
           username: this.loginForm.username,
 		      password: this.loginForm.password
