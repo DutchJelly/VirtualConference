@@ -99,14 +99,12 @@ export default {
         this.handleTempError();
         return;
       }
-      console.log("before");
       const response = await this.$axios.post("http://localhost:5000/create_user", {
         data: {
           username: this.registerForm.newUsername,
 		      password: this.registerForm.newPassword
         }
       });
-      console.log("after");
       console.log({ response });
       this.$router.push("/");
     },
