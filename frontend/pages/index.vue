@@ -36,6 +36,9 @@
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
       </div>
+      <div class="creation-message" :class="message ? 'opacity-100' : 'opacity-0'">
+        {{ message }}
+      </div>
     </form>
   </main>
 </template>
@@ -49,14 +52,18 @@ export default {
     return {
       loginForm: {
         username: "",
-		password: "",
-		sessionKey: ""
+		    password: ""
       },
-      error: null,
+      sessionKey: "",
+      message: "",
+      error: null
 	};	
   },
-  created: function(){
-  
+  created(){
+    if (this.$route.query.message) {
+       this.message = this.$route.query.message;
+       this.handleTempMessage();
+    }
   },
   methods: {
     async login() {
@@ -146,6 +153,12 @@ export default {
         this.error = null;
       }, 5000);
     },
+    handleTempMessage () {
+      if (this.timeout) { clearTimeout(this.timeout); }
+      this.timeout = setTimeout(() => {
+        this.message = null;
+      }, 5000);
+    }
   },
 };
 </script>

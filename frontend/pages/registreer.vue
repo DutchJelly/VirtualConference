@@ -41,7 +41,7 @@
 
     <button class="register-button" @click.prevent="register">Register</button>
 
-    <router-link to='/' class="login-button" tag="button">Back to login</router-link>
+    <router-link :to="{name: 'index'}" class="login-button" tag="button">Back to login</router-link>
 
     <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
       {{ error }}
@@ -122,7 +122,7 @@ export default {
       }
       
       console.log({ response });
-      this.$router.push("/");
+      this.$router.push({name: 'index', query: { message: 'Your account has succesfully been created'}});
     },
     validNewUsername: function (newUsername) {
       var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
