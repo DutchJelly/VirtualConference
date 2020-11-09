@@ -99,12 +99,28 @@ export default {
         this.handleTempError();
         return;
       }
-      const response = await this.$axios.post("http://localhost:5000/create_user", {
-        data: {
-          username: this.registerForm.newUsername,
-		      password: this.registerForm.newPassword
+      let response;
+      try {
+        response = await this.$axios.post("http://localhost:5000/create_user", {
+          data: {
+            username: this.registerForm.newUsername,
+            password: this.registerForm.newPassword
+          }
+        });
+      } catch (error) {
+        if (error.response.status == 400) {
+          console.log(error.response.data.error);
+          this.error = error.response.data.error;
+          this.handleTempError();
+          return;
+        } else {
+          console.log("an undefined error occured.");
+          this.error = `an undefined error occured.`;
+          this.handleTempError();
+          return;
         }
-      });
+      }
+      
       console.log({ response });
       this.$router.push("/");
     },
