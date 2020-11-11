@@ -209,7 +209,7 @@ export default {
                         self.conversationRequest.pending = false;
                         self.conversationRequest.user = "none";
                         self.info = error;
-                        // self.info = "something went wrong with accepting the request";
+                        console.log("error accept request");
                     }
                 },
                 declineRequest: async function(withWho) {

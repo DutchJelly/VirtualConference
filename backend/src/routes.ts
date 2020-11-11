@@ -254,6 +254,7 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     let withwhoCall = await Calls.findOne({username:withwho})
     let roomType = ""
     if (withwhoCall != undefined) {
+        console.log("user is in room after deleting")
         let roomID = withwhoCall.allCalls().roomID
         let room = await Rooms.findOne({roomID:roomID})
         if (room != undefined)
@@ -276,6 +277,7 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     }
 
     console.log(`chose conversation type ${typeConversation} \n`);
+    console.log(`conversationtype is ${type}`)
     socketMapping.get(user)?.emit("typeConversation", {withwho, type});
 
     //Return the type to user.
@@ -334,7 +336,7 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         return;
     }
     
-    let ongoingConversation = await Calls.findOne({username:user})
+    let ongoingConversation = await Calls.findOne({username:withwho})
     if(ongoingConversation){
         console.log("user is already in conversation");
         res.status(400).json({message: "user is already in conversation"});
@@ -353,6 +355,13 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     if(userIsInRoom){
         //User is in room already
         console.log(`${user} is already in room`);
+        let room = await Calls.findOne({username:user});
+        if (room != undefined){
+            call.roomID = room.roomID;
+            let roomObject = await Rooms.findOne({roomID: room.roomID})
+            if (roomObject != undefined)
+                roomName = roomObject.roomCode;
+        }
     } else{
         //If not, create a new room with the two users.
         roomName = randomstring.generate();
@@ -510,13 +519,19 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
 app.get('/leaveconversation/:name', json(), async (req, res, next) => {
     let user = req.params.name;
     let roomID = -1;
+    console.log(`${user} leaves conversation`);
 
     let inConversation = await Calls.findOne({username:user})
     if(inConversation != undefined){
         roomID = inConversation.roomID
         Calls.delete({username: user});
+        let userExist = await Calls.findOne({username: user});
+        if (userExist != undefined){
+            console.log("De gebruiker zit nog steeds in de database")
+        }
 
         let thisRoomConversation = await Calls.find({roomID: roomID})
+        socketMapping.get(user)?.emit("leaveCoversation", {user});
 
         // Last user leaves a room, room gets deleted
         if (thisRoomConversation.length == 0) {
