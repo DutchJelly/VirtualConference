@@ -12,7 +12,6 @@ export const mutations = {
     },
     errorMsg(state, e) {
         state.errorMsg = e
-        console.log(state.errorMsg)
     }
 };
 

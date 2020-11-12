@@ -36,6 +36,9 @@
       <router-link to="registreer" class="register-button" tag="button">
           Nog geen account? klik hier
       </router-link>
+      <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
+        {{ error }}
+      </div>
     </form>
   </main>
 </template>
@@ -57,6 +60,11 @@ export default {
     if (this.$route.query.message) {
       this.message = this.$route.query.message;
       this.handleTempMessage();
+    }
+  },
+  computed: {
+    error: function() {
+      return this.$store.state.errorMsg
     }
   },
   methods: {
