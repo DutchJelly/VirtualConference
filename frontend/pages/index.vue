@@ -36,6 +36,9 @@
       <router-link to="registreer" class="register-button" tag="button">
           Nog geen account? klik hier
       </router-link>
+      <div class="sent-message" :class="message ? 'opacity-100' : 'opacity-0'">
+        {{ message }}
+      </div>
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
       </div>
@@ -76,6 +79,12 @@ export default {
 				})
 				this.loginForm.username = ""
         this.loginForm.password = ""
+    },
+    handleTempMessage() {
+        if (this.timeout) clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
+            this.message = null;
+        }, 5000);
     }
   }
 };

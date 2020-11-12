@@ -11,7 +11,11 @@ export const mutations = {
         state.errorMsg = null
     },
     errorMsg(state, e) {
+        if (timeout) clearTimeout(this.timeout);
         state.errorMsg = e
+        let timeout = setTimeout(() => {
+            state.errorMsg = null;
+        }, 5000);
     }
 };
 
@@ -36,8 +40,6 @@ export const actions = {
 
     }
 };
-
-
 
 function saveToken(token, cb) {
     localStorage.setItem('token', token)
