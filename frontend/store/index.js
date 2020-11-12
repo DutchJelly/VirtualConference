@@ -7,9 +7,8 @@ export const state = () => ({
   
 export const mutations = {
     authenticated(state) {
-        console.log("into authenticated")
         state.loggedIn = true
-        errorMsg = null
+        state.errorMsg = null
     },
     errorMsg(state, e) {
         state.errorMsg = e
@@ -19,16 +18,15 @@ export const mutations = {
 
 export const actions = {
     login({ commit }, { username, password }) {
-        console.log("iets")
         axios
             .post("http://localhost:5000/login", {
                 data: {
                     username,
                     password
-                }
+                },
             })
             .then(res => saveToken(res.data.sessionKey, commit))
-            .catch(({ response }) => {
+            .catch(({response}) => {
                 commit('errorMsg', response.data.error)
             })
     },
@@ -44,10 +42,6 @@ export const actions = {
 
 function saveToken(token, cb) {
     localStorage.setItem('token', token)
-    console.log("saveToken")
-    console.log(token)
-    console.log(cb)
     // succes
     cb('authenticated')
-    console.log("out authenticated")
 }
