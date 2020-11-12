@@ -33,20 +33,9 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 
-      <router-link to="registreer" class="register-button" tag="button"
-        >Nog geen account? klik hier</router-link
-      >
-
-      <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
-        {{ error }}
-      </div>
-      <div
-        class="creation-message"
-        :class="message ? 'opacity-100' : 'opacity-0'"
-      >
-        {{ message }}
-        
-      </div>
+      <router-link to="registreer" class="register-button" tag="button">
+          Nog geen account? klik hier
+      </router-link>
     </form>
   </main>
 </template>
@@ -60,9 +49,7 @@ export default {
         username: "",
         password: "",
       },
-      sessionKey: "",
       message: "",
-      error: null,
     };
   },
 
@@ -73,84 +60,16 @@ export default {
     }
   },
   methods: {
-    async login() {
-      if (this.timeout) clearTimeout(this.timeout);
-      this.error = null;
-      if (!this.loginForm.username) {
-        this.error = `Please fill in a username`;
-        this.handleTempError();
-        return;
-      }
-      if (!this.loginForm.password) {
-        this.error = `Please fill in your password`;
-        this.handleTempError();
-        return;
-      }
-      let response = null;
-      try {
-        response = await this.$axios.post("http://localhost:5000/login", {
-          data: {
+    login() {
+				this.$store.dispatch({
+            type: 'login',
             username: this.loginForm.username,
-            password: this.loginForm.password,
-          },
-        });
-      } catch (error) {
-        if (error.response.status == 400) {
-          console.log(error.response.data.error);
-          this.error = error.response.data.error;
-          this.handleTempError();
-          return;
-        } else {
-          console.log("an undefined error occured.");
-          this.error = `an undefined error occured.`;
-          this.handleTempError();
-          return;
-        }
-      }
-      this.sessionKey = response.data.sessionKey;
-
-      this.$store.commit('session/set', this.sessionKey);
-      console.log(this.$store);
-      console.log(this.$store.state.session);
-      console.log(this.$store.state);
-      // window.location.href = `/plattegrond`;
-      //   this.$router.push("/kamerview");
-    },
-    async logout() {
-      if (this.timeout) clearTimeout(this.timeout);
-      this.error = null;
-      if (!this.sessionKey) {
-        this.error = `No session key`;
-        this.handleTempError();
-        return;
-      }
-
-      const response = await this.$axios.post("http://localhost:5000/logout", {
-        data: {
-          sessionKey: this.sessionKey,
-        },
-      });
-      this.sessionKey = "";
-    },
-    async debug() {
-      const response = await this.$axios.get("http://localhost:5000/debug");
-      console.log(response.data);
-    },
-    handleTempError() {
-      if (this.timeout) clearTimeout(this.timeout);
-      this.timeout = setTimeout(() => {
-        this.error = null;
-      }, 5000);
-    },
-    handleTempMessage() {
-      if (this.timeout) {
-        clearTimeout(this.timeout);
-      }
-      this.timeout = setTimeout(() => {
-        this.message = null;
-      }, 5000);
-    },
-  },
+            password: this.loginForm.password
+				})
+				this.loginForm.username = ""
+        this.loginForm.password = ""
+    }
+  }
 };
 </script>
 
