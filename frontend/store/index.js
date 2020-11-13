@@ -33,8 +33,20 @@ export const actions = {
                 commit('errorMsg', response.data.error)
             })
     },
-    signup() {
-
+    signup({ commit }, { username, password }) {
+        axios
+            .post("http://localhost:5000/create_user", {
+                data: {
+                    username,
+                    password
+                },
+            })
+            .then(
+                commit('errorMsg', null)
+            )
+            .catch(({ response }) => {
+                commit('errorMsg', response.data)
+            })
     },
     logout () {
 
@@ -43,6 +55,7 @@ export const actions = {
 
 function saveToken(token, cb) {
     localStorage.setItem('token', token)
+    console.log("token saved")
     // succes
     cb('authenticated')
 }
