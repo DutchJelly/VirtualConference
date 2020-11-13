@@ -231,11 +231,34 @@ app.get('/testlogin/:username', json(), async (req, res, next) => {
     io.emit('testlogin', {online: onlineUsers});
 });
 
+/**
+ * @api {get} /typeconversation User requests a conversation
+ * @apiName Type Converation
+ * @apiGroup Call
+ *
+ * @apiParam {name} User that witwho wants to send a request with
+ *           {withwho} User that name wants to send a request to
+ * 
+ * @apiSuccess {String} name that is used to check if the user has a use for the conversation-type
+ *             {String} name that is used to check the status of the user that a request could be send to
+ * 
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "Converation-type of user Coen Bakker has been determined"
+ *      }
+ * @apiError ErrorDecliningCall .
+ * @apiErrorExample Error-Response: The conversation-type of the other could not be checked
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "One of the users is not online"
+ *      }
+ *
+ */
 app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     let user = req.params.name;
     let withwho = req.params.withwho;
     let type = 'none';
-    console.log(`Typeconversation, user: ${user}, withwho: ${withwho}`);
 
     let isUserOnline = await User.findOne({username:user})
     let isWithwhoOnline = await User.findOne({username:withwho})
@@ -246,99 +269,127 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     }
 
     if(!isUserOnline?.loginStatus || !isWithwhoOnline?.loginStatus){ // Check if one of the two is online
-        res.status(400).json({message: "error, one of the users is not online"});
-        console.log("withwho or user wasn't logged in");
+        res.status(400).json({message: "One of the users is not online"});
         return;
     }
     
     let withwhoCall = await Calls.findOne({username:withwho})
     let roomType = ""
     if (withwhoCall != undefined) {
-        console.log("user is in room after deleting")
         let roomID = withwhoCall.allCalls().roomID
         let room = await Rooms.findOne({roomID:roomID})
         if (room != undefined)
             roomType = room.allRooms().roomType
     }
     //if conversation type is private, no one else can join the conversation
-    if(roomType === "private"){
-        console.log('it is a private conversation');
-        type = "private";
-    }
-    //if conversation type is open, any user can join the conversation without any permission
-    else if(roomType === "open"){
-        console.log('it is an open conversation');
-        type = "open";
-    }
-    //if conversation type is closed, any user who want to join the conversation must ask for permission
-    else if(roomType === "closed"){
-        console.log('it is a closed conversation');
-        type = "closed";
-    }
+    if(roomType === "private"){ type = "private"; }
 
-    console.log(`chose conversation type ${typeConversation} \n`);
-    console.log(`conversationtype is ${type}`)
+    //if conversation type is open, any user can join the conversation without any permission
+    else if(roomType === "open"){ type = "open"; }
+
+    //if conversation type is closed, any user who want to join the conversation must ask for permission
+    else if(roomType === "closed"){ type = "closed"; }
+
     socketMapping.get(user)?.emit("typeConversation", {withwho, type});
 
     //Return the type to user.
     res.status(200).json({withwho, type});
 });
 
+/**
+ * @api {get} /requestconversation User requests a conversation
+ * @apiName Request Converation
+ * @apiGroup Call
+ *
+ * @apiParam {name} User that will send a request for a conversation.
+ *           {withwho} User that will receive a request for a conversation.
+ *           {type} Type of the requested conversation
+ * 
+ * @apiSuccess {String} name that is used to check if the user can send a request
+ *             {String} name that is used to check if the requested person is available
+ *             {String} type that is used to check the conversation type
+ * 
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "User Bob Smit send a conversation to user Coen Bakker"
+ *      }
+ * @apiError ErrorDecliningCall .
+ * @apiErrorExample Error-Response: A call between user and withwho could not be created
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "user is already in conversation"
+ *      }
+ *
+ */
 app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, next) => {
     let user = req.params.name;
     let withwho = req.params.withwho;
     typeConversation = req.params.type;
-
-    console.log(`request conversation user: ${user}, withWho: ${withwho}`);
     
     let isUserOnline = await User.findOne({username:user})
     let isWithwhoOnline = await User.findOne({username:withwho})
     if (isUserOnline == undefined || isWithwhoOnline == undefined) {
-        console.log("One of the users does not exist");
         res.status(400).json({message: "One of the users does not exist"});
         return;
     }
     if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        console.log("error, one of the users is not online");
-        res.status(400).json({message: "error, one of the users is not online"});
+        res.status(400).json({message: "One of the users is not online"});
         return;
     }
 
     requested.set(user, withwho);
 
     //withwho gets request with socketio
-    console.log('sent a socket event of requestConversation');
     socketMapping.get(withwho)?.emit("requestConversation", {user, type: typeConversation});
     res.status(200).json({message: `sent a request to ${withwho}`});
 });
 
+/**
+ * @api {get} /acceptconversation User declines a conversation
+ * @apiName Accept Converation
+ * @apiGroup Call
+ *
+ * @apiParam {name} User that accepted a call request form withwho.
+ *           {withwho} User that send user an invitation for a conversation.
+ * @apiSuccess {String} name that is used to insert user into the calls table
+ *             {String} name that is used to insert withwho into the calls table
+ * 
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "User Bob Smit accepted to start a call user Coen Bakker"
+ *      }
+ * @apiError ErrorDecliningCall .
+ * @apiErrorExample Error-Response: A request could not be send
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "user is already in conversation"
+ *      }
+ *
+ */
 app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => {
     let user = req.params.name;
     let withwho = req.params.withwho;
-    console.log(`accept conversation user: ${user}, withWho: ${withwho}`);
 
     let isUserOnline = await User.findOne({username:user})
     let isWithwhoOnline = await User.findOne({username:withwho})
     if (isUserOnline == undefined || isWithwhoOnline == undefined) {
-        console.log("One of the users does not exist");
         res.status(400).json({message: "One of the users does not exist"});
         return;
     }
     if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        console.log("error, one of the users is not online");
-        res.status(400).json({message: "error, one of the users is not online"});
+        res.status(400).json({message: "One of the users is not online"});
         return;
     }
 
     if(requested.get(withwho) !== user){
-        console.log("no request is opened");
-        res.status(400).json({message: "no request is opened"});
+        res.status(400).json({message: "No request is opened"});
         return;
     }
     
     let ongoingConversation = await Calls.findOne({username:withwho})
     if(ongoingConversation){
-        console.log("user is already in conversation");
         res.status(400).json({message: "user is already in conversation"});
         return;
     }
@@ -354,7 +405,6 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     let call = Calls.create()
     if(userIsInRoom){
         //User is in room already
-        console.log(`${user} is already in room`);
         let room = await Calls.findOne({username:user});
         if (room != undefined){
             call.roomID = room.roomID;
@@ -367,8 +417,6 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         roomName = randomstring.generate();
 
         // Create new room in rooms-table
-        console.log(`\n Create new Jitsi Room for ${user} and ${withwho}`);
-        console.log(`roomName = ${roomName} | typeConversation = ${typeConversation}`)
         let room = Rooms.create()
         //room.roomID = "testwaarde" // roomID.toString()
         room.roomCode = roomName.toString()
@@ -380,20 +428,14 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
             return;
         }
         await room.save();
-        //res.status(201).json({message: `Added room with name ${roomName} and type ${typeConversation} to database`})
-
-        console.log(`Room created \n`);
 
         // Add user new call
 
         let roomObject = await Rooms.findOne({roomCode: roomName})
-        if (roomObject != undefined)
-            console.log(`roomID: ${roomObject.roomID} | roomCode ${roomObject.roomCode} | roomType ${roomObject.roomType}`)
 
         if (roomObject != undefined)
             call.roomID = roomObject.roomID
             call.username = user
-            console.log(`roomID: ${call.roomID} | username: ${user}`)
             errors = await validate(call);
             error = errors[0]
         if (error){
@@ -401,25 +443,18 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
             return;
         }
         await call.save();
-        console.log(`Eerste save voltooid`)
-        //res.status(201).json({message: `Added user with name ${user} to new call`})
-        console.log(`eerste status voltooid`)
     }
     // Add witwho to call
-    console.log(`Call username?`)
     call.username = withwho
-    console.log(`Validate call`)
+
     const errors = await validate(call);
     const error = errors[0]
     if (error){
         res.status(400).json({error: error.constraints})
         return;
     }
-    console.log(`call.save`)
-    await call.save();
-    console.log(`save gedaan`)
 
-    //res.status(201).json({message: `Added other user with name ${user} to call`})
+    await call.save();
 
     //Delete withwho from requested mapping because request is answered.
     requested.delete(withwho);
@@ -434,6 +469,30 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     res.status(200).json({user: withwho, room: roomName});
 });
 
+/**
+ * @api {get} /joinopenconversation User declines a conversation
+ * @apiName Join Open Converation
+ * @apiGroup Call
+ *
+ * @apiParam {name} User that wants to join an open call with withwho.
+ *           {withwho} User that is alread in an open call.
+ *
+ * @apiSuccess {String} name The user that declined the conversation.
+ *             {String} witwho The user that declined the conversation.
+ * 
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "User Bob Smit has joined a open call with user Coen Bakker"
+ *      }
+ * @apiError ErrorDecliningCall .
+ * @apiErrorExample Error-Response: User could not join a open conversation
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "user is already in conversation"
+ *      }
+ *
+ */
 app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) => {
     let user = req.params.name;
     let withwho = req.params.withwho;
@@ -446,14 +505,12 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
         return;
     }
     if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        console.log("error, one of the users is not online");
         res.status(400).json({message: "error, one of the users is not online"});
         return;
     }
 
     let inConversation = await Calls.findOne({username:user})
     if(inConversation != undefined){
-        console.log("user is already in conversation");
         res.status(400).json({message: "user is already in conversation"});
         return;
     }
@@ -468,7 +525,6 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
         if (roomObject != undefined)
             roomName = roomObject.roomCode
     } else {
-        console.log("User is ");
         res.status(400).json({message: "user is already in conversation"});
         return;
     }
@@ -488,11 +544,31 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
     res.status(200).json({user: withwho, room: roomName});
 });
 
+/**
+ * @api {get} /declineconversation User declines a conversation
+ * @apiName Decline Converation
+ * @apiGroup Call
+ *
+ * @apiParam {name} User that declined the call.
+ *
+ * @apiSuccess {String} name The user that declined the conversation.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "User Bob Smit declined a call."
+ *      }
+ * @apiError ErrorDecliningCall .
+ * @apiErrorExample Error-Response: Request was not succesfully denied
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No request is opened"
+ *      }
+ *
+ */
 app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) => {
     let user = req.params.name;
     let withwho = req.params.withwho;
-
-    console.log(`decline conversation user: ${user}, withWho: ${withwho}`);
 
     let isUserOnline = await User.findOne({username:user})
     let isWithwhoOnline = await User.findOne({username:withwho})
@@ -501,14 +577,12 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
         return;
     }
     if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        console.log(`decline not successful because on of the users was not online. Passed user args: [${user}, ${withwho}]`);
-        res.status(400).json({message: "error, one of the users is not online"});
+        res.status(400).json({message: "One of the users is not online"});
         return;
     }
 
     if(requested.get(withwho) !== user){
-        console.log("decline not successful because no request was opened");
-        res.status(400).json({message: "no request is opened"});
+        res.status(400).json({message: "No request is opened"});
         return;
     }
     requested.delete(withwho);
@@ -516,10 +590,31 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
     res.status(200).json({message: "request was declined"});
 });
 
+/**
+ * @api {get} /leaveconversation User leaves a conversation
+ * @apiName Leave Converation
+ * @apiGroup Call
+ *
+ * @apiParam {name} User that left the call.
+ *
+ * @apiSuccess {String} name The user that left the conversation.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "User Bob Smit left a call."
+ *      }
+ * @apiError ErrorLeavingCall The user wasn't removed from the Calls table.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "User not deleted from Calls table in database"
+ *      }
+ *
+ */
 app.get('/leaveconversation/:name', json(), async (req, res, next) => {
     let user = req.params.name;
     let roomID = -1;
-    console.log(`${user} leaves conversation`);
 
     let inConversation = await Calls.findOne({username:user})
     if(inConversation != undefined){
@@ -527,7 +622,8 @@ app.get('/leaveconversation/:name', json(), async (req, res, next) => {
         Calls.delete({username: user});
         let userExist = await Calls.findOne({username: user});
         if (userExist != undefined){
-            console.log("De gebruiker zit nog steeds in de database")
+            res.status(400).json({error: 'User not deleted from Calls table in database'})
+            return
         }
 
         let thisRoomConversation = await Calls.find({roomID: roomID})
@@ -538,14 +634,6 @@ app.get('/leaveconversation/:name', json(), async (req, res, next) => {
             await Rooms.delete({roomID: roomID});
         }
     }
-
-    /*
-    socketMapping.get(user)?.emit("leaveCoversation", {user});
-    for (let [key, value] of rooms){
-        if(value === roomName){
-            socketMapping.get(key)?.emit("leaveCoversation", {user});
-        }
-    } */ // Dit werkt niet meer omdat de map niet meer bestaat
 });
 
 app.get('/')
@@ -554,5 +642,4 @@ app.get('/')
 app.use((req, res) => {
     if (!res.headersSent)
         res.status(404).json({error: 'This route could not be found'})
-    console.log(`${req.ip} requested ${req.url} - ${res.statusCode}`)
 })
