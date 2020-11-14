@@ -58,7 +58,7 @@
         <g
             inkscape:groupmode="layer"
             id="layer3"
-            @click.prevent="clickHandler('layer3', 'Coffee Room')"
+            @click.prevent="enterRoom('1', 'Coffee Room')"
             inkscape:label="Coffee Room"
             style="display:inline">
             <rect
@@ -154,7 +154,7 @@
         <g
             inkscape:groupmode="layer"
             id="layer8"
-            @click.prevent="clickHandler('layer8', 'Relaxation Room')"
+            @click.prevent="enterRoom('2', 'Relaxation Room')"
             inkscape:label="Relaxation Room"
             style="display:inline">
             <rect
@@ -179,7 +179,7 @@
         <g
             inkscape:groupmode="layer"
             id="layer5"
-            @click.prevent="clickHandler('layer5', 'Toilets')"
+            @click.prevent="enterRoom('3', 'Toilets')"
             inkscape:label="Toilets"
             style="display:inline">
             <g
@@ -254,7 +254,7 @@
             inkscape:groupmode="layer"
             id="layer7"
             inkscape:label="Meeting Rooms Details"
-            @click.prevent="clickHandler('layer7', 'Meeting Rooms')"
+            @click.prevent="enterRoom('4', 'Meeting Rooms')"
             style="display:inline">
             <rect
             style="fill:none;stroke:#000000;stroke-width:0.2"
@@ -369,7 +369,7 @@
             inkscape:groupmode="layer"
             id="layer2"
             inkscape:label="Conference Room 1"
-            @click.prevent="clickHandler('layer2', 'Conference Room 1')"
+            @click.prevent="enterRoom('5', 'Conference Room 1')"
             style="display:inline">
             <rect
             style="fill:#ffccaa;stroke:#000000;stroke-width:0.2"
@@ -394,7 +394,7 @@
             inkscape:groupmode="layer"
             id="g25"
             inkscape:label="Conference Room 2"
-            @click.prevent="clickHandler('g25', 'Conference Room 2')"
+            @click.prevent="enterRoom('6', 'Conference Room 2')"
             style="display:inline">
             <g
             id="g34">
@@ -427,8 +427,9 @@
 <script>
 export default {
     methods: {
-        clickHandler(id, label) {
-            alert('onClick koffietafel roomnummer: ' + id + ' en label: ' + label)
+        enterRoom(roomId, roomName) {
+            //alert('Je wordt doorgestuurt naar kamerview met id: ' + roomId + ' en kamertitel: ' + roomName)
+            this.$router.push({ name: 'kamerview', params: { id: roomId, name: roomName } })
         }
     }
 }
