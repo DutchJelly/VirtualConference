@@ -25,6 +25,7 @@ export const actions = {
                 },
             })
             .then(res => saveToken(res.data.sessionKey, commit))
+            .then(this.$router.push({name:'plattegrond'}))
             .catch(({ response }) => {
                 commit('errorMsg', response.data.error)
             })
