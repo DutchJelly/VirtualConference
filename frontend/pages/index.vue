@@ -59,6 +59,11 @@ export default {
       return this.$store.state.errorMsg
     }
   },
+  watch: {
+    error(oldVal, newVal) {
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+    }
+  },
   methods: {
     login() {
 				this.$store.dispatch({

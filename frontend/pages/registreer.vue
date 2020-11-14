@@ -72,6 +72,11 @@ export default {
       return (this.registerForm.newPassword == this.registerForm.checkNewPassword)
     }
   },
+  watch: {
+    error(oldVal, newVal) {
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+    }
+  },
   methods: {
       signup() {
           if (this.registerForm.newPassword == this.registerForm.checkNewPassword ) {

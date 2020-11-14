@@ -11,11 +11,7 @@ export const mutations = {
         state.errorMsg = null
     },
     errorMsg(state, e) {
-        if (timeout) clearTimeout(this.timeout);
         state.errorMsg = e
-        let timeout = setTimeout(() => {
-            state.errorMsg = null;
-        }, 5000);
     }
 };
 
@@ -29,7 +25,7 @@ export const actions = {
                 },
             })
             .then(res => saveToken(res.data.sessionKey, commit))
-            .catch(({response}) => {
+            .catch(({ response }) => {
                 commit('errorMsg', response.data.error)
             })
     },
@@ -45,7 +41,7 @@ export const actions = {
                 commit('errorMsg', null)
             )
             .catch(({ response }) => {
-                commit('errorMsg', response.data)
+                commit('errorMsg', response.data.error)
             })
     },
     logout () {
