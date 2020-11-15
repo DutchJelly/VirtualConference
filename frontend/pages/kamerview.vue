@@ -5,7 +5,7 @@
       v-bind:contains="value"
     />
     <Sidebar 
-      roomName="templateRoom01"
+      :roomName="roomName"
       v-bind:items="items"
       v-on:inputChange="handleChange"></Sidebar>
   </main>
@@ -23,6 +23,12 @@ export default {
       ],
       value: ''
 
+    }
+  },
+  computed: {
+    roomName: function() {
+      //this.$router.params.id haalt de id van de kamer op
+      return this.$route.params.name
     }
   },
   methods: {

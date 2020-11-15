@@ -28,8 +28,9 @@ export class User extends BaseEntity {
 	@IsBoolean()
 	loginStatus!: boolean;
 	
-	@Column()
-	profilePicture!: string; //TODO: Currently using string, should be changed later, but we didn't know how to fix it.
+	//Commented out profile image because we're using a nonnull constraint for it, meaning that it needs to be filled in.
+	// @Column()
+	// profilePicture!: string;
 
     toUserData() {
         return {

@@ -39,12 +39,13 @@
       </div>
     </div>
 
-    <button class="register-button" @click.prevent="register">Register</button>
+    <button class="register-button" @click.prevent="signup">Register</button>
 
-    <router-link to='/' class="login-button" tag="button">Back to login</router-link>
+    <router-link :to="{name: 'index'}" class="login-button" tag="button">Back to login</router-link>
 
-    <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
+    <div class="error-message" :class="error || !match ? 'opacity-100' : 'opacity-0'">
       {{ error }}
+      <div v-if="!match">passwords do not match</div>
     </div>
     </form>
   </main>
@@ -57,67 +58,40 @@ export default {
   data () {
     return {
       registerForm: {
-        Username: "",
-        NewPassword: "",
-        CheckNewPassword: ""
+        newUsername: "",
+        newPassword: "",
+        checkNewPassword: ""
       },
-      error: null
     };
   },
-
-  methods: {
-    async register () {
-      if (this.timeout) { clearTimeout(this.timeout); }
-      this.error = null;
-      if (!this.registerForm.newUsername) {
-        this.error = "Please fill in a username";
-        this.handleTempError();
-        return;
-      } else if (!this.validNewUsername(this.registerForm.newUsername)) {
-        this.error = "Please fill in a valid email";
-        this.handleTempError();
-        return;
-      }
-
-      if (!this.registerForm.newPassword) {
-        this.error = "Please fill in your password";
-        this.handleTempError();
-        return;
-      } else if (!(this.registerForm.newPassword.length > 7)) {
-        this.error = "Your password must be at least 8 characters";
-        this.handleTempError();
-        return;
-      }
-
-      if (!this.registerForm.checkNewPassword) {
-        this.error = "Please confirm your password";
-        this.handleTempError();
-        return;
-      }
-      if (this.registerForm.newPassword !== this.registerForm.checkNewPassword) {
-        this.error = "Your passwords do not match";
-        this.handleTempError();
-        return;
-      }
-      const response = await this.$axios.post("http://localhost:5000/create_user", {
-        data: {
-          username: this.registerForm.newUsername,
-		      password: this.registerForm.newPassword
-        }
-      });
-      console.log({ response });
-      this.$router.push("/");
+  computed: {
+    error: function() {
+      return this.$store.state.errorMsg
     },
-    validNewUsername: function (newUsername) {
-      var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      return re.test(newUsername);
-    },
-    handleTempError () {
-      if (this.timeout) { clearTimeout(this.timeout); }
-      this.timeout = setTimeout(() => {
-        this.error = null;
-      }, 5000);
+    match() {
+      return (this.registerForm.newPassword == this.registerForm.checkNewPassword)
     }
+  },
+  watch: {
+    error(oldVal, newVal) {
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+    }
+  },
+  methods: {
+      signup() {
+          if (this.registerForm.newPassword == this.registerForm.checkNewPassword ) {
+              this.$store.dispatch({
+                  type: 'signup',
+                  username: this.registerForm.newUsername,
+                  password: this.registerForm.newPassword
+              })
+              this.registerForm.newUsername = ""
+              this.registerForm.newPassword = ""
+              this.registerForm.checkNewPassword = ""
+          } else {
+            this.$store.commit('errorMsg', "passwords do not match")
+          }
+      }
   }
 };
 </script>
