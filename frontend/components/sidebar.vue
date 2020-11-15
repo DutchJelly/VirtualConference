@@ -1,66 +1,51 @@
 <template>
-    <main class="sidebar">
-        <div class="sidebar-header">{{roomName}}</div>
-        <UserList :items="items" :contains="message" class="sidebar-content"></UserList>
-        <div class="sidebar-search-bar">
-            <input 
-              v-model='message'
-              type="text"
-              placeholder="Search for users"
-              v-on:input="(event) => this.$emit('inputChange', event)">
-        </div>
-    </main>
+  <main class="sidebar-container">
+    <div class="sidebar-header">Users</div>
+    <UserList
+      :items="items"
+      :contains="message"
+      class="sidebar-content"
+    ></UserList>
+    <div class="sidebar-search-bar">
+      <input v-model="message" type="text" placeholder="Search for users" />
+    </div>
+  </main>
 </template>
 
 <script>
-
-
 export default {
-    name: 'SideBar',
-    props: {
-        roomName: String,
-        items: Array,
-    },
-
-    data() {
-        return { 
-            message:"",
-        }
-    }
-}
+  name: "SideBar",
+  props: {
+    roomName: String,
+    items: Array,
+  },
+  data() {
+    return {
+      message: "",
+    };
+  },
+};
 </script>
 
 <style scoped>
-
-.sidebar{
-  @apply bg-white rounded shadow-lg;
-  height: 90%;
-  width: 10%;
-  min-width: 150px;
-  position: fixed;
-  right: 3%;
+.sidebar {
+  @apply ml-1 text-center;
+  background-color: #181c21;
+  min-width: 300px;
 }
-
-
-.sidebar-header{
-  @apply text-xl px-1 py-1 flex flex-col items-center justify-center;
+.sidebar-header {
+  @apply text-5xl text-white mx-1 my-10 flex flex-col items-center justify-center;
 }
-
-.sidebar-items{
-  
+.sidebar-content {
+  @apply px-2 text-white text-xl;
+  height: 70%;
+  width: 80%;
+  text-align: left;
+  color: white;
+  margin: 0 auto;
 }
-
-.sidebar-content{
-  @apply px-1;
-  height: 90%;
-  position: relative;
-}
-
-.sidebar-search-bar input{
-  @apply px-1 border-t-2 border-gray-800;
-  position: absolute;
-  left: 1%;
-  bottom: 0.2%;
-  width: 98%;
+.sidebar-search-bar input {
+  @apply px-2 py-2 my-5 border-t-2 border-gray-800;
+  width: 80%;
 }
 </style>
