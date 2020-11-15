@@ -12,7 +12,10 @@ export class Rooms extends BaseEntity {
     roomID!: number;
 
     @Column()
-	roomCode!: string;
+    roomCode!: string;
+    
+    @Column()
+	roomType!: string;
 
 	@Column()
 	roomType!: string;
@@ -22,6 +25,7 @@ export class Rooms extends BaseEntity {
 			roomID: this.roomID,
 			roomCode: this.roomCode,
 			roomType: this.roomType
+
         }
 	}	
 }

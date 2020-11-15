@@ -19,12 +19,12 @@ export async function initDatabase() {
 	await createConnection(options)
 	
 	if (process.env.NODE_ENV === 'development') {
-		const users = await User.findOne("test@test.com")
+		const users = await User.findOne("example@example.com")
 		if(!users){
-			await User.create({username: 'test@test.com', password: '123456789', loginStatus: false }).save()
-			console.warn('Development mode active, test user with username=test@test.com password=123456789 available')
+			await User.create({username: 'example@example.com', password: '123456789', loginStatus: true }).save()
+			console.warn('Development mode active, test user with username=example@example.com password=123456789 available')
 		} else {
-			await User.create({username: 'test@test.com', sessionKey: "", loginStatus: false }).save()
+			await User.create({username: 'example@example.com', sessionKey: "", loginStatus: true }).save()
 		}
 	}
 }

@@ -1,16 +1,14 @@
 <template>
     <main class="iconShape">
         <ul v-for="item in items" :key="item.user">
-            <div :class="item.user.toLowerCase().includes(contains.toLowerCase()) ? '' : 'not-included'">
-                <button class="user" @click.prevent="onUserClick(item)">
-                    <div class="popupBox">
-                        <span>
-                            Gebruikersnaam: {{ item.user }}
-                            Status: Beschikbaar
-                        </span>
-                    </div>
-                </button>
-            </div>
+            <button class="user" @click.prevent="onUserClick(item)">
+                <div class="popupBox">
+                    <span>
+                        Gebruikersnaam: {{ item.user }}
+                        Status: Beschikbaar
+                    </span>
+                </div>
+            </button>
         </ul>
     </main>
 </template>
@@ -22,7 +20,6 @@ export default {
     props: {
         items: Array,
         onUserClick: Function,
-        contains: String
     },
 }
 </script>
