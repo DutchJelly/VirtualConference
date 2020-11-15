@@ -29,7 +29,7 @@
         </div>
       </div>
 
-      <button class="login-button" @click.prevent="login">Login</button>
+      <button class="login-button" @click.prevent="login">login</button>		
 
       <router-link to='registreer' class="register-button" tag="button">Nog geen account? klik hier</router-link>
 
@@ -49,10 +49,11 @@ export default {
     return {
       loginForm: {
         username: "",
-        password: "",
+		password: "",
+		sessionKey: ""
       },
       error: null,
-    };
+	};	
   },
   created: function(){
   
@@ -70,12 +71,75 @@ export default {
         this.error = `Please fill in your password`;
         this.handleTempError();
         return;
+    }
+    let response = null;
+    try {
+      response = await this.$axios.post("http://localhost:5000/login", {
+        data: {
+          username: this.loginForm.username,
+		      password: this.loginForm.password
+        }
+      })
+    } catch (error) {
+      if (error.response.status == 400) {
+        console.log(error.response.data.error);
+        this.error = error.response.data.error;
+        this.handleTempError();
+        return;
+      } else {
+        console.log("an undefined error occured.");
+        this.error = `an undefined error occured.`;
+        this.handleTempError();
+        return;
       }
-      // const response = await this.$axios("http://localhost:5000");
-      // console.log({ response });
-      window.location.href = `/jitsi?username=${this.loginForm.username}`;
-      // this.$router.push("/overview");
-    },
+    }
+	  this.sessionKey = response.data.sessionKey
+    window.location.href = `/plattegrond`;
+    //   this.$router.push("/kamerview");
+	},
+	async create_user() {
+      if (this.timeout) clearTimeout(this.timeout);
+      this.error = null;
+      if (!this.loginForm.username) {
+        this.error = `Please fill in a username`;
+        this.handleTempError();
+        return;
+      }
+      if (!this.loginForm.password) {
+        this.error = `Please fill in your password`;
+        this.handleTempError();
+        return;
+	  }
+	  
+  
+	  const response = await this.$axios.post("http://localhost:5000/create_user", {
+        data: {
+          username: this.loginForm.username,
+		      password: this.loginForm.password
+        }
+	  })
+	},
+	async logout() {
+	
+      if (this.timeout) clearTimeout(this.timeout);
+      this.error = null;
+      if (!this.sessionKey) {
+        this.error = `No session key`;
+        this.handleTempError();
+        return;
+	  }
+
+	  const response = await this.$axios.post("http://localhost:5000/logout", {
+		data: {
+			sessionKey: this.sessionKey
+        }
+	  })
+	  this.sessionKey = "";
+	},
+	async debug() {
+		const response = await this.$axios.get("http://localhost:5000/debug")
+		console.log(response.data)
+	},
     handleTempError() {
       if (this.timeout) clearTimeout(this.timeout);
       this.timeout = setTimeout(() => {

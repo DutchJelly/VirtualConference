@@ -10,6 +10,11 @@
     postcss "7.0.32"
     purgecss "^2.3.0"
 
+"@mycure/vue-jitsi-meet@^0.0.7":
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/@mycure/vue-jitsi-meet/-/vue-jitsi-meet-0.0.7.tgz#7e27c29c7c50b984a0454b6af695279f06dd235a"
+  integrity sha512-jaO4vTsqkIFTAA2cpRdAQVNun9jRzgI6FsjsZTlQGCZ3q5KFhM/W6qdIlmeC3Cp0YPwJwrF5kBneJocet2uAsA==
+
 "@types/color-name@^1.1.1":
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/@types/color-name/-/color-name-1.1.1.tgz#1c1261bbeaa10a8055bbc5d8ab84b7b2afc846a0"

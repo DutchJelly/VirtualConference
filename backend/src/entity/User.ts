@@ -1,6 +1,6 @@
 import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert} from "typeorm"
 import { genSaltSync, hashSync} from "bcrypt"
-import {IsEmail, Length,  } from "class-validator"
+import {IsBoolean, IsEmail, Length } from "class-validator"
 
 @Entity()
 export class User extends BaseEntity {
@@ -8,7 +8,9 @@ export class User extends BaseEntity {
     @BeforeInsert()
     private hashPassword() {
         this.password = hashSync(this.password, genSaltSync())
-    }
+	}
+	
+
 
     @PrimaryColumn()
     @IsEmail()
@@ -16,11 +18,19 @@ export class User extends BaseEntity {
 
     @Column()
     @Length(8)
-    password!: string;
+	password!: string;
+	
+	@Column({default: ""})
+	sessionKey!: string ;
+
+	@Column({default: false})
+	@IsBoolean()
+    loginStatus!: boolean;
 
     toUserData() {
         return {
-            username: this.username
+			username: this.username,
+			loginStatus: this.loginStatus
         }
-    }
+	}	
 }
