@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "@mycure/vue-jitsi-meet": "^0.0.7",
     "global": "^4.4.0",
     "tailwindcss": "^1.8.10"
   }

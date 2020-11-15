@@ -41,6 +41,8 @@
 
     <button class="register-button" @click.prevent="register">Register</button>
 
+    <router-link to='/' class="login-button" tag="button">Back to login</router-link>
+
     <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
       {{ error }}
     </div>
@@ -71,12 +73,22 @@ export default {
         this.error = "Please fill in a username";
         this.handleTempError();
         return;
+      } else if (!this.validNewUsername(this.registerForm.newUsername)) {
+        this.error = "Please fill in a valid email";
+        this.handleTempError();
+        return;
       }
+
       if (!this.registerForm.newPassword) {
         this.error = "Please fill in your password";
         this.handleTempError();
         return;
+      } else if (!(this.registerForm.newPassword.length > 7)) {
+        this.error = "Your password must be at least 8 characters";
+        this.handleTempError();
+        return;
       }
+
       if (!this.registerForm.checkNewPassword) {
         this.error = "Please confirm your password";
         this.handleTempError();
@@ -87,10 +99,18 @@ export default {
         this.handleTempError();
         return;
       }
-      const response = await this.$axios("http://localhost:5000");
+      const response = await this.$axios.post("http://localhost:5000/create_user", {
+        data: {
+          username: this.registerForm.newUsername,
+		      password: this.registerForm.newPassword
+        }
+      });
       console.log({ response });
-      window.location.href = `/jitsi?username=${this.registerForm.newUsername}`;
-      // this.$router.push("/overview");
+      this.$router.push("/");
+    },
+    validNewUsername: function (newUsername) {
+      var re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return re.test(newUsername);
     },
     handleTempError () {
       if (this.timeout) { clearTimeout(this.timeout); }
@@ -186,5 +206,15 @@ body{
 .register-button:hover,
 .register-button:focus {
   @apply  bg-green-500;
+}
+
+.login-button {
+  outline: none;
+  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  height: 60px;
+}
+.login-button:hover,
+.login-button:focus {
+  @apply  bg-green-600;
 }
 </style>
