@@ -1,8 +1,7 @@
 <template>
   <main class="kamerpage">
     <div class="kamer">
-      <UserIcon v-bind:items="items"
-      v-bind:contains="value"></UserIcon>
+      <UserIcon v-bind:items="items"></UserIcon>
       <router-link to='plattegrond' class="plattegrond-button" tag="button">Terug naar de plattegrond</router-link>
     </div>
     <Sidebar 

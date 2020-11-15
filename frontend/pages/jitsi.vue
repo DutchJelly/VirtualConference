@@ -1,7 +1,7 @@
 <template>
     <div class="main kamerpage">
         <div class="kamer">
-            <TimedInfoMessageBox v-if="info" :message="info" time="5"/>
+            <TimedInfoMessageBox v-if="info" :message="info" :time=3 />
             <UserIcon 
                 :items="users" 
                 :onUserClick="conversations().sendRequest"
@@ -70,7 +70,7 @@ export default {
         };
     },
     async mounted() {
-        var response = await this.$axios(
+        let response = await this.$axios(
             `http://localhost:5000/testlogin/${this.username}`
         );
 
@@ -120,7 +120,7 @@ export default {
             if(!data || !data.online) return;
             
             this.users = [];
-            for(var online of data.online) {
+            for(let online of data.online) {
                 this.users.push({user: online});
             }
         });
@@ -160,7 +160,7 @@ export default {
         //The server doesn't know what user is using this socket, tell the server.
         this.socket.emit("register", {username: this.username});
 
-        for(var online of response.data.online){
+        for(let online of response.data.online){
             this.users.push({user: online});
         }
     },
@@ -169,12 +169,12 @@ export default {
         conversations: function() {
             //We have to save the 'this' in a variable because the context
             //is different for these nested functions.
-            var self = this;
+            let self = this;
             
             //Return all functions as json.
             return {
                 sendRequest: async function(withWho) {
-                    console.log("hello world");
+                    console.log("send request");
                     if(self.username === withWho.user) {
                         self.info = "you cannot invite yourself to a conversation";
                         return;
@@ -185,7 +185,8 @@ export default {
                 },
                 
                 acceptRequest: async function(withWho){
-                    var response = undefined;
+                    console.log("accept request");
+                    let response = undefined;
                     try {
                         response = await self.$axios(`http://localhost:5000/acceptconversation/${self.username}/${withWho}`);
 
@@ -196,7 +197,7 @@ export default {
                         self.conversation.room = response.data.room;
 
                         //Automatically decline all other requests that were sent after the accepted one.
-                        for(var pendingUser in self.conversationRequest.pendingUsers){
+                        for(let pendingUser in self.conversationRequest.pendingUsers){
                             this.declineRequest(pendingUser);
                         }
                         // self.conversationRequest.pendingUsers.forEach(element => {
@@ -208,11 +209,12 @@ export default {
                         self.conversationRequest.pending = false;
                         self.conversationRequest.user = "none";
                         self.info = error;
-                        // self.info = "something went wrong with accepting the request";
+                        console.log("error accept request");
                     }
                 },
                 declineRequest: async function(withWho) {
-                    var response = undefined;
+                    console.log("decline request");
+                    let response = undefined;
                     response = await self.$axios(`http://localhost:5000/declineconversation/${self.username}/${withWho}`);
                     if(self.conversationRequest.pendingUsers.length > 0){
                         self.conversationRequest.user = self.conversationRequest.pendingUsers[0];
@@ -234,64 +236,44 @@ export default {
             }
         },
         closedConversation: async function() {
-            this.conversation.type = "closed";
-            this.conversationRequest.active = false;
-            alert("ClosedConversation");
-            // alert(this.username);
-            // alert(this.typeConversationUser);
-            // alert(this.conversation.type);
-            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
+            let self = this;
+            console.log("closed conversation");
+            self.conversation.type = "closed";
+            self.conversationRequest.active = false;
+            console.log(`username: ${self.username}, withWho: ${self.typeConversationUser}, type: ${self.conversation.type}`);
+            await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
         },
         openConversation: async function() {
-            this.conversation.type = "open";
-            this.conversationRequest.active = false;
-            alert("openConversation");
-            // alert(this.username);
-            // alert(this.typeConversationUser);
-            // alert(this.conversation.type);
-            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
+            let self = this;
+            console.log("open conversation");
+            self.conversation.type = "open";
+            self.conversationRequest.active = false;
+            console.log(`username: ${self.username}, withWho: ${self.typeConversationUser}, type: ${self.conversation.type}`);
+            await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
         },
         privateConversation: async function() {
-            this.conversation.type = "private";
-            this.conversationRequest.active = false;
-            alert("privateConversation");
-            // alert(this.username);
-            // alert(this.typeConversationUser);
-            // alert(this.conversation.type);
-            await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
+            let self = this;
+            console.log("private conversation");
+            self.conversation.type = "private";
+            self.conversationRequest.active = false;
+            console.log(`username: ${self.username}, withWho: ${self.typeConversationUser}, type: ${self.conversation.type}`);
+            await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
         },
         joinOpenConversation: async function() {
-            this.conversation.type = "open";
-            alert("joinOpenConversation");
-            // alert(this.username);
-            // alert(this.typeConversationUser);
-            // alert(this.conversation.type);
-            await this.$axios(`http://localhost:5000/joinopenconversation/${this.username}/${this.typeConversationUser}`);
+            let self = this;
+            console.log("join open conversation");
+            self.conversation.type = "open";
+            console.log(self.username);
+            console.log(self.typeConversationUser);
+            console.log(`username: ${self.username}, withWho: ${self.typeConversationUser}`);
+            await self.$axios(`http://localhost:5000/joinopenconversation/${self.username}/${self.typeConversationUser}`);
         },
         joinClosedConversation: async function() {
-            this.conversation.type = "closed";
-            alert("joinClosedConversation");
-            // alert(this.username);
-            // alert(this.typeConversationUser);
-            // alert(this.conversation.type);
-            var response = undefined;
-            response = await this.$axios(`http://localhost:5000/requestconversation/${this.username}/${this.typeConversationUser}/${this.conversation.type}`);
-
-            this.conversationRequest.pending = false;
-            this.conversationRequest.user = "none";
-
-            this.conversation.user = withWho;
-            this.conversation.room = response.data.room;
-
-            //Automatically decline all other requests that were sent after the accepted one.
-
-            for(var pendingUser in this.conversationRequest.pendingUsers) {
-                this.declineRequest(pendingUser);
-            }
-            // self.conversationRequest.pendingUsers.forEach(element => {
-            //     this.declineRequest(element);
-            // });
-            this.conversationRequest.pendingUsers = [];
+            let self = this;
+            console.log("join closed conversation");
+            self.conversation.type = "closed";
+            console.log(`username: ${self.username}, withWho: ${self.typeConversationUser}, type: ${self.conversation.type}`);
+            await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
         }
     }
 };
