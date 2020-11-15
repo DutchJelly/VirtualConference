@@ -41,3 +41,4 @@
 |08-11-2020 | 11:00-12:45 | Discord | Meeting 27 with TTC (Richard en Wouter) |
 |09-11-2020 | 17:00-18:10 | MS teams | Meeting 28 with TTC (Wouter, Jie, Richard, Milou en Luuk) |
 |15-11-2020 | 11:00-11:25 | MS teams | Meeting 29 with TTC (Jie, Richard, Milou en Luuk) |
+|15-11-2020 | 15:00-15:55 | MS teams | Meeting 29 with TTC |
