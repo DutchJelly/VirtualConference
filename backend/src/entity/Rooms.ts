@@ -9,12 +9,16 @@ export class Rooms extends BaseEntity {
     roomID!: number;
 
     @Column()
-	roomCode!: string;
+    roomCode!: string;
+    
+    @Column()
+	roomType!: string;
 
     allRooms() {
         return {
 			roomID: this.roomID,
-			roomCode: this.roomCode
+            roomCode: this.roomCode,
+            roomType: this.roomType
         }
 	}	
 }
