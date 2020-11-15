@@ -106,12 +106,8 @@ export default {
             }
         },
         isModerator() {
-            if(this.user === "A") {
-                
-                return true
-            } else {
-                return false
-            }     
+            if(this.user === "A") return true
+            else return false    
         },
     },
     methods: {
@@ -131,14 +127,16 @@ export default {
             // do stuff
         },
         onLeaveRoom: async function() {
+            let self = this;
             this.open_conference = false;
             this.$refs.jitsiRef.removeJitsiWidget();
-            await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
+            await self.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
         }, 
         onCloseRoom: async function() {
+            let self = this;
             this.open_conference = false;
             this.$refs.jitsiRef.removeJitsiWidget();
-            await this.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
+            await self.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
         },     
     },
 };
