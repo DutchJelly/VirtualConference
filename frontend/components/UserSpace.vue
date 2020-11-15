@@ -536,7 +536,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
 .userspace{
     display: grid;
     overflow-y: auto;
@@ -547,7 +547,7 @@ export default {
 }
 
 .user{
-    background-image: url("../static/small.jpg");
+    background: rgb(19, 64, 70) url("../static/small.jpg");
     background-position: center;
     background-repeat: no-repeat;
     background-size: cover;
