@@ -1,9 +1,9 @@
 <template>
   <main class="kamerpage">
-    <div class="kamer">
-      <UserIcon v-bind:items="items"></UserIcon>
-      <router-link to='plattegrond' class="plattegrond-button" tag="button">Terug naar de plattegrond</router-link>
-    </div>
+    <UserSpace 
+      v-bind:users="items"
+      v-bind:contains="value"
+    />
     <Sidebar 
       :roomName="roomName"
       v-bind:items="items"
@@ -17,9 +17,12 @@ export default {
     return {
       items: [
         { user: "Richard" },
-        { user: "Wouter" }
+        { user: "Wouter" },
+        { user: "Joost" },
+        { user: "Damian" }
       ],
-      value: '',
+      value: ''
+
     }
   },
   computed: {

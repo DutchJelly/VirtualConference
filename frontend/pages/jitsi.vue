@@ -66,7 +66,9 @@ export default {
                 active: false,
                 user: "none",
                 pendingUsers: []
-            }
+            },
+
+            value: ""
         };
     },
     async mounted() {
@@ -164,7 +166,12 @@ export default {
             this.users.push({user: online});
         }
     },
-    methods: {
+    methods: {        
+        handleChange(event) {
+            const { value } = event.target;
+            this.value = value;
+        },
+
         //Nested functions are not possible. This is the next best thing.
         conversations: function() {
             //We have to save the 'this' in a variable because the context
