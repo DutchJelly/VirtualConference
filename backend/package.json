@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "doc:build": "apidoc -i src/ -o docs/",
+    "doc:view": "serve docs"
   },
   "dependencies": {
     "@types/bcrypt": "^3.0.0",

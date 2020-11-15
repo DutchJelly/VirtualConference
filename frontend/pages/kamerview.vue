@@ -6,7 +6,7 @@
       <router-link to='plattegrond' class="plattegrond-button" tag="button">Terug naar de plattegrond</router-link>
     </div>
     <Sidebar 
-      roomName="templateRoom01"
+      :roomName="roomName"
       v-bind:items="items"
       v-on:inputChange="handleChange"></Sidebar>
   </main>
@@ -21,6 +21,12 @@ export default {
         { user: "Wouter" }
       ],
       value: '',
+    }
+  },
+  computed: {
+    roomName: function() {
+      //this.$router.params.id haalt de id van de kamer op
+      return this.$route.params.name
     }
   },
   methods: {

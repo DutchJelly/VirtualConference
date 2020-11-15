@@ -39,10 +39,13 @@
       </div>
     </div>
 
-    <button class="register-button" @click.prevent="register">Register</button>
+    <button class="register-button" @click.prevent="signup">Register</button>
 
-    <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
+    <router-link :to="{name: 'index'}" class="login-button" tag="button">Back to login</router-link>
+
+    <div class="error-message" :class="error || !match ? 'opacity-100' : 'opacity-0'">
       {{ error }}
+      <div v-if="!match">passwords do not match</div>
     </div>
     </form>
   </main>
@@ -55,49 +58,40 @@ export default {
   data () {
     return {
       registerForm: {
-        Username: "",
-        NewPassword: "",
-        CheckNewPassword: ""
+        newUsername: "",
+        newPassword: "",
+        checkNewPassword: ""
       },
-      error: null
     };
   },
-
-  methods: {
-    async register () {
-      if (this.timeout) { clearTimeout(this.timeout); }
-      this.error = null;
-      if (!this.registerForm.newUsername) {
-        this.error = "Please fill in a username";
-        this.handleTempError();
-        return;
-      }
-      if (!this.registerForm.newPassword) {
-        this.error = "Please fill in your password";
-        this.handleTempError();
-        return;
-      }
-      if (!this.registerForm.checkNewPassword) {
-        this.error = "Please confirm your password";
-        this.handleTempError();
-        return;
-      }
-      if (this.registerForm.newPassword !== this.registerForm.checkNewPassword) {
-        this.error = "Your passwords do not match";
-        this.handleTempError();
-        return;
-      }
-      const response = await this.$axios("http://localhost:5000");
-      console.log({ response });
-      window.location.href = `/jitsi?username=${this.registerForm.newUsername}`;
-      // this.$router.push("/overview");
+  computed: {
+    error: function() {
+      return this.$store.state.errorMsg
     },
-    handleTempError () {
-      if (this.timeout) { clearTimeout(this.timeout); }
-      this.timeout = setTimeout(() => {
-        this.error = null;
-      }, 5000);
+    match() {
+      return (this.registerForm.newPassword == this.registerForm.checkNewPassword)
     }
+  },
+  watch: {
+    error(oldVal, newVal) {
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+    }
+  },
+  methods: {
+      signup() {
+          if (this.registerForm.newPassword == this.registerForm.checkNewPassword ) {
+              this.$store.dispatch({
+                  type: 'signup',
+                  username: this.registerForm.newUsername,
+                  password: this.registerForm.newPassword
+              })
+              this.registerForm.newUsername = ""
+              this.registerForm.newPassword = ""
+              this.registerForm.checkNewPassword = ""
+          } else {
+            this.$store.commit('errorMsg', "passwords do not match")
+          }
+      }
   }
 };
 </script>
@@ -186,5 +180,15 @@ body{
 .register-button:hover,
 .register-button:focus {
   @apply  bg-green-500;
+}
+
+.login-button {
+  outline: none;
+  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 w-full rounded border-2 border-transparent;
+  height: 60px;
+}
+.login-button:hover,
+.login-button:focus {
+  @apply  bg-green-600;
 }
 </style>
