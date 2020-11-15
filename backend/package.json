@@ -5,7 +5,9 @@
   "private": true,
   "scripts": {
     "dev": "ts-node-dev src/index.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "doc:build": "apidoc -i src/ -o docs/",
+    "doc:view": "serve docs"
   },
   "dependencies": {
     "@types/bcrypt": "^3.0.0",
@@ -14,6 +16,7 @@
     "@types/jsonwebtoken": "^8.5.0",
     "@types/randomstring": "^1.1.6",
     "@types/socket.io": "2.1.11",
+    "apidoc": "^0.25.0",
     "bcrypt": "^5.0.0",
     "class-validator": "^0.12.2",
     "cors": "^2.8.5",
@@ -22,6 +25,7 @@
     "jsonwebtoken": "^8.5.1",
     "randomstring": "^1.1.5",
     "reflect-metadata": "^0.1.13",
+    "serve": "^11.3.2",
     "socket.io": "^2.3.0",
     "sqlite3": "^5.0.0",
     "ts-node-dev": "^1.0.0",

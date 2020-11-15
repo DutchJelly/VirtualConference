@@ -1,7 +1,7 @@
 ### Planned meetings
 | date | time | where | info |
 |:-:|:-:|---|---|
-|28-10-2020 | 15:00-? | MS teams | Meeting 4 with H. Basold |
+|16-11-2020 | 10:00-??:?? | MS teams | Meeting 4 with H. Basold |
 
 ### Previous meetings
 | date | time | where | info |
@@ -32,4 +32,8 @@
 |24-10-2020 | 13:23-17:08 | MS teams | Meeting 21 with TTC (Jelle en Richard)|
 |26-10-2020 | 14:45-16:20 | Discord | Meeting 22 with TTC (Luuk en Milou) |
 |28-10-2020 | 15:00-16:25 | MS teams | Meeting 23 with TTC |
-|29-10-2020 | 13:42-14:42 | MS teams | Meeting 24 with TTC(Jelle en Richard) |
+|29-10-2020 | 13:42-14:42 | MS teams | Meeting 24 with TTC (Jelle en Richard) |
+|31-10-2020 | 12:21-12:56 | MS teams | Meeting 24 with TTC (Wouter en Milou) |
+|31-10-2020 | 22:58-23:42 | MS teams | Meeting 24 with TTC (Wouter en Jie) |
+|02-11-2020 | 10:00-10:30 | MS teams | Meeting 4 with H. Basold |
+|03-11-2020 | 9:30-12:00 | Discord | Meeting 25 with TTC (Wouter en Luuk)
