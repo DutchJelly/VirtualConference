@@ -1,7 +1,7 @@
 <template>
   <main class="conformation-window">
     <div class="message">
-      <span class="user">{{user}}</span> wants to start a <span class="type">{{typeConversation}}</span> conversation with you
+      <span class="requestinguser">{{user}}</span> wants to start a <span class="type">{{typeConversation}}</span> conversation with you
     </div>
     <div class="buttons">
       <button id="accept" @click.prevent="onAccept(user);">Accept</button>
@@ -43,7 +43,7 @@ export default {
   color: white;
 }
 
-.message .user{
+.message .requestinguser{
   color: rgb(97, 156, 8);
 }
 
