@@ -22,7 +22,6 @@ export class Rooms extends BaseEntity {
 			roomID: this.roomID,
 			roomCode: this.roomCode,
 			roomType: this.roomType
-
         }
 	}	
 }
