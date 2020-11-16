@@ -70,7 +70,7 @@ export default {
             type: 'login',
             username: this.loginForm.username,
             password: this.loginForm.password
-				})
+        })
 				this.loginForm.username = ""
         this.loginForm.password = ""
     }

@@ -24,8 +24,9 @@ export const actions = {
                     password
                 },
             })
-            .then(res => saveToken(res.data.sessionKey, commit))
-            .then(this.$router.push({path:'kamerview', query: {username}})) //TODO change this to a simple path only, this is not secure
+            .then(res => {saveToken(res.data.sessionKey, commit)
+                this.$router.push({name:'kamerview', query: {username}})
+            })//TODO change this to a simple path only, this is not secure
             .catch(({ response }) => {
                 commit('errorMsg', response.data.error)
             })
