@@ -1,7 +1,7 @@
 ### samevatting demo
 De demo werkte niet omdat er op het laatste moment nog fouten bleken te zitten in het managen van gesprekken.
 
-
+TODOtjes
 -	SVG verwerken (Richard)
 -	Registreren gesprekken en veel testen
 -	Errors beter afhandelen in de frontend
