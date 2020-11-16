@@ -527,7 +527,7 @@ export default {
             //Selected user without vue refs because those were not allowing me to add styling.
 
             //This could also be done in the template, but this is just a bit more modulair.
-            let htmlElement = document.querySelector(`#${id}`);
+            let htmlElement = document.querySelector(`#${CSS.escape(id)}`);
             let positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';
             htmlElement.style.marginLeft = (position.x * this.iconSize + this.gridSpacing) + '%';

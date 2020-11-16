@@ -2,13 +2,14 @@
     <div class="main kamerpage">
         <div class="kamer">
             <UserSpace 
-              class="userspace" 
-              :users="users"
-              :groups="groups" 
-              :gridCols=6
-              :gridSpacing=1
-              filter=""
-              ref="userspace"
+                class="userspace" 
+                :users="users"
+                :groups="groups" 
+                :gridCols=6
+                :gridSpacing=1
+                :onUserClick="conversations().sendRequest"
+                filter=""
+                ref="userspace"
             />
             <Sidebar class="sidebar" roomName="templateRoom01" :items="users"/>
         </div>
@@ -172,8 +173,9 @@ export default {
         this.socket.emit("register", {username: this.username});
 
         for(let online of response.data.online){
-            this.users.push({user: online});
+            this.users.push({user: online, id: online});
         }
+        this.groups = response.data.groups;
     },
     methods: {        
         handleChange(event) {

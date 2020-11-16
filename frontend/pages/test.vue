@@ -4,7 +4,7 @@
             class="userspace" 
             :users="users"
             :groups="groups" 
-            :gridCols=6
+            :gridCols=9
             :gridSpacing=1
             filter=""
             ref="userspace"
