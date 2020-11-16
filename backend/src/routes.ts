@@ -221,14 +221,15 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
 app.get('/testlogin/:username', json(), async (req, res, next) => {
     let username = req.params.username;
     console.log(`a user logged in: ${username}`);
+    let groups = await getGroups();
     if(onlineUsers.includes(username)){
-        res.status(200).json({message: `you logged in`, online: onlineUsers});
+        res.status(200).json({message: `you logged in`, online: onlineUsers, groups});
         return;
     }
     onlineUsers.push(username);
-    res.status(200).json({message: `you logged in`, online: onlineUsers});
+    res.status(200).json({message: `you logged in`, online: onlineUsers, groups});
 
-    io.emit('testlogin', {online: onlineUsers});
+    io.emit('testlogin', {online: onlineUsers, groups});
 });
 
 /**
@@ -464,7 +465,6 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
 
     //Notify user that he/she has accepted the conversation.
     socketMapping.get(user)?.emit("requestAcceptedFrom", {withwho, room: roomName});
-    console.log(`Wordt dit bereikt?`)
     //Return the room name to user.
     res.status(200).json({user: withwho, room: roomName});
 });
@@ -539,6 +539,8 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
     //res.status(201).json({message: `Added user with name ${user} to existing open call`})
 
     socketMapping.get(user)?.emit("joinOpenConversation", {user, room: roomName});
+
+    // await getGroups();
 
     //Return the room name to user.
     res.status(200).json({user: withwho, room: roomName});
@@ -643,3 +645,21 @@ app.use((req, res) => {
     if (!res.headersSent)
         res.status(404).json({error: 'This route could not be found'})
 })
+
+//This does not yet work because not all users are actually registered as being in a call.
+async function getGroups(){
+    console.log("start getGroups");
+    let calls = await Calls.find();
+    let groups: {id: number, members: string[]}[] = [];
+    calls.forEach(x => {
+        let group = groups.find(y => y.id === x.roomID);
+        if(!group && x.username && x.roomID){
+            groups.push({id: x.roomID, members: [x.username]});
+        }
+        else if(group){
+            group.members.push(x.username);
+        }
+    })
+    console.log(groups);
+    return groups;
+}
