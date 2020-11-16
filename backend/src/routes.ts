@@ -180,6 +180,39 @@ app.post('/create_user', json(), async (req, res, next) => {
     next()
 });
 
+<<<<<<< HEAD
+=======
+/**
+ * @api {post} /login /login
+ * @apiDescription Make a login request.
+ * @apiName Login
+ * @apiGroup User
+ *
+ * @apiParam {String} username User who wants to login's email.
+ * @apiParam {String} password User who wants to login's password.
+ *
+ * @apiSuccess {String} sessionKey A session token that can be used to make authenticated requests.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "sessionToken": "ABCDEFGHIJ0123456789".
+ *      }
+ * @apiError EmailNotFound The provided email address did not match any existing ones.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "No registered user for email {provided email address}".
+ *      }
+ *
+ * @apiError PasswordIncorrect The provided password was incorrect.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "Username or password incorrect".
+ *      }
+ */
+>>>>>>> origin/sprint-4-APIDocumentation
 app.post('/login', json(), async (req, res, next) => {
 	
     const {username, password} = req.body.data;
