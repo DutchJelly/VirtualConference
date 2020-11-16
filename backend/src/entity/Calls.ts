@@ -1,4 +1,4 @@
-import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert, OneToOne, JoinColumn} from "typeorm"
+import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert, OneToOne, JoinColumn, PrimaryGeneratedColumn} from "typeorm"
 import { genSaltSync, hashSync} from "bcrypt"
 import {isEmail, IsEmail, Length,  } from "class-validator"
 import { Rooms } from "./Rooms";
@@ -9,12 +9,14 @@ import { User } from "./User";
 @Entity()
 export class Calls extends BaseEntity {
 
-	@PrimaryColumn()
+	@PrimaryGeneratedColumn()
+	callId!: number;
+
 	@OneToOne(() => Rooms)
 	@JoinColumn()
     roomID!: number;
 
-	@PrimaryColumn() //linken naar user met foreign key met one-to-one relatie
+	// @PrimaryColumn() //linken naar user met foreign key met one-to-one relatie
 	@IsEmail()
 	@OneToOne(() => User)
 	@JoinColumn()
