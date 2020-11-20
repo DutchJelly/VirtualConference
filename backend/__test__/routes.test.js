@@ -1,6 +1,5 @@
 const request = require('supertest')
-const app = require('../src/routes')
-
+const { app } = require('../src/routes');
 // import app from "../src/routes"
 describe('create_user', () => {
   it('should create a new user', async () => {
