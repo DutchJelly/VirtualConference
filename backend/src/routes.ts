@@ -810,7 +810,7 @@ app.get('/leaveconversation/:name', json(), async (req, res, next) => {
         }
 
         let thisRoomConversation = await Calls.find({roomID: roomID})
-        socketMapping.get(user)?.emit("leaveCoversation", {user});
+        socketMapping.get(user)?.emit("leaveConversation", {user});
 
         // Last user leaves a room, room gets deleted
         if (thisRoomConversation.length == 0) {
