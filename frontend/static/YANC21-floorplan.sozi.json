@@ -1,0 +1,36 @@
+{
+  "aspectWidth": 4,
+  "aspectHeight": 3,
+  "enableKeyboardZoom": true,
+  "enableKeyboardRotation": true,
+  "enableKeyboardNavigation": true,
+  "enableMouseTranslation": true,
+  "enableMouseZoom": true,
+  "enableMouseRotation": true,
+  "enableMouseNavigation": true,
+  "updateURLOnFrameChange": true,
+  "frames": [],
+  "elementsToHide": [],
+  "selectedFrames": [],
+  "selectedLayers": [
+    "layer1",
+    "layer3",
+    "layer8",
+    "layer5",
+    "layer6",
+    "layer7",
+    "layer2",
+    "g25",
+    "__sozi_auto__"
+  ],
+  "editableLayers": [
+    "layer1",
+    "layer3",
+    "layer8",
+    "layer5",
+    "layer6",
+    "layer7",
+    "layer2",
+    "g25"
+  ]
+}
