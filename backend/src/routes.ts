@@ -120,7 +120,7 @@ app.get('/user/:email', async (req, res, next) => {
 });
 
 app.get('/test', async (req, res, next) => {
-    res.status(200);
+    res.status(200).json({hello: 'world'});
 })
 
 /**
@@ -390,7 +390,7 @@ app.post('/login', json(), async (req, res, next) => {
  *
  */  
 app.post('/logout', json(), loginRequired, async (req, res, next) => {
-	const user = req.user;
+    const user = req.user;
     if (!user) {
         res.status(400).json({error: `There was an error loggin out`})
         return;
