@@ -13,3 +13,11 @@ describe('create_user', () => {
     expect(res.body).toHaveProperty('json')
   })
 })
+
+describe('test', () => {
+    it('should be true', async () => {
+        const res = await request(app).get('/test');
+        expect(res.statusCode).toEqual(200);
+    })
+    
+})

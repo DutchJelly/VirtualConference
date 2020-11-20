@@ -119,6 +119,10 @@ app.get('/user/:email', async (req, res, next) => {
     res.json({data: user.toUserData()})
 });
 
+app.get('/test', async (req, res, next) => {
+    res.status(200);
+})
+
 /**
  * @api {get} /allUsers /allUsers
  * @apiDescription Getting all users objects from the database
