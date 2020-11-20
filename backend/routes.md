@@ -65,6 +65,7 @@ type Message{
 ```
 
 ### /joinconversation
+Joins a converation. If it's open you'll join and the response will be a room code. If it's a closed conversation, a conversation request will be created with an corresponding response of 'request sent to ...'.
 
 **request**
 ```ts
