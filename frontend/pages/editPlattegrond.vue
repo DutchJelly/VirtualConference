@@ -1,11 +1,11 @@
 <template>
-    <mainDiv class="main">
-        <iframe id="ifr" src="YANC21-floorplan.sozi.html">
+    <div class="main">
+        <iframe id="ifr" src="YANC21-floorplan.svg">
         </iframe>
         <div class="overigeRuimte">
             
         </div>
-    </mainDiv>
+    </div>
 </template>
 
 <script>
@@ -13,6 +13,13 @@ export default {
     // $("g").click(function() {
     //     alert($(this).attr("id"));        
     // });
+    mounted() {
+        console.log("into")
+        this.$nextTick(() => {
+            console.log(document.querySelectorAll("iframe"))
+            // console.log(document.querySelectorAll("g").children)
+        });
+    }
 }
 </script>
 <style>
@@ -21,7 +28,7 @@ export default {
     height:100%;
 }
 iframe {
-    height:50%;
+    height:100%;
     width: 100%;
 }
 .overigeRuimte {
