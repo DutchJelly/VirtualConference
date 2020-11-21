@@ -1,13 +1,18 @@
 <template>
     <mainDiv class="main">
-        <iframe src="YANC21-floorplan.sozi.html">
+        <iframe id="ifr" src="YANC21-floorplan.sozi.html">
         </iframe>
+        <div class="overigeRuimte">
+            
+        </div>
     </mainDiv>
 </template>
 
 <script>
 export default {
-
+    // $("g").click(function() {
+    //     alert($(this).attr("id"));        
+    // });
 }
 </script>
 <style>
@@ -16,7 +21,11 @@ export default {
     height:100%;
 }
 iframe {
-    height:100%;
+    height:50%;
     width: 100%;
+}
+.overigeRuimte {
+    width: 100%;
+    height: 50;
 }
 </style>
