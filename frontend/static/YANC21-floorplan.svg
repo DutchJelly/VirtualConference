@@ -7,12 +7,12 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="297mm"
-   height="210mm"
-   viewBox="0 0 297 210"
+   width="501.25555mm"
+   height="136.19083mm"
+   viewBox="0 0 501.25555 136.19083"
    version="1.1"
    id="svg8"
-   inkscape:version="1.0.1 (3bc2e813f5, 2020-09-07)"
+   inkscape:version="1.0.1 (0767f8302a, 2020-10-17)"
    sodipodi:docname="YANC21-floorplan.svg">
   <defs
      id="defs2" />
@@ -23,18 +23,30 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="1.4"
-     inkscape:cx="524.83288"
-     inkscape:cy="505.86732"
+     inkscape:zoom="0.53670006"
+     inkscape:cx="1120.8681"
+     inkscape:cy="128.32144"
      inkscape:document-units="mm"
-     inkscape:current-layer="layer6"
+     inkscape:current-layer="layer1"
      inkscape:document-rotation="0"
      showgrid="false"
-     inkscape:window-width="2560"
-     inkscape:window-height="1343"
-     inkscape:window-x="0"
+     inkscape:window-width="1853"
+     inkscape:window-height="1025"
+     inkscape:window-x="67"
      inkscape:window-y="27"
-     inkscape:window-maximized="1" />
+     inkscape:window-maximized="1"
+     fit-margin-left="2"
+     fit-margin-right="2"
+     fit-margin-top="2"
+     fit-margin-bottom="2"
+     inkscape:snap-bbox="true"
+     inkscape:snap-global="false">
+    <inkscape:grid
+       type="xygrid"
+       id="grid686"
+       originx="-35.760687"
+       originy="-73.082571" />
+  </sodipodi:namedview>
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -43,15 +55,467 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
   <g
      inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="Relaxation Room 2"
+     style="display:inline;opacity:1"
+     sodipodi:insensitive="true">
+    <rect
+       style="display:inline;fill:#eeffaa;stroke:#000000;stroke-width:0.2"
+       id="rect407-8"
+       width="63.416042"
+       height="36.700813"
+       x="313.66898"
+       y="91.959244"
+       transform="translate(-35.760686,-73.082571)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:6.39182px;line-height:1.25;font-family:sans-serif;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.266327"
+       x="342.75476"
+       y="113.68372"
+       id="text413-5"
+       transform="matrix(1.0065854,0,0,0.99345766,-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan411-9"
+         x="342.75476"
+         y="113.68372"
+         style="font-size:6.39182px;text-align:center;text-anchor:middle;stroke-width:0.266327">Relaxation Room 2</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer10"
+     inkscape:label="Conference Room 4"
+     style="display:inline"
+     sodipodi:insensitive="true">
+    <rect
+       style="display:inline;fill:#ffccaa;stroke:#000000;stroke-width:0.2"
+       id="rect10-9"
+       width="75"
+       height="50"
+       x="459.91623"
+       y="157.11414"
+       transform="translate(-35.760686,-73.082571)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="462.85156"
+       y="184.74448"
+       id="text17-2"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan15-5"
+         x="462.85156"
+         y="184.74448"
+         style="font-size:7.05556px;stroke-width:0.264583">Conference Room 4</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer9"
+     inkscape:label="Conference Room 3"
+     style="display:inline"
+     sodipodi:insensitive="true">
+    <g
+       id="g34-4"
+       style="display:inline"
+       transform="translate(228.46365,-73.141837)">
+      <rect
+         style="fill:#ffccaa;stroke:#000000;stroke-width:0.2"
+         id="rect19-0"
+         width="75"
+         height="50"
+         x="37.860687"
+         y="157.1734" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="40.823578"
+         y="184.80373"
+         id="text23-5"><tspan
+           sodipodi:role="line"
+           x="40.823578"
+           y="184.80373"
+           style="font-size:7.05556px;stroke-width:0.264583"
+           id="tspan27-9">Conference Room 3</tspan></text>
+    </g>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer6"
+     inkscape:label="Meeting Rooms"
+     style="display:inline"
+     transform="translate(-35.760687,-73.082571)">
+    <rect
+       style="fill:#ffaacc;stroke:#000000;stroke-width:0.2"
+       id="rect123"
+       width="75"
+       height="40"
+       x="195.69189"
+       y="88.719315" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="205.78958"
+       y="110.66579"
+       id="text128"><tspan
+         sodipodi:role="line"
+         id="tspan126"
+         x="205.78958"
+         y="110.66579"
+         style="font-size:7.05556px;stroke-width:0.264583">Meeting Rooms</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="468.94467"
+       y="111.06273"
+       id="text128-3"><tspan
+         sodipodi:role="line"
+         id="tspan126-6"
+         x="468.94467"
+         y="111.06273"
+         style="font-size:7.05556px;stroke-width:0.264583">Meeting Rooms</tspan></text>
+    <rect
+       style="display:inline;fill:#ffaacc;stroke:#000000;stroke-width:0.2"
+       id="rect123-9"
+       width="75"
+       height="40"
+       x="459.91623"
+       y="88.660049" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="470.01392"
+       y="110.60652"
+       id="text128-6"><tspan
+         sodipodi:role="line"
+         id="tspan126-4"
+         x="470.01392"
+         y="110.60652"
+         style="font-size:7.05556px;stroke-width:0.264583">Meeting Rooms</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer12"
+     inkscape:label="Room 1"
+     style="display:inline">
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136"
+       width="25"
+       height="15"
+       x="195.69189"
+       y="88.719315"
+       transform="translate(-35.760686,-73.082571)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="198.11757"
+       y="98.110672"
+       id="text180"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178"
+         x="198.11757"
+         y="98.110672"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 1</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer13"
+     inkscape:label="Room 2"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="223.13824"
+       y="98.145554"
+       id="text180-1"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-2"
+         x="223.13824"
+         y="98.145554"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 2</tspan></text>
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-3"
+       width="25"
+       height="15"
+       x="220.69189"
+       y="88.719315"
+       transform="translate(-35.760686,-73.082571)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer14"
+     inkscape:label="Room 3"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="248.08525"
+       y="98.145554"
+       id="text180-7"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-0"
+         x="248.08525"
+         y="98.145554"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 3</tspan></text>
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-5"
+       width="25"
+       height="15"
+       x="245.69188"
+       y="88.719315"
+       transform="translate(-35.760686,-73.082571)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer15"
+     inkscape:label="Room 4"
+     style="display:inline">
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-6"
+       width="25"
+       height="15"
+       x="195.69189"
+       y="113.71931"
+       transform="translate(-35.760686,-73.082571)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="198.02197"
+       y="123.11066"
+       id="text180-9"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-3"
+         x="198.02197"
+         y="123.11066"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 4</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer16"
+     inkscape:label="Room 5"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="223.10464"
+       y="123.11066"
+       id="text180-6"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-06"
+         x="223.10464"
+         y="123.11066"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 5</tspan></text>
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-2"
+       width="25"
+       height="15"
+       x="220.69189"
+       y="113.71931"
+       transform="translate(-35.760686,-73.082571)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer17"
+     inkscape:label="Room 6"
+     style="display:inline">
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-9"
+       width="25"
+       height="15"
+       x="245.69189"
+       y="113.71931"
+       transform="translate(-35.760686,-73.082571)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="248.04005"
+       y="123.14555"
+       id="text180-2"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-6"
+         x="248.04005"
+         y="123.14555"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 6</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer18"
+     inkscape:label="Room 7"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="462.34189"
+       y="98.051414"
+       id="text180-8"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-8"
+         x="462.34189"
+         y="98.051414"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 7</tspan></text>
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-33"
+       width="25"
+       height="15"
+       x="459.91623"
+       y="88.660049"
+       transform="translate(-35.760686,-73.082571)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer19"
+     inkscape:label="Room 8"
+     style="display:inline">
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-3-3"
+       width="25"
+       height="15"
+       x="484.91623"
+       y="88.660049"
+       transform="translate(-35.760686,-73.082571)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="487.36258"
+       y="98.086296"
+       id="text180-1-8"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-2-9"
+         x="487.36258"
+         y="98.086296"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 8</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer20"
+     inkscape:label="Room 9"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="512.30963"
+       y="98.086296"
+       id="text180-7-7"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-0-7"
+         x="512.30963"
+         y="98.086296"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 9</tspan></text>
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-5-8"
+       width="25"
+       height="15"
+       x="509.9162"
+       y="88.660049"
+       transform="translate(-35.760686,-73.082571)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer21"
+     inkscape:label="Room 10"
+     style="display:inline">
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-6-6"
+       width="25"
+       height="15"
+       x="459.91623"
+       y="113.66004"
+       transform="translate(-35.760686,-73.082571)" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="460.73972"
+       y="123.09707"
+       id="text180-9-6"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-3-4"
+         x="460.73972"
+         y="123.09707"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 10</tspan></text>
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer22"
+     inkscape:label="Room 11"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="486.01993"
+       y="123.08068"
+       id="text180-6-3"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-06-0"
+         x="486.01993"
+         y="123.08068"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 11</tspan></text>
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-2-0"
+       width="25"
+       height="15"
+       x="484.91623"
+       y="113.66004"
+       transform="translate(-35.760686,-73.082571)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="layer23"
+     inkscape:label="Room 12"
+     style="display:inline">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="510.86685"
+       y="123.08629"
+       id="text180-2-3"
+       transform="translate(-35.760686,-73.082571)"><tspan
+         sodipodi:role="line"
+         id="tspan178-6-0"
+         x="510.86685"
+         y="123.08629"
+         style="font-size:5.29167px;stroke-width:0.264583">Room 12</tspan></text>
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect136-9-4"
+       width="25"
+       height="15"
+       x="509.91623"
+       y="113.66004"
+       transform="translate(-35.760686,-73.082571)" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
      id="layer3"
      inkscape:label="Coffee Room"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(-35.760687,-73.082571)"
+     sodipodi:insensitive="true">
     <rect
        style="fill:none;stroke:#000000;stroke-width:0.2"
        id="rect42"
@@ -141,12 +605,103 @@
        cy="157.3326"
        cx="157.42708"
        r="3.4939632" />
+    <rect
+       style="display:inline;fill:none;stroke:#000000;stroke-width:0.2"
+       id="rect42-7"
+       width="82.831207"
+       height="131.93156"
+       x="377.08502"
+       y="75.182571" />
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+       x="394.55377"
+       y="138.6851"
+       id="text46-6"><tspan
+         sodipodi:role="line"
+         id="tspan44-3"
+         x="394.55377"
+         y="138.6851"
+         style="font-size:7.05556px;stroke-width:0.264583">Coffee Room/</tspan><tspan
+         sodipodi:role="line"
+         x="394.55377"
+         y="147.50455"
+         style="font-size:7.05556px;stroke-width:0.264583"
+         id="tspan48-1">Hallway</tspan></text>
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-75"
+       cy="99.947433"
+       cx="411.8634"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-6-9"
+       cy="99.159492"
+       cx="437.9989"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-1-6"
+       cy="115.88494"
+       cx="396.89398"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-2-2"
+       cy="118.90874"
+       cx="436.01453"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-9-1"
+       cy="167.3842"
+       cx="435.35306"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-3-7"
+       cy="164.2659"
+       cx="400.10678"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-19-8"
+       cy="185.90501"
+       cx="406.15439"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-4-5"
+       cy="191.00771"
+       cx="435.06958"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-7-7"
+       cy="150.65875"
+       cx="440.45575"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-8-4"
+       cy="89.237617"
+       cx="391.8858"
+       r="3.4939632" />
+    <circle
+       style="display:inline;fill:#aad400;stroke:#000000;stroke-width:0.2"
+       id="coffee-table-45-1"
+       cy="157.27333"
+       cx="421.65143"
+       r="3.4939632" />
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer8"
      inkscape:label="Relaxation Room"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(-35.760687,-73.082571)"
+     sodipodi:insensitive="true">
     <rect
        style="fill:#eeffaa;stroke:#000000;stroke-width:0.2"
        id="rect407"
@@ -170,7 +725,9 @@
      inkscape:groupmode="layer"
      id="layer5"
      inkscape:label="Toilets"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(-35.760687,-73.082571)"
+     sodipodi:insensitive="true">
     <g
        id="g97">
       <rect
@@ -214,150 +771,60 @@
            y="145.57669"
            style="font-size:7.05556px;stroke-width:0.264583">Toilets</tspan></text>
     </g>
-  </g>
-  <g
-     inkscape:groupmode="layer"
-     id="layer6"
-     inkscape:label="Meeting Rooms"
-     style="display:inline">
-    <rect
-       style="fill:#ffaacc;stroke:#000000;stroke-width:0.2"
-       id="rect123"
-       width="75"
-       height="40"
-       x="195.69189"
-       y="88.719315" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="205.78958"
-       y="110.66579"
-       id="text128"><tspan
-         sodipodi:role="line"
-         id="tspan126"
-         x="205.78958"
-         y="110.66579"
-         style="font-size:7.05556px;stroke-width:0.264583">Meeting Rooms</tspan></text>
-  </g>
-  <g
-     inkscape:groupmode="layer"
-     id="layer7"
-     inkscape:label="Meeting Rooms Details"
-     style="display:inline">
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.2"
-       id="rect136"
-       width="25"
-       height="15"
-       x="195.69189"
-       y="88.719315" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.2"
-       id="rect136-3"
-       width="25"
-       height="15"
-       x="220.69189"
-       y="88.719315" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.2"
-       id="rect136-5"
-       width="25"
-       height="15"
-       x="245.69188"
-       y="88.719315" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.2"
-       id="rect136-6"
-       width="25"
-       height="15"
-       x="195.69189"
-       y="113.71931" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.2"
-       id="rect136-2"
-       width="25"
-       height="15"
-       x="220.69189"
-       y="113.71931" />
-    <rect
-       style="fill:none;stroke:#000000;stroke-width:0.2"
-       id="rect136-9"
-       width="25"
-       height="15"
-       x="245.69189"
-       y="113.71931" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="198.11757"
-       y="98.110672"
-       id="text180"><tspan
-         sodipodi:role="line"
-         id="tspan178"
-         x="198.11757"
-         y="98.110672"
-         style="font-size:5.29167px;stroke-width:0.264583">Room 1</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="223.13824"
-       y="98.145554"
-       id="text180-1"><tspan
-         sodipodi:role="line"
-         id="tspan178-2"
-         x="223.13824"
-         y="98.145554"
-         style="font-size:5.29167px;stroke-width:0.264583">Room 2</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="248.08525"
-       y="98.145554"
-       id="text180-7"><tspan
-         sodipodi:role="line"
-         id="tspan178-0"
-         x="248.08525"
-         y="98.145554"
-         style="font-size:5.29167px;stroke-width:0.264583">Room 3</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="198.02197"
-       y="123.11066"
-       id="text180-9"><tspan
-         sodipodi:role="line"
-         id="tspan178-3"
-         x="198.02197"
-         y="123.11066"
-         style="font-size:5.29167px;stroke-width:0.264583">Room 4</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="223.10464"
-       y="123.11066"
-       id="text180-6"><tspan
-         sodipodi:role="line"
-         id="tspan178-06"
-         x="223.10464"
-         y="123.11066"
-         style="font-size:5.29167px;stroke-width:0.264583">Room 5</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:5.29167px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;display:inline;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
-       x="248.04005"
-       y="123.14555"
-       id="text180-2"><tspan
-         sodipodi:role="line"
-         id="tspan178-6"
-         x="248.04005"
-         y="123.14555"
-         style="font-size:5.29167px;stroke-width:0.264583">Room 6</tspan></text>
+    <g
+       id="g97-7"
+       style="display:inline"
+       transform="translate(264.22434,-0.05926635)">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.2"
+         id="rect86-5"
+         width="35.388023"
+         height="28.45409"
+         x="77.472664"
+         y="128.71931" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="84.283623"
+         y="145.57669"
+         id="text92-3"><tspan
+           sodipodi:role="line"
+           id="tspan90-8"
+           x="84.283623"
+           y="145.57669"
+           style="font-size:7.05556px;stroke-width:0.264583">Toilets</tspan></text>
+    </g>
+    <g
+       id="g97-3-8"
+       transform="translate(382.44357,-0.05926635)"
+       style="display:inline">
+      <rect
+         style="fill:none;stroke:#000000;stroke-width:0.2"
+         id="rect86-6-3"
+         width="35.388023"
+         height="28.45409"
+         x="77.472664"
+         y="128.71931" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-weight:normal;font-size:7.05556px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.264583"
+         x="84.283623"
+         y="145.57669"
+         id="text92-7-1"><tspan
+           sodipodi:role="line"
+           id="tspan90-5-8"
+           x="84.283623"
+           y="145.57669"
+           style="font-size:7.05556px;stroke-width:0.264583">Toilets</tspan></text>
+    </g>
   </g>
   <g
      inkscape:groupmode="layer"
      id="layer2"
      inkscape:label="Conference Room 1"
-     style="display:inline">
+     style="display:inline"
+     transform="translate(-35.760687,-73.082571)"
+     sodipodi:insensitive="true">
     <rect
        style="fill:#ffccaa;stroke:#000000;stroke-width:0.2"
        id="rect10"
@@ -381,7 +848,9 @@
      inkscape:groupmode="layer"
      id="g25"
      inkscape:label="Conference Room 2"
-     style="display:inline">
+     style="display:inline;opacity:1"
+     transform="translate(-35.760687,-73.082571)"
+     sodipodi:insensitive="true">
     <g
        id="g34">
       <rect

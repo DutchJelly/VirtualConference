@@ -1,6 +1,6 @@
 <template>
     <div class="main">
-        <iframe id="ifr" src="YANC21-floorplan.svg">
+        <iframe id="ifr" src="YANC21-floorplan.sozi.html">
         </iframe>
         <div class="overigeRuimte">
             
@@ -18,10 +18,12 @@ export default {
             let layers = iframe.contentDocument.querySelectorAll('g')
             console.log(layers)
             layers.forEach(element => {
-                console.log(element)
-                element.addEventListener('click', function(event) {
-                    alert(element.id + " " + element.getAttribute("inkscape:label"))
-                })
+                console.log(element.id)
+                if(element.getAttribute("inkscape:label")) {
+                    element.addEventListener('click', function(event) {
+                        alert(element.id + " " + element.getAttribute("inkscape:label"))
+                    })
+                }
             });
             console.log(layers)
             // console.log(document.querySelectorAll("g").children)
