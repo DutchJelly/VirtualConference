@@ -33,9 +33,9 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 
-      <router-link to="registreer" class="register-button" tag="button">
+      <nuxt-link to="registreer" class="register-button" tag="button">
           Nog geen account? klik hier
-      </router-link>
+      </nuxt-link>
       <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
         {{ error }}
       </div>

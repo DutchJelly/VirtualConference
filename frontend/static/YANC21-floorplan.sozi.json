@@ -4,7 +4,7 @@
   "enableKeyboardZoom": true,
   "enableKeyboardRotation": true,
   "enableKeyboardNavigation": true,
-  "enableMouseTranslation": false,
+  "enableMouseTranslation": true,
   "enableMouseZoom": true,
   "enableMouseRotation": false,
   "enableMouseNavigation": false,
