@@ -10,13 +10,17 @@
 
 <script>
 export default {
-    // $("g").click(function() {
-    //     alert($(this).attr("id"));        
-    // });
     mounted() {
         console.log("into")
         this.$nextTick(() => {
-            console.log(document.querySelectorAll("iframe"))
+            console.log("through let")
+            let iframe = document.getElementById('ifr')
+            let layers = iframe.contentDocument.querySelectorAll('g')
+            console.log(layers)
+            layers.forEach(element => {
+                console.log(element)
+            });
+            console.log(layers)
             // console.log(document.querySelectorAll("g").children)
         });
     }
