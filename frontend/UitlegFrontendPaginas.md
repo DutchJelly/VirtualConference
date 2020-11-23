@@ -2,7 +2,7 @@
 ### Layout:
 
   - Inputveld van het emailadres:  (loginForm.username als String)<br>
-    Hierin wordt het emailadres van de gebruiker ingevoerd. 
+    > Hierin wordt het emailadres van de gebruiker ingevoerd. 
   - Inputveld van het wachtwoord: (loginForm.password als String)<br>
     Hierin wordt het wachtwoord van de gebruiker ingevoerd.
   - Verstuurknop van het inlogformulier: (loginForm{ username: "", password: ""})<br>
