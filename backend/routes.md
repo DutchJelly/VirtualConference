@@ -16,6 +16,8 @@ type LoginRequest{
 **response**
 all user data
 
+if fail: response with `error: string`
+
 
 ### /conversationrequestresponse
 
