@@ -45,7 +45,7 @@
         <TypeConversationPrompt 
             class="absolute-center" 
             v-if="conversationRequest.active === true"
-            :onClosedCoversation="closedConversation"
+            :onClosedConversation="closedConversation"
             :onOpenConversation="openConversation"
             :onPrivateConversation="privateConversation" 
         />          
@@ -257,6 +257,7 @@ export default {
                     let response = undefined;
                     try {
                         response = await self.$axios(`http://localhost:5000/declineconversation/${self.username}/${withWho}`);
+                        self.info = response.data.message;
                         if(self.conversationRequest.pendingUsers.length > 0){
                             self.conversationRequest.user = self.conversationRequest.pendingUsers[0];
                             self.conversationRequest.pendingUsers.shift();
@@ -276,11 +277,13 @@ export default {
         closedConversation: async function() {
             //TODO: sessionkey meesturen
             let self = this;
+            let response = undefined;
             console.log("closed conversation");
             try {
                 self.conversation.type = "closed";
                 self.conversationRequest.active = false;
-                await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                self.info = response.data.message;
             } catch(error) {
                 self.info = error;
                 console.log("error closed conversation");
@@ -291,11 +294,13 @@ export default {
         openConversation: async function() {
             //TODO: sessionkey meesturen
             let self = this;
+            let response = undefined;
             console.log("open conversation");
             try {
                 self.conversation.type = "open";
                 self.conversationRequest.active = false;
-                await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                self.info = response.data.message;
             } catch(error) {
                 self.info = error;
                 console.log("error open conversation");
@@ -306,11 +311,13 @@ export default {
         privateConversation: async function() {
             //TODO: sessionkey meesturen
             let self = this;
+            let response = undefined;
             console.log("private conversation");
             try {
                 self.conversation.type = "private";
                 self.conversationRequest.active = false;
-                await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                self.info = response.data.message;
             } catch(error) {
                 self.info = error;
                 console.log("error private conversation");
@@ -335,10 +342,12 @@ export default {
         joinClosedConversation: async function() {
             //TODO: sessionkey meesturen
             let self = this;
+            let response = undefined;
             console.log("join closed conversation");
             try {
                 self.conversation.type = "closed";
-                await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                self.info = response.data.message;
             } catch(error) {
                 self.info = error;
                 console.log("error join closed conversation");

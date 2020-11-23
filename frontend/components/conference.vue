@@ -32,6 +32,7 @@ export default {
     },
     data: function() {
         return {
+            username: this.$route.query.username,
             joinedRoom: false,
             closeRoom: true,
         };
@@ -124,7 +125,7 @@ export default {
             try {
                 this.joinedRoom = false; //Show the button with 'Leave'.
                 this.$refs.jitsiRef.removeJitsiWidget();
-                await self.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
+                await self.$axios(`http://localhost:5000/leaveconversation/${this.username}`);
             } catch(error) {
                 console.log(error);
                 console.log("error leave room");
@@ -136,7 +137,7 @@ export default {
             try {
                 this.closeRoom = false; //Show the button with 'Close'.
                 this.$refs.jitsiRef.removeJitsiWidget();
-                await self.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
+                await self.$axios(`http://localhost:5000/leaveconversation/${this.username}`);
             } catch(error) {
                 console.log(error);
                 console.log("error close room");

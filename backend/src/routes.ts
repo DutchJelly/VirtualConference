@@ -474,9 +474,6 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
     else if(roomType === "closed"){ type = "closed"; }
 
     socketMapping.get(user)?.emit("typeConversation", {withwho, type});
-
-    //Return the type to user.
-    res.status(200).json({withwho, type});
 });
 
 /**
@@ -652,7 +649,7 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
     //Notify user that he/she has accepted the conversation.
     socketMapping.get(user)?.emit("requestAcceptedFrom", {withwho, room: roomName});
     //Return the room name to user.
-    res.status(200).json({user: withwho, room: roomName});
+    res.status(200).json({room: roomName});
 });
 
 /**
@@ -728,9 +725,6 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
     socketMapping.get(user)?.emit("joinOpenConversation", {user, room: roomName});
 
     // await getGroups();
-
-    //Return the room name to user.
-    res.status(200).json({user: withwho, room: roomName});
 });
 
 /**

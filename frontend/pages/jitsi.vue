@@ -37,7 +37,7 @@
         <TypeConversationPrompt 
             class="absolute-center" 
             v-if="conversationRequest.active === true"
-            :onClosedCoversation="closedConversation"
+            :onClosedConversation="closedConversation"
             :onOpenConversation="openConversation"
             :onPrivateConversation="privateConversation" 
         />          
