@@ -151,14 +151,14 @@ Join a room of the conference. (this is not a jitsi room, but a physical room)
 ```ts
 type JoinRoom{
     sessionKey: string,
-    roomId: number,
+    roomId: string,
 }
 ```
 
 **response**
 ```ts
 type Room{
-    roomId: number,
+    roomId: string,
     users: {
         username: string,
         id: number,
