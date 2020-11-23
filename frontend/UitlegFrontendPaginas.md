@@ -52,8 +52,8 @@
     >  Hier wordt de logout API Request geactiveerd.
 ### API Requests:
 
-  - joinRoom (wat moet er meegestuurd worden?)
-  - logout (wat moet er meegestuurd worden?)
+  - joinRoom (sessionkey, roomId (de id van de <g>))
+  - logout (sessionkey)
 
 ### API Responses:
 
