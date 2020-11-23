@@ -1,10 +1,10 @@
 ## Loginscherm
 ### Layout:
 
-  - Inputveld van het emailadres:  (loginForm.username als String)<br>
+  - Inputveld van het emailadres:  (loginForm.username als String)
     > Hierin wordt het emailadres van de gebruiker ingevoerd. 
-  - Inputveld van het wachtwoord: (loginForm.password als String)<br>
-    Hierin wordt het wachtwoord van de gebruiker ingevoerd.
+  - Inputveld van het wachtwoord: (loginForm.password als String)
+    > Hierin wordt het wachtwoord van de gebruiker ingevoerd.
   - Verstuurknop van het inlogformulier: (loginForm{ username: "", password: ""})<br>
     Hier wordt de login API Request geactiveerd.
   - Routerknop naar de registreerpagina<br>
