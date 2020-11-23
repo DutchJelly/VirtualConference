@@ -87,7 +87,7 @@ type Response{
 on decline
 ```ts
 type ErrorMessage{
-    error: string
+    message: string
 }
 ```
 
