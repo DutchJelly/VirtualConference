@@ -101,8 +101,8 @@
   - joinOpenConversation (username, typeConversationUser)
   - joinClosedConversation (username, typeConversationUser, conversation.type)
   - Conference
-    > onLeaveRoom (username)
-    > onCloseRoom (username)
+    > - onLeaveRoom (username)
+    > - onCloseRoom (username)
 
 ### API Responses:
   - data.room wordt opgeslagen als conversation.room
