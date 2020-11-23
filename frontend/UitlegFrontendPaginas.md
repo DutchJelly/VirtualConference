@@ -65,12 +65,31 @@
   - De gehele kamer
     > de gehele kamer bestaat voornamelijk uit Userspace en Sidebar.
     - Userspace
+      > Dit is een componentruimte waarin alle gebruikerinteractie plaatsvindt van alle gesprekken
     - Sidebar
+      > Dit is de componentruimte waarin informatie voor alle gebruikers worden getoont.
     > de overige delen zijn "overlays" voor de gespreksfunctionaliteiten.
     - TimedInfoMessageBox
+      > Dit is een popUp voor informatie
     - Conference
+      > Dit is een popUp voor het bellen
     - ConformationPrompt
+      > Dit is een popUp voor het accepteren van een verzoek
     - TypeConformationPrompt
+      > Dit is een popUp voor het specificeren welk type gesprek er gestart moet worden.
+### Components:
+  - Userspace
+    > Toelichting wat er in de component gebeurt.
+  - Sidebar
+    > Toelichting wat er in de component gebeurt.
+  - TimedInfoMessageBox
+    > Toelichting wat er in de component gebeurt.
+  - Conference
+    > Toelichting wat er in de component gebeurt.
+  - ConformationPrompt
+    > Toelichting wat er in de component gebeurt.
+  - TypeConformationPrompt
+    > Toelichting wat er in de component gebeurt.
 ### API Requests:
 
 ### API Responses:
