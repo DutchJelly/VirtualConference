@@ -85,12 +85,25 @@
   - TimedInfoMessageBox
     > Toelichting wat er in de component gebeurt.
   - Conference
-    > Toelichting wat er in de component gebeurt.
+    > Hier wordt de Jitsi venster weergegeven met close/leave knop als de parameter openConference op true staat. De toolbar buttons die bij de Jitsi venster wordt weergegeven worden aangepast naar de rol van de gebruiker (moderator/geen moderator). Wanneer de gebruiker op close/leave knop drukt, dan wordt de Jitsi venster gesloten en de gebruiker wordt uit de conferentie/gesprek verwijderd.
   - ConformationPrompt
     > Toelichting wat er in de component gebeurt.
   - TypeConformationPrompt
-    > Toelichting wat er in de component gebeurt.
+    > Hier wordt aan de gebruiker gevraagd welke type conversatie (gesloten/open/prive) hij/zij wilt.
 ### API Requests:
+  //Alle username moet nog naar sessionKey veranderd worden
+  - checkType (username, withWho.user)
+  - accpetRequest (username, withWho)
+  - declineRequest (username, withWho)
+  - closedConversation (username, typeConversationUser, conversation.type)
+  - openConversation (username, typeConversationUser, conversation.type)
+  - closedConversation (username, typeConversation, conversation.type)
+  - joinOpenConversation (username, typeConversationUser)
+  - joinClosedConversation (username, typeConversationUser, conversation.type)
+  - Conference
+    > onLeaveRoom (username)
+    > onCloseRoom (username)
 
 ### API Responses:
-
+  - data.room wordt opgeslagen als conversation.room
+  - data.message wordt opgeslagen als info
