@@ -8,7 +8,7 @@ This is a quick document that describes the general layout of the api, including
 **request**
 ```ts
 type LoginRequest{
-    username: string,
+    email: string,
     password: string
 }
 ```
