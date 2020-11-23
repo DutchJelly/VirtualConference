@@ -5,10 +5,10 @@
     > Hierin wordt het emailadres van de gebruiker ingevoerd. 
   - Inputveld van het wachtwoord: (loginForm.password als String)
     > Hierin wordt het wachtwoord van de gebruiker ingevoerd.
-  - Verstuurknop van het inlogformulier: (loginForm{ username: "", password: ""})<br>
-    Hier wordt de login API Request geactiveerd.
-  - Routerknop naar de registreerpagina<br>
-     Hier wordt de gebruiker naar de registreerpagina gestuurd.
+  - Verstuurknop van het inlogformulier: (loginForm{ username: "", password: ""})
+    > Hier wordt de login API Request geactiveerd.
+  - Routerknop naar de registreerpagina
+     > Hier wordt de gebruiker naar de registreerpagina gestuurd.
 ### API Requests:   
 
   - login ( loginForm.username en loginForm.password)
@@ -19,20 +19,20 @@
 ## Registreerscherm
 ### Layout:
 
-  - Inputveld van emailadres: (registerForm.newEmail als String)<br>
-     Hierin wordt het emailadres van de gebruiker ingevoerd.
-  - Inputveld van gebruikersnaam: (registerForm.newUsername als String)<br>
-     Hierin wordt de gebruikersnaam van de gebruiker ingevoerd.
-  - Inputveld van de afbeelding: (registerForm.newPicture als Afbeelding(waarschijnlijk als String in base64))<br>
-     Hierin wordt een afbeelding geupload door de gebruiker.
-  - Inputveld van het wachtwoord: (registerForm.newPassword als String)<br>
-     Hierin wordt het wachtwoord voor het account ingevoerd.
-  - Inputveld van het herhaalde wachtwoord (registerForm.CheckNewPassword als String)<br>
-     Hierin wordt voor de tweede keer het wachtwoord ingevoerd door de gebruiker.
-  - Verstuurknop van het registratieformulier: (registerForm{ newEmail: "", newUsername: "", ..., newPassword: ""})<br>
-     Hier wordt de signup API Request geactiveerd.
-  - Routerknop naar het loginscherm<br>
-     Hier wordt de gebruiker naar het loginscherm gestuurd.
+  - Inputveld van emailadres: (registerForm.newEmail als String)
+     > Hierin wordt het emailadres van de gebruiker ingevoerd.
+  - Inputveld van gebruikersnaam: (registerForm.newUsername als String)
+     > Hierin wordt de gebruikersnaam van de gebruiker ingevoerd.
+  - Inputveld van de afbeelding: (registerForm.newPicture als Afbeelding(waarschijnlijk als String in base64))
+     > Hierin wordt een afbeelding geupload door de gebruiker.
+  - Inputveld van het wachtwoord: (registerForm.newPassword als String)
+     > Hierin wordt het wachtwoord voor het account ingevoerd.
+  - Inputveld van het herhaalde wachtwoord (registerForm.CheckNewPassword als String)
+    >  Hierin wordt voor de tweede keer het wachtwoord ingevoerd door de gebruiker.
+  - Verstuurknop van het registratieformulier: (registerForm{ newEmail: "", newUsername: "", ..., newPassword: ""})
+    >  Hier wordt de signup API Request geactiveerd.
+  - Routerknop naar het loginscherm
+    >  Hier wordt de gebruiker naar het loginscherm gestuurd.
 
 ### API Requests:
 
@@ -43,13 +43,13 @@
 ## Plattegrond
 ### Layout:
   - Iframe venster: ({plattegrond}.sozi.html)
-    - sozi pagina (svg afbeelding)<br>
-      Hierin bevindt zich de plattegrond waarin alle kamers een clickfunctie hebben om erheen te gaan
-    - Kamerknoppen naar kamer (Kamerobject gegevens opgehaald uit de joinRoom API Request)<br>
-      Bij het drukken op een Kamerknop eerst de joinRoom API Request geactiveerd;<br>
-      Hierna wordt het kamerscherm geladen.
-  - Verstuurknop om uit te loggen<br>
-     Hier wordt de loguit API Request geactiveerd.
+    - sozi pagina (svg afbeelding)
+     >  Hierin bevindt zich de plattegrond waarin alle kamers een clickfunctie hebben om erheen te gaan
+    - Kamerknoppen naar kamer (Kamerobject gegevens opgehaald uit de joinRoom API Request)
+     >  Bij het drukken op een Kamerknop eerst de joinRoom API Request geactiveerd;
+     >  Hierna wordt het kamerscherm geladen.
+  - Verstuurknop om uit te loggen
+    >  Hier wordt de loguit API Request geactiveerd.
 ### API Requests:
 
 ### API Responses:
