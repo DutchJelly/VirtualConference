@@ -62,7 +62,15 @@
 
 ## Kamerview
 ### Layout:
-
+  - De gehele kamer
+    > de gehele kamer bestaat voornamelijk uit Userspace en Sidebar.
+    - Userspace
+    - Sidebar
+    > de overige delen zijn "overlays" voor de gespreksfunctionaliteiten.
+    - TimedInfoMessageBox
+    - Conference
+    - ConformationPrompt
+    - TypeConformationPrompt
 ### API Requests:
 
 ### API Responses:
