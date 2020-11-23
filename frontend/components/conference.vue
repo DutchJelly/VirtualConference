@@ -38,7 +38,6 @@ export default {
     },
     props: {
         user: String,
-        withWho: String, 
         room: String,
         openConference: Boolean,
         typeConversation: String,
@@ -69,14 +68,14 @@ export default {
                         TOOLBAR_BUTTONS: [
                             'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
                             'fodeviceselection', 'profile', 'chat', 'recording',
-                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                            'livestreaming', 'etherpad', 'sharedvideo', 'settings',
                             'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
                             'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone', 'security'
                         ],
                     },
                     onload: this.onIFrameLoad
                 };
-            } else { //If the user is not the moderator.
+            } else { //If the user is not a moderator.
                 return {
                     roomName: this.room,
                     width: 700,
@@ -96,11 +95,11 @@ export default {
                         SHOW_WATERMARK_FOR_GUESTS: false,
                         SHOW_CHROME_EXTENSION_BANNER: false,
                         TOOLBAR_BUTTONS: [
-                            'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
+                            'microphone', 'camera', 'fullscreen',
                             'fodeviceselection', 'profile', 'chat',
-                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                            'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-                            'tileview', 'videobackgroundblur', 'download', 'help', 'security'
+                            'etherpad', 'settings', 'raisehand',
+                            'filmstrip', 'feedback', 'shortcuts',
+                            'tileview', 'videobackgroundblur', 'download', 'help'
                         ],
                     },
                     onload: this.onIFrameLoad
@@ -142,7 +141,7 @@ export default {
                 console.log(error);
                 console.log("error close room");
             }
-        },     
+        }, 
     },
 };
 </script>

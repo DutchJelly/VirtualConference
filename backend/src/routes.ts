@@ -438,6 +438,7 @@ app.get('/testlogin/:username', json(), async (req, res, next) => {
  *
  */
 app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
+    //TODO: sessionkey checken
     let user = req.params.name;
     let withwho = req.params.withwho;
     let type = 'none';
@@ -505,6 +506,8 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
  *
  */
 app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, next) => {
+    //TODO: sessionkey checken
+    //TODO: aanmaken requestID (moet uniek zijn) en meesturen naar de frontend en checken in de accept/decline functie
     let user = req.params.name;
     let withwho = req.params.withwho;
     typeConversation = req.params.type;
@@ -532,7 +535,7 @@ app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, ne
  * @apiName Accept Converation
  * @apiGroup Call
  *
- * @apiParam {name} User that accepted a call request form withwho.
+ * @apiParam {user} User that accepted a call request form withwho.
  *           {withwho} User that send user an invitation for a conversation.
  * @apiSuccess {String} name that is used to insert user into the calls table
  *             {String} name that is used to insert withwho into the calls table
@@ -551,6 +554,8 @@ app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, ne
  *
  */
 app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => {
+    //TODO: sessionkey checken
+    //TODO: checken requestID
     let user = req.params.name;
     let withwho = req.params.withwho;
 
@@ -675,6 +680,7 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
  *
  */
 app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) => {
+    //TODO: sessionkey checken
     let user = req.params.name;
     let withwho = req.params.withwho;
     console.log(`${user} joined open conversation with ${withwho}`);
@@ -750,6 +756,8 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
  *
  */
 app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) => {
+    //TODO: sessionkey checken
+    //TODO: checken requestID
     let user = req.params.name;
     let withwho = req.params.withwho;
 
@@ -796,6 +804,7 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
  *
  */
 app.get('/leaveconversation/:name', json(), async (req, res, next) => {
+    //TODO: sessionkey checken
     let user = req.params.name;
     let roomID = -1;
 

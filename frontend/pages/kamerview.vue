@@ -27,7 +27,6 @@
         <Conference
             class="absolute-center"
             :user="this.username"
-            :withWho="conversation.user"
             :room="conversation.room"
             :openConference="activeConference"
             :typeConversation="this.conversation.type"
@@ -209,6 +208,7 @@ export default {
             return {
                 //Checks if withWho is already in a conversation. If the user is already in a conversation, checks which type conversation it is.
                 checkType: async function(withWho) {
+                    //TODO: sessionkey meesturen
                     console.log("send request");
                     if(self.username === withWho.user) {
                         self.info = "you cannot invite yourself to a conversation";
@@ -224,6 +224,7 @@ export default {
                 
                 //The request which is send to the user from withWho is been accepted.
                 acceptRequest: async function(withWho){
+                    //TODO: sessionkey meesturen
                     console.log("accept request");
                     let response = undefined;
                     try {
@@ -251,6 +252,7 @@ export default {
 
                 //The request which is send to the user from withWho is been declined.
                 declineRequest: async function(withWho) {
+                    //TODO: sessionkey meesturen
                     console.log("decline request");
                     let response = undefined;
                     try {
@@ -272,6 +274,7 @@ export default {
 
         //Send a request to typeConversationUser from the current user to start a closed conversation.
         closedConversation: async function() {
+            //TODO: sessionkey meesturen
             let self = this;
             console.log("closed conversation");
             try {
@@ -286,6 +289,7 @@ export default {
 
         //Send a request to typeConversationUser from the current user to start a open conversation.
         openConversation: async function() {
+            //TODO: sessionkey meesturen
             let self = this;
             console.log("open conversation");
             try {
@@ -300,6 +304,7 @@ export default {
 
         //Send a request to typeConversationUser from the current user to start a private conversation.
         privateConversation: async function() {
+            //TODO: sessionkey meesturen
             let self = this;
             console.log("private conversation");
             try {
@@ -314,6 +319,7 @@ export default {
 
         //Join an open conversation with typeConversationUser.
         joinOpenConversation: async function() {
+            //TODO: sessionkey meesturen
             let self = this;
             console.log("join open conversation");
             try {
@@ -327,6 +333,7 @@ export default {
 
         //Join a closed conversation with typeConversationUser by sending a request to the typeConversationUser.
         joinClosedConversation: async function() {
+            //TODO: sessionkey meesturen
             let self = this;
             console.log("join closed conversation");
             try {
