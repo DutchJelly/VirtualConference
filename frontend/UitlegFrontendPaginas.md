@@ -49,11 +49,16 @@
      >  Bij het drukken op een Kamerknop eerst de joinRoom API Request geactiveerd;
      >  Hierna wordt het kamerscherm geladen.
   - Verstuurknop om uit te loggen
-    >  Hier wordt de loguit API Request geactiveerd.
+    >  Hier wordt de logout API Request geactiveerd.
 ### API Requests:
+
+  - joinRoom (wat moet er meegestuurd worden?)
+  - logout (wat moet er meegestuurd worden?)
 
 ### API Responses:
 
+  - joinRoom antwoord (wat wordt er geantwoord?)
+  - logout antwoord (wat wordt er geantwoord?)
 
 ## Kamerview
 ### Layout:
