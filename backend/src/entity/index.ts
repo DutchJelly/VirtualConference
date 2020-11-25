@@ -1,7 +1,8 @@
 import {ConnectionOptions, createConnection} from "typeorm"
 import { User } from "./User"
-import { Calls } from "./Calls"
-import { Rooms } from "./Rooms"
+import { Call } from "./Call"
+import { Room } from "./Room"
+import { RoomParticipant } from "./RoomParticipant"
 
 
 export async function initDatabase() {
@@ -9,7 +10,7 @@ export async function initDatabase() {
 		name: 'default',
 		type: 'sqlite',
         database: `./virtualconference.sqlite`,
-        entities: [ User, Calls, Rooms ],
+        entities: [ User, Call, Room, RoomParticipant ],
         logging: false,
 		synchronize: true
 	}

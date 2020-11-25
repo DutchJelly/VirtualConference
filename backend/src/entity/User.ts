@@ -1,6 +1,9 @@
-import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert, PrimaryGeneratedColumn, Unique} from "typeorm"
+import {Entity, BaseEntity, Column, BeforeInsert, PrimaryGeneratedColumn} from "typeorm"
 import { genSaltSync, hashSync} from "bcrypt"
-import {IsBoolean, IsEmail, Length } from "class-validator"
+import { IsEmail, Length } from "class-validator"
+
+//TODO make typeorm update this automatically
+export const sessionExpireDuration = 10 * 60 * 60 * 1000; //10 hours
 
 //User entity. People that will visit the conference will have to create an account. That will be stored here.
 @Entity()
@@ -34,10 +37,6 @@ export class User extends BaseEntity {
 	@Column({default: 0})
 	expireDate!: number;
 	
-	//Commented out profile image because we're using a nonnull constraint for it, meaning that it needs to be filled in.
-	// @Column()
-	// profilePicture!: string;
-
     toUserData() {
         return {
 			username: this.email,
@@ -46,5 +45,5 @@ export class User extends BaseEntity {
 			email: this.email,
 			id: this.id
         }
-	}	
+	}
 }
