@@ -54,7 +54,7 @@ describe('user handling', () => {
     const res = await request(app).post('/logout').send({
       sessionKey: loggedInSession
     })
-    expect(res.body.statusCode).toEqual(200);
+    expect(res.statusCode).toEqual(200);
 
     //TODO find a way to test this
   });

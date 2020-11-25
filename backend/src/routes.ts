@@ -87,7 +87,8 @@ io.on('connection', (socket) => {
  * @apiError {loginError: string} loginError invalid session was found.
  */
 const loginRequired: Handler = async (req, res, next) => {
-	const {sessionKey} = req.body;
+    const sessionKey = req.body.sessionKey;
+    console.log(req.body);
 	if (!sessionKey) {
         return res.status(400).json({
             loginError: 'Invalid session key provided.'
