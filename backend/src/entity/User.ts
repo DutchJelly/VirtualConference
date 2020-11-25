@@ -1,4 +1,4 @@
-import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert} from "typeorm"
+import {Entity, BaseEntity, Column, PrimaryColumn, BeforeInsert, PrimaryGeneratedColumn, Unique} from "typeorm"
 import { genSaltSync, hashSync} from "bcrypt"
 import {IsBoolean, IsEmail, Length } from "class-validator"
 
@@ -10,23 +10,29 @@ export class User extends BaseEntity {
     private hashPassword() {
         this.password = hashSync(this.password, genSaltSync())
 	}
-	
 
+	@PrimaryGeneratedColumn()
+	id!: number;
 
-    @PrimaryColumn()
+	@Column()
     @IsEmail()
-    username!: string;
+    email!: string;
 
     @Column()
     @Length(8)
 	password!: string;
-	
-	@Column({default: ""})
-	sessionKey!: string ;
 
-	@Column({default: false})
-	@IsBoolean()
-	loginStatus!: boolean;
+	@Column()
+	username!: string;
+
+	@Column()
+	image!: string;
+
+	@Column({default: ""})
+	sessionKey!: string;
+
+	@Column({default: 0})
+	expireDate!: number;
 	
 	//Commented out profile image because we're using a nonnull constraint for it, meaning that it needs to be filled in.
 	// @Column()
@@ -34,8 +40,11 @@ export class User extends BaseEntity {
 
     toUserData() {
         return {
-			username: this.username,
-			loginStatus: this.loginStatus
+			username: this.email,
+			image: this.image,
+			sessionKey: this.sessionKey,
+			email: this.email,
+			id: this.id
         }
 	}	
 }

@@ -5,7 +5,6 @@ import { Rooms } from "./entity/Rooms";
 import { Calls } from "./entity/Calls";
 import { validate} from "class-validator"
 import {compareSync} from "bcrypt"
-import {verify, sign, decode} from "jsonwebtoken"
 import socketio, { Socket } from "socket.io";
 import randomstring from "randomstring";
 import crypto from "crypto"
@@ -14,42 +13,14 @@ import { Handler } from "express" // Importeer het type Handler
 
 //credits naar Sjors Holstrop
 declare global {
-namespace Express {
+    namespace Express {
 		interface Request {
 			user?: User;
 		}
 	}
 }
 	
- /**
- * @api {Function} - LoginRequired
- * @apiDescription Checks if the session key received from the frontend, exists in the database. If so, the user object will be set to the correct user. This function must be used in a pipeline.
- * @apiName loginRequired
- * @apiGroup Functions
- * 
- * @apiParam {NULL} NULL No parameters.
- *
- * @apiSuccess {object} userObject Sets userObject to user with the correct sessionkey.
- *
- * @apiError NoSessionTokenGiven There was no session token found in the body data.
- * @apiError NoSessionTokenMatch No match was found with the given session token.
- */
-const loginRequired: Handler = async (req, res, next) => {
-	// Pak de token van de Authorization header van de request
-	// const sessionKey = req.headers.authorization
-	const {sessionKey} = req.body.data;
-	console.log(sessionKey)
-	if (!sessionKey)
-		throw Error(`Session token missing in Authorization header`)
-	// Er van uitgaande dat de column met tokens sessionToken heet:
-	const authenticatedUser = await User.findOne({sessionKey: sessionKey})
-	if (!authenticatedUser)
-		throw Error(`User provided token did not match any existing tokens`)
-	// We zetten de uit de database verkregen User op het request object, zodat die beschikbaar
-	// is voor volgende Handler functies die de request afwerken:
-	req.user = authenticatedUser;
-	next();
-}
+
 
 
 const env = require('dotenv');
@@ -66,13 +37,13 @@ export const apiPort = process.env.API_PORT;
 export const server = require("http").createServer(app);
 const io = socketio(server);
 
-
-
 app.use(
     cors({
         origin: "*"
     })
 );
+
+const sessionExpireDuration = 10 * 60 * 60 * 1000; //10 hours
 
 //testing jitsi rooms
 let onlineUsers:string[] = [];
@@ -106,209 +77,80 @@ io.on('connection', (socket) => {
     //TODO add periodic socketio event handling here to see if a user is online 
 });
 
-//API requests
-app.get('/user/:email', async (req, res, next) => {
-    const email = req.params.email;
-    const token = req.headers.authorization
-    const user = await User.findOne({username: email})
-    if (!user || !token || !email) {
-        res.status(400).json({error: 'Missing'})
-        return;
+
+/**
+ * @api {Function} - LoginRequired
+ * @apiDescription Checks if the session key received from the frontend, exists in the database. If so, the user object will be set to the correct user. This function must be used in a pipeline.
+ * @apiName loginRequired
+ * @apiGroup Functions
+ * @apiSuccess {User} user Sets user to corresponding user of sessionkey.
+ * @apiError {loginError: string} loginError invalid session was found.
+ */
+const loginRequired: Handler = async (req, res, next) => {
+	const {sessionKey} = req.body;
+	if (!sessionKey) {
+        return res.status(400).json({
+            loginError: 'Invalid session key provided.'
+        });
     }
-    const claims = verify(token, `secret`)
-    res.json({data: user.toUserData()})
-});
 
-app.get('/test', async (req, res, next) => {
-    res.status(200).json({hello: 'world'});
-})
+	const user = await User.findOne({sessionKey});
+    if (!user || user.expireDate <= Date.now()){
+        return res.status(400).json({
+            loginError: 'Invalid or expired session.'
+        });
+    }
 
-/**
- * @api {get} /allUsers /allUsers
- * @apiDescription Getting all users objects from the database
- * @apiName allUsers
- * @apiGroup User
- * 
- * @apiParam {NULL} NULL No parameters.
- *
- * @apiSuccess {array} allUsers All userObjects.
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *          "username: test@test.com"
- * 			"password: dsbhdsfhyihi32h3rhbjdsnjdsfjkdsf"
- * 			"sessionKey: dkdkjn3mmdfkfmnhsa"
- * 			"loginStatus: True"
- *      }
- * @apiError UserDoesNotExist The user could not be found in the database.
- * @apiErrorExample Error-Response:
- *      HTTP/1.1 400 Bad Request
- *      {
- *          "error": "No registered user for email test@test.com"
- *      }
- *
- */
-app.get('/allUsers', loginRequired, async (req, res) => { //TODO: security??? SHOULD BE DELETEN ON PRODUCTION
-	if (process.env.NODE_ENV === 'development') {
-		const allUsers = await User.find();
-		res.status(200).json({data: allUsers})
-	} else {
-		res.status(400).json("NO PERMISSION")
-	}
-})
-
-app.get('/debug', async (req, res) => { //TODO: security???
-	const allUsers = await User.find();
-	const allRooms = await Rooms.find();
-	const allCalls = await Calls.find();
-	console.log(allUsers);
-	console.log(allRooms);
-	console.log(allCalls);
-	res.json({data: allUsers, allRooms, allCalls})
-})
+	//Pass the user to the rest of the routes.
+    req.user = user;
+	next();
+}
 
 /**
- * @api {post} /userData /userData
- * @apiDescription Getting the userData of a specific user (userData is defined in User.ts
- * @apiName userData
- * @apiGroup User
- *
- * @apiParam {string} username Username of which the userData needs to be returned.
- *
- * @apiSuccess {object} userData A userData object. (Defined in User.ts).
- *
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *          "username: test@test.com"
- * 			"loginStatus: True"
- *      }
- * @apiError UserDoesNotExist The user could not be found in the database.
- * @apiErrorExample Error-Response:
- *      HTTP/1.1 400 Bad Request
- *      {
- *          "error": "No registered user for email test@test.com"
- *      }
- *
- */
-app.post('/userData', loginRequired, json(), async (req, res) => { //TODO: security???
-	const {username} = req.body.data;
-	const user = await User.findOne({username})
-	if (!user) {
-        res.status(400).json({error: `No registered user for email ${username}`})
-        return;
-	}
-	const userData = user.toUserData()
-	res.status(200).json({userData})
-	return;
-})
-
-/**
- * @api {post} /userStatus /userStatus
- * @apiDescription Getting the status of a specific user
- * @apiName userStatus
- * @apiGroup User
- *
- * @apiParam {string} username Username of which the status needs to be returned.
- *
- * @apiSuccess {Boolean} loginStatus Login status of the user.
- *
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *          True
- *      }
- * @apiError UserDoesNotExist The user could not be found in the database.
- * @apiErrorExample Error-Response:
- *      HTTP/1.1 400 Bad Request
- *      {
- *          "error": "No registered user for email test@test.com."
- *      }
- *
- */
-app.post('/userStatus', json(), async (req, res) => { //TODO: security???
-	const {username, password} = req.body.data;
-    const token = req.headers.authorization
-	const user = await User.findOne({username})
-	if (!user) {
-        res.status(400).json({error: `No registered user for email ${username}.`})
-        return;
-	}
-	const userData = user.toUserData()
-	const status = userData.loginStatus;
-	res.json({status})
-	return;
-})
-
-/**
- * @api {post} /create_user /create_user
+ * @api {post} /register
  * @apiDescription Create a new user for the database.
- * @apiName Create user
+ * @apiName Register
  * @apiGroup User
  *
- * @apiParam {String} username Email with which the user wants to create an account.
- * @apiParam {String} password Password with which the user wants to create an account.
+ * @apiParam {string} username the username for the new account
+ * @apiParam {string} password the password to login
+ * @apiParam {string} image the profile image
+ * @apiParam {string} email a unique email adress
  *
- * @apiSuccess {String} username The username with which an account has been created will be returned.
- *
+ * @apiSuccess {message: string} message The username with which an account has been created will be returned.
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 201 OK
  *      {
- *          Created new user with username test@test.com.
+ *          "message": "Created new user with username test@test.com."
  *      }
- * @apiError NoUsernameGiven No username was given to the backend.
+ * @apiError {error: string} error could not create the account
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "error": "No username in post body"
- *      }
- * @apiError NoPasswordGiven No password was given to the backend.
- * @apiErrorExample Error-Response:
- *      HTTP/1.1 400 Bad Request
- *      {
- *          "error": "No password in post body'"
- *      }
- *
- * @apiError UserAlreadyExists The username given to the backend already exists.
- * @apiErrorExample Error-Response:
- *      HTTP/1.1 400 Bad Request
- *      {
- *          "error": "User: {username} already exists"
- *      }
- * 
- * @apiError validateUser The user could not be put in the database.
- * @apiErrorExample Error-Response:
- *      HTTP/1.1 400 Bad Request
- *      {
- *          "error": "Constraints that failed validation with error message"
+ *          "error": "An account with that email address already exists."
  *      }
  */
-app.post('/create_user', json(), async (req, res, next) => {
-	const isOnline = false;
-	const {username, password} = req.body.data;
-    if (!username)
-		res.status(400).json({error: 'No username in post body'})
-    if (!password)
-        res.status(400).json({error: 'No password in post body'})
-    if (!username || !password)
-		return;
-	let user = await User.findOne({username})
-	if(user){
-		res.status(400).json({error: `User: ${username} already exists.`})
-		return;
-	}
-	const temp = {username, password, isOnline} //Without this it crashes??????????
-	user = User.create(temp)
-	user.loginStatus = false;
-    const errors = await validate(user);
-	const error = errors[0]
-    if (error){
-        res.status(400).json({error: error.constraints})
+app.post('/register', json(), async (req, res, next) => {
+    const {username, password, image, email} = req.body;
+    if (!username || !password || !image || !email) {
+        res.status(400).json({error: 'Not all fields were filled. The fields are: username, password, image, email.'});
         return;
     }
+	let user = await User.findOne({email})
+	if(user){
+		res.status(400).json({error: `That email address is already in use.`})
+		return;
+    }
+    const userdata = {username, password, image, email};
+    user = User.create(userdata);
+    const errors = await validate(user);
+    if (errors.length){
+        res.status(400).json({error: errors[0].constraints})
+        return;
+    }
+
     await user.save();
-    res.status(201).json({message: `Created new user with username ${username}`})
-    next()
+    res.status(201).json({message: `Created a new user for ${email}.`});
 });
 
 /**
@@ -343,28 +185,35 @@ app.post('/create_user', json(), async (req, res, next) => {
  */
 app.post('/login', json(), async (req, res, next) => {
 	
-    const {username, password} = req.body.data;
-    const user = await User.findOne({username})
-    if (!user) {
-        res.status(400).json({error: `No registered user for email ${username}`})
+    const {email, password} = req.body;
+    if (!email || !password) {
+        return res.status(400).json({error: 'Not all fields are present in the post body.'});
         return;
-	}
-    const passwordsMatch = compareSync(password, user.password)
-    if (!passwordsMatch) {
-        res.status(400).json({error: `Username or password incorrect`})
-        return;
-	}
-    // TODO: use proper secret key
-	// or use sessions (with redis)
+    }
 
-	let sessionKey = crypto.randomBytes(20).toString('base64'); //generate session key
-	user.loginStatus = true;
-	user.sessionKey = sessionKey;
-	await user.save();
-    // const loginToken = sign({username}, `secret`)
-    res.status(200).json({sessionKey: sessionKey})
+    const user = await User.findOne({email})
+
+    // Check if the credentials are right.
+    if (!user || !compareSync(password, user.password)) {
+        res.status(400).json({error: 'Invalid login credentials.'})
+        return;
+    }
+    
+    // Generate new session only if it doesn't exist. Always update expire date of session.
+    if(!user.sessionKey) 
+        user.sessionKey = crypto.randomBytes(20).toString('base64');
+    user.expireDate = Date.now() + sessionExpireDuration;
+    await user.save();
+    
+    // Send back all the user data.
+    res.status(200).json({
+        sessionKey: user.sessionKey,
+        username: user.username,
+        email: user.email,
+        id: user.id,
+        image: user.image
+    })
 })
-	
 	
 /**
  * @api {post} /logout /logout
@@ -391,15 +240,10 @@ app.post('/login', json(), async (req, res, next) => {
  */  
 app.post('/logout', json(), loginRequired, async (req, res, next) => {
     const user = req.user;
-    if (!user) {
-        res.status(400).json({error: `There was an error loggin out`})
-        return;
-	}
-	user.loginStatus = false;
-	user.sessionKey = "";
-	await user.save();
-    // const loginToken = sign({username}, `secret`)
-    res.status(200).json("User logged out")
+	user!.expireDate = Date.now();
+	user!.sessionKey = ""; //Do this for debugging purposes, time would be enough.
+    await user!.save();
+    res.status(200).json({message: "Successfully logged out."})
 })
 
 // Test login
@@ -454,10 +298,10 @@ app.get('/typeconversation/:name/:withwho', json(), async (req, res, next) => {
         return;
     }
 
-    if(!isUserOnline?.loginStatus || !isWithwhoOnline?.loginStatus){ // Check if one of the two is online
-        res.status(400).json({message: "One of the users is not online"});
-        return;
-    }
+    // if(!isUserOnline?.loginStatus || !isWithwhoOnline?.loginStatus){ // Check if one of the two is online
+    //     res.status(400).json({message: "One of the users is not online"});
+    //     return;
+    // }
     
     let withwhoCall = await Calls.findOne({username:withwho})
     let roomType = ""
@@ -519,10 +363,10 @@ app.get('/requestconversation/:name/:withwho/:type', json(), async (req, res, ne
         res.status(400).json({message: "One of the users does not exist"});
         return;
     }
-    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        res.status(400).json({message: "One of the users is not online"});
-        return;
-    }
+    // if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
+    //     res.status(400).json({message: "One of the users is not online"});
+    //     return;
+    // }
 
     requested.set(user, withwho);
 
@@ -564,10 +408,10 @@ app.get('/acceptconversation/:name/:withwho', json(), async (req, res, next) => 
         res.status(400).json({message: "One of the users does not exist"});
         return;
     }
-    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        res.status(400).json({message: "One of the users is not online"});
-        return;
-    }
+    // if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
+    //     res.status(400).json({message: "One of the users is not online"});
+    //     return;
+    // }
 
     if(requested.get(withwho) !== user){
         res.status(400).json({message: "No request is opened"});
@@ -689,10 +533,10 @@ app.get('/joinopenconversation/:name/:withwho', json(), async (req, res, next) =
         res.status(400).json({message: "One of the users does not exist"});
         return;
     }
-    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        res.status(400).json({message: "error, one of the users is not online"});
-        return;
-    }
+    // if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
+    //     res.status(400).json({message: "error, one of the users is not online"});
+    //     return;
+    // }
 
     let inConversation = await Calls.findOne({username:user})
     if(inConversation != undefined){
@@ -763,10 +607,10 @@ app.get('/declineconversation/:name/:withwho', json(), async (req, res, next) =>
         res.status(400).json({message: "One of the users does not exist"});
         return;
     }
-    if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
-        res.status(400).json({message: "One of the users is not online"});
-        return;
-    }
+    // if(!isUserOnline.loginStatus || !isWithwhoOnline.loginStatus){ // Check if one of the two is online
+    //     res.status(400).json({message: "One of the users is not online"});
+    //     return;
+    // }
 
     if(requested.get(withwho) !== user){
         res.status(400).json({message: "No request is opened"});

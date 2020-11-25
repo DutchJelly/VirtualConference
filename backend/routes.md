@@ -4,6 +4,19 @@ This is a quick document that describes the general layout of the api, including
 
 ------------------------------
 
+### /register
+**request**
+```ts
+type Register{
+    username: string,
+    email: string,
+    password: string,
+    image: string
+}
+```
+**response**
+It'll respond with a `message: string` if successful, and a `error: string` if not.
+
 ### /login
 **request**
 ```ts
