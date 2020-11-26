@@ -15,7 +15,7 @@ export class Room extends BaseEntity {
     @Column({default: "open"})
     roomType!: string;
     
-    @OneToMany(() => RoomParticipant, (participant) => participant.room)
+    @OneToMany(() => RoomParticipant, participant => participant.room)
     members!: RoomParticipant[];
 
     allRooms() {

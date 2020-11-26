@@ -96,19 +96,25 @@ describe('roomhandling',  () => {
     console.log(res.body);
     expect(res.statusCode).toEqual(200);
     expect(res.body.roomId).toEqual('atestingroom');
-    expect(res.body.users).toContain(x => x.id === roomTesting1Res.body.id);
+    expect(res.body.users).toEqual(expect.arrayContaining([expect.objectContaining({id: roomTesting1Res.body.id})]));
     expect(res.body.groups.length).toEqual(0);
   });
 
   it('should show all users in a room', async () => {
+    await request(app).post('/joinroom').send({
+      sessionKey: roomTesting1Res.body.sessionKey,
+      roomId: 'atestingroom'
+    })
     const res = await request(app).post('/joinroom').send({
       sessionKey: roomTesting2Res.body.sessionKey,
       roomId: 'atestingroom'
     });
     expect(res.statusCode).toEqual(200);
     expect(res.body.roomId).toEqual('atestingroom');
-    expect(res.body.users).toContain(x => x.id === roomTesting1Res.body.id);
-    expect(res.body.users).toContain(x => x.id === roomTesting2Res.body.id);
+    expect(res.body.users).toEqual(expect.arrayContaining([
+      expect.objectContaining({id: roomTesting1Res.body.id}),
+      expect.objectContaining({id: roomTesting2Res.body.id})
+    ]));
     expect(res.body.groups.length).toEqual(0);
   });
 

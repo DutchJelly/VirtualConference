@@ -93,8 +93,8 @@ const emitRoomUpdate = async (roomId: string) => {
     if(!room) return;
     const roomData = {
         roomId,
-        users: room.members.map(x => ({username: x.user.username, id: x.user.id, image: x.user.image, email: x.user.email})),
-        groups: calls.map(x => ({memberIds: x.members.map(y => y.id), groupId: x.callId}))
+        users: room.members?.map(x => ({username: x.user.username, id: x.user.id, image: x.user.image, email: x.user.email})) ?? [],
+        groups: calls?.map(x => ({memberIds: x.members.map(y => y.id), groupId: x.callId})) ?? []
     };
     await Promise.all(roomData.users.map(async x => {
         let socket = await getSocket(x.id);
@@ -325,8 +325,11 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     }
 
     let room = await Room.findOne({roomId});
-    if(!room)
-        room = Room.create({roomId, members: []});
+    if(!room){
+        room = Room.create({roomId});
+        await room.save();
+    }
+       
 
     let roomParticipant = await RoomParticipant.findOne({user});
     if(!roomParticipant){
@@ -334,15 +337,21 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     } else roomParticipant.room = room;
     
     await roomParticipant.save();
-
-    room.members.push(roomParticipant);
-    await room.save();
+    // room = await Room.findOne({roomId});
 
     let calls = await Call.find({room});
+    
+    room = await Room.findOne({roomId});
+    if(!room) throw new Error('Internal error -> room should not be undefined.');
+
+    let usersData = [user?.toUserData()];
+    if(room.members && room.members.length){
+        room.members.forEach(x => usersData.push(x.user.toUserData()));
+    }
 
     res.status(200).json({
         roomId: room.roomId,
-        users: room.members.map(x => ({username: x.user.username, id: x.user.id, image: x.user.image, email: x.user.email})),
+        users: room.members.map(x => x.user.toUserData()),
         groups: calls.map(x => ({memberIds: x.members.map(y => y.id), groupId: x.callId}))
     });
 
