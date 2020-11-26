@@ -8,7 +8,6 @@ import { User } from "./User";
 export class RoomParticipant extends BaseEntity {
 
     @PrimaryGeneratedColumn()
-    @Column()
     id!: number;
 
     @ManyToOne(() => Room, (r) => r.members)

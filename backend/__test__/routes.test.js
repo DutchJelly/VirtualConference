@@ -36,7 +36,6 @@ describe('user handling', () => {
     expect(res.body.image).toBeDefined();
 
     loggedInSession = res.body.sessionKey;
-    console.log(loggedInSession);
   })
 
   it('should not login a nonexisting user', async () => {
@@ -65,17 +64,18 @@ describe('roomhandling',  () => {
 
   let roomTesting1Res;
   let roomTesting2Res;
-  beforeAll(async () => {
-    //create another user for testing.
-    await request(app).post('/register').send({
+
+  it('should return correct room data upon joining the same one', async () => {
+
+    const regResult = await request(app).post('/register').send({
       password: 'test1234',
-      image: '',
+      image: '123',
       email: 'roomtesting1@test.com',
       username: 'roomtesting1'
     });
     await request(app).post('/register').send({
       password: 'test1234',
-      image: '',
+      image: '1234',
       email: 'roomtesting2@test.com',
       username: 'roomtesting2'
     })
@@ -87,23 +87,13 @@ describe('roomhandling',  () => {
       password: 'test1234',
       email: 'roomtesting2@test.com'
     })
-  });
 
-  afterAll(async () => {
-    await request(app).post('/logout').send({
-      sessionKey: roomTesting1Res.body.sessionKey
-    });
-    
-    await request(app).post('/logout').send({
-      sessionKey: roomTesting2Res.body.sessionKey
-    });
-  })
 
-  it('should return correct room data upon joining the same one', async () => {
     const res = await request(app).post('/joinroom').send({
       sessionKey: roomTesting1Res.body.sessionKey,
       roomId: 'atestingroom'
     }) 
+    console.log(res.body);
     expect(res.statusCode).toEqual(200);
     expect(res.body.roomId).toEqual('atestingroom');
     expect(res.body.users).toContain(x => x.id === roomTesting1Res.body.id);
@@ -136,11 +126,20 @@ describe('roomhandling',  () => {
 
     expect(res2.body.users).not.toContain(x => x.id === roomTesting1Res.body.id);
     expect(res2.body.users).toContain(x => x.id === roomTesting2Res.body.id);
+
+
+    await request(app).post('/logout').send({
+      sessionKey: roomTesting1Res.body.sessionKey
+    });
+    
+    await request(app).post('/logout').send({
+      sessionKey: roomTesting2Res.body.sessionKey
+    });
   });
 });
 
 
-describe('conversations', async () => {
+describe('conversations', () => {
 
   let roomTesting1Res, roomTesting2Res;
 

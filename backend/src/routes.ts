@@ -144,7 +144,6 @@ const leaveRooms = async (user: User) => {
  */
 const loginRequired: Handler = async (req, res, next) => {
     const sessionKey = req.body.sessionKey;
-    console.log(req.body);
 	if (!sessionKey) {
         return res.status(400).json({
             loginError: 'Invalid session key provided.'
@@ -160,6 +159,7 @@ const loginRequired: Handler = async (req, res, next) => {
 
 	//Pass the user to the rest of the routes.
     req.user = user;
+    console.log(`successfully logged in user ${user.username}`);
 	next();
 }
 
@@ -218,7 +218,7 @@ app.post('/register', json(), async (req, res, next) => {
     }
 
     await user.save();
-    res.status(201).json({message: `Created a new user for ${email}.`});
+    res.status(200).json({message: `Created a new user for ${email}.`});
 });
 
 /**
@@ -313,6 +313,7 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
 	user!.expireDate = Date.now();
 	user!.sessionKey = ""; //Do this for debugging purposes, time would be enough.
     await user!.save();
+    await leaveRooms(user!);
     res.status(200).json({message: "Successfully logged out."})
 });
 
