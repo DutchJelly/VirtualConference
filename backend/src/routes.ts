@@ -103,17 +103,19 @@ const emitRoomUpdate = async (roomId: string) => {
     }));
 }
 
+//Required roomUser relations: ["room", "call", "call.members", "call.members.user"]
 const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if(!roomUser.call) return;
 
     const call = roomUser.call;
     call.members = call.members.filter(x => x !== roomUser);
-    await call.save();
 
-    if(call.members.length === 1){
-        const leftOverUser = call.members[0].user;
-        await(leaveCalls(call.members[0], false));
-        const socket = await getSocket(leftOverUser.id);
+    if(call.members.length === 1) throw new Error('Illegal state: only 1 member in a call.')
+
+    if(call.members.length === 2){
+        const leftOverUser = call.members.find(x => x.user.id !== roomUser.user.id);
+        await(leaveCalls(leftOverUser!, false));
+        const socket = await getSocket(leftOverUser!.user.id);
         if(socket) socket.emit('callUpdate', {message: 'The call stopped because you were the only one left.'});
     }
 
@@ -122,16 +124,17 @@ const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     }
 }
 
-const leaveRooms = async (user: User) => {
-    const roomUser = await RoomParticipant.findOne({user});
+//TODO add relations retreiving of database.
+const leaveRooms = async (user: User, submitUpdate: boolean) => {
+    const roomUser = await RoomParticipant.findOne({where: {user}, relations: ["room", "call", "call.members"]});
     const room = roomUser?.room;
-    if(!roomUser) return;
-    await leaveCalls(roomUser, false);
-    if(!room) return;
-    room.members = room.members.filter(x => x !== roomUser);
-    await room.save();
+    if(!roomUser || !room) return;
+    
     await RoomParticipant.remove(roomUser);
-    await emitRoomUpdate(room.roomId);
+
+    //TODO handle leavecall event here
+    if(submitUpdate)
+        await emitRoomUpdate(room.roomId);
 }
 
 /**
@@ -166,12 +169,15 @@ const loginRequired: Handler = async (req, res, next) => {
 const roomRequired: Handler = async (req, res, next) => {
     const user = req.user;
 
-    let roomParticipant = await RoomParticipant.findOne({user});
+    //TODO look if this many relations can hurt performance
+    const roomParticipant = await RoomParticipant.findOne({where: {user}, relations: ["room"]});
+    
     if(!roomParticipant || !roomParticipant.room){
         return res.status(400).json({
             error: 'You are not in a room.'
         });
     }
+    roomParticipant.user = user!;
     req.roomParticipant = roomParticipant;
     next();
 }
@@ -313,7 +319,7 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
 	user!.expireDate = Date.now();
 	user!.sessionKey = ""; //Do this for debugging purposes, time would be enough.
     await user!.save();
-    await leaveRooms(user!);
+    await leaveRooms(user!, true);
     res.status(200).json({message: "Successfully logged out."})
 });
 
@@ -324,39 +330,41 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
         return res.status(400).json({error: 'Not all fields are present in the post body.'});
     }
 
-    let room = await Room.findOne({roomId});
+    let room = await Room.findOne({where: {roomId}});
     if(!room){
         room = Room.create({roomId});
         await room.save();
     }
        
-
     let roomParticipant = await RoomParticipant.findOne({user});
     if(!roomParticipant){
         roomParticipant = RoomParticipant.create({ room, user, call: undefined });
     } else roomParticipant.room = room;
     
     await roomParticipant.save();
-    // room = await Room.findOne({roomId});
 
-    let calls = await Call.find({room});
+    const calls = await Call.find({where: {room}, relations: ["room", "members"]});
     
-    room = await Room.findOne({roomId});
+    //Now get the members (which are relations) of the room.
+    room = await Room.findOne({where: {roomId}, relations: ["members", "members.user"]});
     if(!room) throw new Error('Internal error -> room should not be undefined.');
-
-    let usersData = [user?.toUserData()];
-    if(room.members && room.members.length){
-        room.members.forEach(x => usersData.push(x.user.toUserData()));
-    }
 
     res.status(200).json({
         roomId: room.roomId,
-        users: room.members.map(x => x.user.toUserData()),
+        users: room.members.filter(x => x.user).map(x => x.user.toUserData()),
         groups: calls.map(x => ({memberIds: x.members.map(y => y.id), groupId: x.callId}))
     });
 
     await emitRoomUpdate(roomId);
 });
+
+app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, next) => {
+    const user = req.user;
+    await leaveRooms(user!, false);
+    await emitRoomUpdate(req.roomParticipant!.room.roomId);
+    res.status(200).json({message: 'Successfully left the room.'});
+});
+
 
 /**
  * @apiParam {sessionKey: string, userId: number, conversationType: string} conversationRequest

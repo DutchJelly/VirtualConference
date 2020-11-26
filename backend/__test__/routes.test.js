@@ -130,8 +130,12 @@ describe('roomhandling',  () => {
       roomId: 'atestingroom'
     });
 
-    expect(res2.body.users).not.toContain(x => x.id === roomTesting1Res.body.id);
-    expect(res2.body.users).toContain(x => x.id === roomTesting2Res.body.id);
+    expect(res2.body.users).not.toEqual(expect.arrayContaining([
+      expect.objectContaining({id: roomTesting1Res.body.id}),
+    ]));
+    expect(res2.body.users).toEqual(expect.arrayContaining([
+      expect.objectContaining({id: roomTesting2Res.body.id}),
+    ]));
 
 
     await request(app).post('/logout').send({
