@@ -194,9 +194,9 @@ describe('roomhandling',  () => {
   });
 });
 
-
 describe('conversations', () => {
-  let conversationTesting1, conversationTesting2, conversationTestin3;
+  let conversationTesting1, conversationTesting2, conversationTesting3;
+  let roomData;
 
   beforeAll(async (done) => {
     //create another user for testing.
@@ -231,10 +231,6 @@ describe('conversations', () => {
       email: 'conversationtesting3@test.com'
     })
 
-    sockets[0].emit('register', {sessionKey: conversationTesting1.body.sessionKey});
-    sockets[1].emit('register', {sessionKey: conversationTesting2.body.sessionKey});
-    sockets[1].emit('register', {sessionKey: conversationTesting3.body.sessionKey});
-
     await request(app).post('/joinroom').send({
       sessionKey: conversationTesting1.body.sessionKey,
       roomId: 'atestingroom'
@@ -243,11 +239,10 @@ describe('conversations', () => {
       sessionKey: conversationTesting2.body.sessionKey,
       roomId: 'atestingroom'
     });
-    await request(app).post('/joinroom').send({
+    roomData = await request(app).post('/joinroom').send({
       sessionKey: conversationTesting3.body.sessionKey,
       roomId: 'atestingroom'
     });
-    
     done();
   });
 
@@ -265,6 +260,56 @@ describe('conversations', () => {
   })
 
   it('should be possible to send and accept conversation requests between users', async () => {
+    
+    sockets[0].emit('register', {sessionKey: conversationTesting1.body.sessionKey});
+    sockets[1].emit('register', {sessionKey: conversationTesting2.body.sessionKey});
+    sockets[2].emit('register', {sessionKey: conversationTesting3.body.sessionKey});
+
+    let socketRespondCounter = 0;
+    sockets[1].on('directrequest', async (data) => {
+      
+      sockets[0].on('requestaccepted', (data) => {
+        socketRespondCounter++;
+
+        expect(data.memberIds).toHaveLength(2);
+        expect(data.id).toBeDefined();
+        expect(data.type).toEqual('open');
+        expect(data.senderId).toEqual(conversationTesting1.body.id);
+        expect(data.sentToId).toEqual(conversationTesting2.body.id);
+
+      })
+
+      socketRespondCounter++;
+
+      expect(data).toMatchObject({
+        senderId: conversationTesting1.body.id,
+        type: 'open',
+        sentToId: conversationTesting2.body.id,
+      });
+      const conversationResponseRes = await request(app).post('/conversationrequestresponse').send({
+        sessionKey: conversationTesting2.body.sessionKey,
+        requestId: data.id,
+        response: true
+      });
+      expect(conversationResponseRes.body.memberIds).toHaveLength(2);
+      expect(conversationResponseRes.body.id).toBeDefined();
+      expect(conversationResponseRes.body.type).toEqual('open');
+      expect(conversationResponseRes.body.senderId).toEqual(conversationTesting1.body.id);
+      expect(conversationResponseRes.body.sentToId).toEqual(conversationTesting2.body.id);
+    });
+
+    const res = await request(app).post('/requestconversation').send({
+      sessionKey: conversationTesting1.body.sessionKey,
+      userId: conversationTesting2.body.id,
+      conversationType: 'open'
+    });
+
+    if(res.statusCode === 400) console.log(res.body);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.message).toBeDefined();
+  });
+
+  it('should be possible to join an open call', async () => {
 
   });
 
