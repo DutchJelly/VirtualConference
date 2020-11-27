@@ -43,7 +43,15 @@ export const actions = {
                 commit('errorMsg', null)
             )
             .catch(({ response }) => {
-                commit('errorMsg', response.data.error)
+                console.log(response.data)
+                console.log(response.data.error)
+                if(response.data.error.isEmail) {
+                    commit('errorMsg', response.data.error.isEmail)
+                } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
+                    commit('errorMsg', response.data.error.length)
+                } else {
+                    commit('errorMsg', response.data.error)
+                }
             })
     },
     logout () {
