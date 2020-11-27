@@ -43,8 +43,6 @@ export const actions = {
                 commit('errorMsg', null)
             )
             .catch(({ response }) => {
-                console.log(response.data)
-                console.log(response.data.error)
                 if(response.data.error.isEmail) {
                     commit('errorMsg', response.data.error.isEmail)
                 } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
@@ -61,7 +59,6 @@ export const actions = {
 
 function saveToken(token, cb) {
     localStorage.setItem('token', token)
-    console.log("token saved")
     // succes
     cb('authenticated')
 }
