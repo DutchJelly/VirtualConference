@@ -107,3 +107,26 @@
 ### API Responses:
   - data.room wordt opgeslagen als conversation.room
   - data.message wordt opgeslagen als info
+  
+## Admin pagina
+
+### layout:
+  - Hoofdscherm
+    > deel van het scherm waarin de locatie van de plattegrondbestand kan worden geselecteerd
+  - Sidebar
+    > deel van het scherm waarin alle gebruikers van alle kamers staan. (hier voegen we geen interacties nog aan toe.)
+
+### Components:
+  - FileSelector component
+    > Hier wordt een file geselecteerd.
+  - Sidebar
+    > Lijst met alle gebruikers + zoekfunctie.
+ ### API Requests:
+ 
+  - TODO
+  
+
+ ### API Responses:
+ 
+  - TODO api voor het opslaan van de file.
+  - data.users wordt opgeslagen om in de sidebar te tonen.
