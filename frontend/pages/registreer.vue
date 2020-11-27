@@ -41,7 +41,7 @@
 
     <button class="register-button" @click.prevent="signup">Register</button>
 
-    <router-link :to="{name: 'index'}" class="login-button" tag="button">Back to login</router-link>
+    <nuxt-link :to="{name: 'index'}" class="login-button" tag="button">Back to login</nuxt-link>
 
     <div class="error-message" :class="error || !match ? 'opacity-100' : 'opacity-0'">
       {{ error }}
