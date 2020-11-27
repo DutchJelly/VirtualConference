@@ -43,8 +43,8 @@
 
     <nuxt-link :to="{name: 'index'}" class="login-button" tag="button">Back to login</nuxt-link>
 
-    <div class="error-message" :class="error || !match ? 'opacity-100' : 'opacity-0'">
-      {{ error }}
+    <div class="error-message" :class="error || !match || succes ? 'opacity-100' : 'opacity-0'">
+      {{ error }} {{ succes }}
       <div v-if="!match">passwords do not match</div>
     </div>
     </form>
@@ -68,6 +68,9 @@ export default {
     error: function() {
       return this.$store.state.errorMsg
     },
+    succes: function() {
+      return this.$store.state.succesMsg
+    },
     match() {
       return (this.registerForm.newPassword == this.registerForm.checkNewPassword)
     }
@@ -75,6 +78,9 @@ export default {
   watch: {
     error(oldVal, newVal) {
         if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+    },
+    succes(oldVal, newVal) {
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('succesMsg', null), 4000)
     }
   },
   methods: {
