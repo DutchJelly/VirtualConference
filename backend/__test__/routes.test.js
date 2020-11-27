@@ -1,8 +1,52 @@
 const request = require('supertest');
-const { app } = require('../src/routes');
-const { initDatabase } = require ('../src/entity');
+const { app, server } = require('../src/routes');
+const { initDatabase, closeDatabase } = require ('../src/entity');
 
-beforeAll(() => initDatabase());
+//Setup socketio
+const ioClient = require('socket.io-client');
+const serverAddr = server.listen().address();
+
+//Allow socketsCount sockets for testing.
+const sockets = [];
+const socketsCount = 3;
+
+beforeAll(async (done) => {
+  await initDatabase();
+  done();
+});
+
+afterAll(async (done) => {
+  await closeDatabase();
+  done();
+})
+
+beforeEach((done) => {
+  let cbCalledCounter = 0;
+  const cb = () => {
+    if(++cbCalledCounter === socketsCount)
+      done();
+  }
+
+  for(let i = 0; i < socketsCount; i++){
+    sockets[i] = ioClient.connect(`http://[${serverAddr.address}]:${serverAddr.port}`, {
+      'reconnection delay': 0,
+      'reopen delay': 0,
+      'force new connection': true,
+      transports: ['websocket'],
+    });
+    sockets[i].on('connect', () => cb());
+  }
+});
+
+afterEach((done) => {
+  for(let i = 0; i < socketsCount; i++){
+    if(sockets[i].connected){
+      sockets[i].disconnect();
+    }
+  }
+  done();
+});
+
 
 // import app from "../src/routes"
 describe('user handling', () => {
@@ -64,6 +108,8 @@ describe('roomhandling',  () => {
 
   let roomTesting1Res;
   let roomTesting2Res;
+
+  //NOTE: beforeAll() did not work so we just login users in the first 'it', and log them out in the last one.
 
   it('should return correct room data upon joining the same one', async () => {
 
