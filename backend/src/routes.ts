@@ -38,8 +38,7 @@ export const app = express();
 export const socketPort = process.env.SOCKET_PORT;
 export const apiPort = process.env.API_PORT;
 export const server = require("http").createServer(app);
-
-const io = socketio(server);
+export const io = socketio(server);
 
 app.use(
     cors({
@@ -70,11 +69,8 @@ const isDirectRequest = (req: DirectRequest | JoinRequest) => {
 io.on('connection', (socket) => {
     console.log(`[SocketIO:connection] A client with socket id ${socket.id} was connected.`);
     
-    socket.on("register", async (data) => {
+    socket.on('register', async (data) => {
         if(!data || !data.sessionKey) return;
-
-        if(process.env.SOCKET_LOGGING)
-            console.log(`[SocketIO:register] User "${data.sessionKey}" wants to authenticate on socket ${socket.id}.`);
         
         const user = await User.findOne({sessionKey: data.sessionKey});
         if(!user || user.expireDate <= Date.now()) return;
@@ -82,7 +78,19 @@ io.on('connection', (socket) => {
         socketMapping.set(user.id, socket);
 
         if(process.env.SOCKET_LOGGING)
-            console.log(`[SocketIO:register] Socket "${socket.id}" is now linked to the user "${user.email}".`)
+            console.log(`[SocketIO:register] Socket "${socket.id}" is now linked to the user "${user.email}".`);
+    });
+
+    socket.on('disconnect', () => {
+        socketMapping.keys()
+        for(const socketMapItem of socketMapping.entries()){
+            if(socketMapItem[1] === socket){
+                socketMapping.delete(socketMapItem[0]);
+                if(process.env.SOCKET_LOGGING)
+                    console.log(`[SocketIO:disconnect] User id:${socketMapItem[0]} disconnected with socket "${socket.id}".`);
+                return;
+            }
+        }
     });
 });
 
