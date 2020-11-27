@@ -8,4 +8,4 @@ async function main() {
     server.listen(socketPort, () => { console.log(`[SocketIO] Listening on localhost:${socketPort}`)});
 }
 
-main()
+main();
