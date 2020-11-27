@@ -10,6 +10,7 @@ import socketio, { Socket } from "socket.io";
 import randomstring from "randomstring";
 import crypto from "crypto"
 import { Handler } from "express"
+import { createServer } from "http"
 
 declare global {
     namespace Express {
@@ -37,8 +38,11 @@ env.config();
 export const app = express();
 export const socketPort = process.env.SOCKET_PORT;
 export const apiPort = process.env.API_PORT;
-export const server = require("http").createServer(app);
+export const server = createServer(app);
 export const io = socketio(server);
+
+//TODO add this to .env file, there were some issues with that with jest.
+const SOCKET_LOGGING = false;
 
 app.use(
     cors({
@@ -67,8 +71,8 @@ const isDirectRequest = (req: DirectRequest | JoinRequest) => {
 
 //Handle socket connections
 io.on('connection', (socket) => {
-    console.log(`[SocketIO:connection] A client with socket id ${socket.id} was connected.`);
-    
+    if(SOCKET_LOGGING)
+        console.log(`[SocketIO:connection] A client with socket id ${socket.id} was connected.`);
     socket.on('register', async (data) => {
         if(!data || !data.sessionKey) return;
         
@@ -77,7 +81,7 @@ io.on('connection', (socket) => {
 
         socketMapping.set(user.id, socket);
 
-        if(process.env.SOCKET_LOGGING)
+        if(SOCKET_LOGGING)
             console.log(`[SocketIO:register] Socket "${socket.id}" is now linked to the user "${user.email}".`);
     });
 
@@ -86,7 +90,7 @@ io.on('connection', (socket) => {
         for(const socketMapItem of socketMapping.entries()){
             if(socketMapItem[1] === socket){
                 socketMapping.delete(socketMapItem[0]);
-                if(process.env.SOCKET_LOGGING)
+                if(SOCKET_LOGGING)
                     console.log(`[SocketIO:disconnect] User id:${socketMapItem[0]} disconnected with socket "${socket.id}".`);
                 return;
             }
@@ -170,7 +174,7 @@ const loginRequired: Handler = async (req, res, next) => {
 
 	//Pass the user to the rest of the routes.
     req.user = user;
-    console.log(`successfully logged in user ${user.username}`);
+    // console.log(`successfully logged in user ${user.username}`);
 	next();
 }
 

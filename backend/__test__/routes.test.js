@@ -4,19 +4,20 @@ const { initDatabase, closeDatabase } = require ('../src/entity');
 
 //Setup socketio
 const ioClient = require('socket.io-client');
-const serverAddr = server.listen().address();
-
+let serverAddr;
 //Allow socketsCount sockets for testing.
 const sockets = [];
 const socketsCount = 3;
 
 beforeAll(async (done) => {
   await initDatabase();
+  serverAddr = server.listen().address();
   done();
 });
 
 afterAll(async (done) => {
   await closeDatabase();
+  server.close();
   done();
 })
 
@@ -109,11 +110,8 @@ describe('roomhandling',  () => {
   let roomTesting1Res;
   let roomTesting2Res;
 
-  //NOTE: beforeAll() did not work so we just login users in the first 'it', and log them out in the last one.
-
-  it('should return correct room data upon joining the same one', async () => {
-
-    const regResult = await request(app).post('/register').send({
+  beforeAll(async (next) => {
+    await request(app).post('/register').send({
       password: 'test1234',
       image: '123',
       email: 'roomtesting1@test.com',
@@ -133,13 +131,24 @@ describe('roomhandling',  () => {
       password: 'test1234',
       email: 'roomtesting2@test.com'
     })
+    next();
+  });
 
+  afterAll(async (next) => {
+    await request(app).post('/logout').send({
+      sessionKey: roomTesting1Res.body.sessionKey
+    });
+    await request(app).post('/logout').send({
+      sessionKey: roomTesting2Res.body.sessionKey
+    });
+    next();
+  });
 
+  it('should return correct room data upon joining the same one', async () => {
     const res = await request(app).post('/joinroom').send({
       sessionKey: roomTesting1Res.body.sessionKey,
       roomId: 'atestingroom'
     }) 
-    console.log(res.body);
     expect(res.statusCode).toEqual(200);
     expect(res.body.roomId).toEqual('atestingroom');
     expect(res.body.users).toEqual(expect.arrayContaining([expect.objectContaining({id: roomTesting1Res.body.id})]));
@@ -182,68 +191,79 @@ describe('roomhandling',  () => {
     expect(res2.body.users).toEqual(expect.arrayContaining([
       expect.objectContaining({id: roomTesting2Res.body.id}),
     ]));
-
-
-    await request(app).post('/logout').send({
-      sessionKey: roomTesting1Res.body.sessionKey
-    });
-    
-    await request(app).post('/logout').send({
-      sessionKey: roomTesting2Res.body.sessionKey
-    });
   });
 });
 
 
 describe('conversations', () => {
+  let conversationTesting1, conversationTesting2, conversationTestin3;
 
-  let roomTesting1Res, roomTesting2Res;
-
-  beforeAll(async () => {
+  beforeAll(async (done) => {
     //create another user for testing.
     await request(app).post('/register').send({
       password: 'test1234',
-      image: '',
-      email: 'roomtesting1@test.com',
-      username: 'roomtesting1'
+      image: '123',
+      email: 'conversationtesting1@test.com',
+      username: 'conversationtesting1'
     })
     await request(app).post('/register').send({
       password: 'test1234',
-      image: '',
-      email: 'roomtesting2@test.com',
-      username: 'roomtesting2'
+      image: '123',
+      email: 'conversationtesting2@test.com',
+      username: 'conversationtesting2'
     })
-    const roomTesting1Res = await request(app).post('/login').send({
+    await request(app).post('/register').send({
       password: 'test1234',
-      email: 'roomtesting1@test.com'
+      image: '123',
+      email: 'conversationtesting3@test.com',
+      username: 'conversationtesting3'
     })
-    const roomTesting2Res = await request(app).post('/login').send({
+    conversationTesting1 = await request(app).post('/login').send({
       password: 'test1234',
-      email: 'roomtesting2@test.com'
+      email: 'conversationtesting1@test.com'
+    })
+    conversationTesting2 = await request(app).post('/login').send({
+      password: 'test1234',
+      email: 'conversationtesting2@test.com'
+    })
+    conversationTesting3 = await request(app).post('/login').send({
+      password: 'test1234',
+      email: 'conversationtesting3@test.com'
     })
 
+    sockets[0].emit('register', {sessionKey: conversationTesting1.body.sessionKey});
+    sockets[1].emit('register', {sessionKey: conversationTesting2.body.sessionKey});
+    sockets[1].emit('register', {sessionKey: conversationTesting3.body.sessionKey});
+
     await request(app).post('/joinroom').send({
-      sessionKey: roomTesting1Res.body.sessionKey,
+      sessionKey: conversationTesting1.body.sessionKey,
+      roomId: 'atestingroom'
+    });
+    await request(app).post('/joinroom').send({
+      sessionKey: conversationTesting2.body.sessionKey,
+      roomId: 'atestingroom'
+    });
+    await request(app).post('/joinroom').send({
+      sessionKey: conversationTesting3.body.sessionKey,
       roomId: 'atestingroom'
     });
     
-    await request(app).post('/joinroom').send({
-      sessionKey: roomTesting2Res.body.sessionKey,
-      roomId: 'atestingroom'
-    });
+    done();
   });
 
-  afterAll(async () => {
+  afterAll(async (done) => {
     await request(app).post('/logout').send({
-      sessionKey: roomTesting1Res.body.sessionKey
+      sessionKey: conversationTesting1.body.sessionKey
     });
-    
     await request(app).post('/logout').send({
-      sessionKey: roomTesting2Res.body.sessionKey
+      sessionKey: conversationTesting2.body.sessionKey
     });
+    await request(app).post('/logout').send({
+      sessionKey: conversationTesting3.body.sessionKey
+    });
+    done();
   })
 
-  //we have to mess with sockets here...
   it('should be possible to send and accept conversation requests between users', async () => {
 
   });
