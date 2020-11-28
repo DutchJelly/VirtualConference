@@ -5,6 +5,18 @@
 
     <div class="register-prompt-item">
       <input
+        v-model="registerForm.newEmail"
+        type="text"
+        placeholder="Email"
+        name="newEmail"
+      />
+      <div class="icon-container">
+        <img class="icon" src="../static/icons/user.svg" alt="" srcset="">
+      </div>
+    </div>
+
+    <div class="register-prompt-item">
+      <input
         v-model="registerForm.newUsername"
         type="text"
         placeholder="Username"
@@ -12,6 +24,17 @@
       />
       <div class="icon-container">
         <img class="icon" src="../static/icons/user.svg" alt="" srcset="">
+      </div>
+    </div>
+
+    <div class="register-prompt-item">
+      <input
+        @change="onFileChange"
+        type="file"
+        name="newPicture"
+      />
+      <div class="icon-container">
+        <img class="icon" :src="image" >
       </div>
     </div>
 
@@ -57,9 +80,11 @@ export default {
 
   data () {
     return {
+      image: "",
       registerForm: {
         newUsername: "",
         newPassword: "",
+        newEmail: "",
         checkNewPassword: ""
       },
     };
@@ -85,18 +110,39 @@ export default {
   },
   methods: {
       signup() {
+        console.log(this.registerForm)
           if (this.registerForm.newPassword == this.registerForm.checkNewPassword ) {
               this.$store.dispatch({
                   type: 'signup',
                   username: this.registerForm.newUsername,
-                  password: this.registerForm.newPassword
+                  password: this.registerForm.newPassword,
+                  image: this.image,
+                  email: this.registerForm.newEmail
               })
               this.registerForm.newUsername = ""
               this.registerForm.newPassword = ""
+              this.image = ""
+              this.registerForm.newEmail = ""
               this.registerForm.checkNewPassword = ""
           } else {
             this.$store.commit('errorMsg', "passwords do not match")
           }
+      },
+      onFileChange(e) {
+        var files = e.target.files || e.dataTransfer.files;
+        if (!files.length)
+          return;
+        this.createImage(files[0]);
+      },
+      createImage(file) {
+        var image = new Image();
+        var reader = new FileReader();
+        var vm = this;
+
+        reader.onload = (e) => {
+          vm.image = e.target.result;
+        };
+        reader.readAsDataURL(file);
       }
   }
 };

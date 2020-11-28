@@ -39,15 +39,18 @@ export const actions = {
                 commit('errorMsg', response.data.error)
             })
     },
-    signup({ commit }, { username, password }) {
+    signup({ commit }, { username, password, image, email }) {
         axios
-            .post("http://localhost:5000/create_user", {
+            .post("http://localhost:5000/register", {
                 data: {
                     username,
-                    password
+                    password,
+                    image,
+                    email
                 },
             })
             .then(
+                console.log(username + password + image + email),
                 commit('succesMsg', "Your registration is successful"),
                 this.$router.push({path:'/'})
             )
