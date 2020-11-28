@@ -42,12 +42,10 @@ export const actions = {
     signup({ commit }, { username, password, image, email }) {
         axios
             .post("http://localhost:5000/register", {
-                data: {
-                    username,
-                    password,
-                    image,
-                    email
-                },
+                username: username,
+                password: password,
+                image: image,
+                email: email
             })
             .then(
                 console.log("into Then:"),
@@ -64,6 +62,7 @@ export const actions = {
                 console.log("password: " + password)
                 console.log("image: " + image)
                 console.log("email: " + email)
+                console.log(response)
                 if(response.data.error.isEmail) {
                     commit('errorMsg', response.data.error.isEmail)
                 } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
