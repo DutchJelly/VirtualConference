@@ -2,16 +2,23 @@ import axios from 'axios'
 
 export const state = () => ({
     loggedIn: false,
-    errorMsg: null
+    errorMsg: null,
+    succesMsg: null
 });
   
 export const mutations = {
     authenticated(state) {
         state.loggedIn = true
         state.errorMsg = null
+        state.succesMsg = null
     },
     errorMsg(state, e) {
         state.errorMsg = e
+        state.succesMsg = null
+    },
+    succesMsg(state, e) {
+        state.succesMsg = e
+        state.errorMsg = null
     }
 };
 
@@ -25,7 +32,8 @@ export const actions = {
                 },
             })
             .then(res => {saveToken(res.data.sessionKey, commit)
-                this.$router.push({name:'kamerview', query: {username}})
+                window.location.replace('/plattegrond')
+                //this.$router.push({name:'plattegrond', query: {username}})
             })//TODO change this to a simple path only, this is not secure
             .catch(({ response }) => {
                 commit('errorMsg', response.data.error)
@@ -40,10 +48,17 @@ export const actions = {
                 },
             })
             .then(
-                commit('errorMsg', null)
+                commit('succesMsg', "Your registration is successful"),
+                this.$router.push({path:'/'})
             )
             .catch(({ response }) => {
-                commit('errorMsg', response.data.error)
+                if(response.data.error.isEmail) {
+                    commit('errorMsg', response.data.error.isEmail)
+                } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
+                    commit('errorMsg', response.data.error.length)
+                } else {
+                    commit('errorMsg', response.data.error)
+                }
             })
     },
     logout () {
@@ -53,7 +68,6 @@ export const actions = {
 
 function saveToken(token, cb) {
     localStorage.setItem('token', token)
-    console.log("token saved")
     // succes
     cb('authenticated')
 }

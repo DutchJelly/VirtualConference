@@ -33,11 +33,11 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 
-      <router-link to="registreer" class="register-button" tag="button">
+      <nuxt-link to="registreer" class="register-button" tag="button">
           Nog geen account? klik hier
-      </router-link>
-      <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
-        {{ error }}
+      </nuxt-link>
+      <div class="message" :class="error || succes ? 'opacity-100' : 'opacity-0'">
+        {{ error }} {{ succes }}
       </div>
     </form>
   </main>
@@ -57,11 +57,17 @@ export default {
   computed: {
     error: function() {
       return this.$store.state.errorMsg
+    },
+    succes: function() {
+      return this.$store.state.succesMsg
     }
   },
   watch: {
     error(oldVal, newVal) {
         if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+    },
+    succes(oldVal, newVal) {
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('succesMsg', null), 4000)
     }
   },
   methods: {
