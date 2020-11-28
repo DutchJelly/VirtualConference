@@ -50,11 +50,20 @@ export const actions = {
                 },
             })
             .then(
-                console.log(username + password + image + email),
+                console.log("into Then:"),
+                console.log("username: " + username),
+                console.log("password: " + password),
+                console.log("image: " + image),
+                console.log("email: " + email),
                 commit('succesMsg', "Your registration is successful"),
                 this.$router.push({path:'/'})
             )
             .catch(({ response }) => {
+                console.log("into catch:")
+                console.log("username: " + username)
+                console.log("password: " + password)
+                console.log("image: " + image)
+                console.log("email: " + email)
                 if(response.data.error.isEmail) {
                     commit('errorMsg', response.data.error.isEmail)
                 } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
