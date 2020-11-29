@@ -18,7 +18,7 @@ export class Room extends BaseEntity {
     @OneToMany(() => RoomParticipant, participant => participant.room)
     members!: RoomParticipant[];
 
-    allRooms() {
+    toRoomData() {
         return {
             id: this.roomId,
             conferenceId: this.conferenceId,
