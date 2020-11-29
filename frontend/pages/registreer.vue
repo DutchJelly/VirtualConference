@@ -110,7 +110,6 @@ export default {
   },
   methods: {
       signup() {
-        console.log(this.registerForm)
           if (this.registerForm.newPassword == this.registerForm.checkNewPassword ) {
               this.$store.dispatch({
                   type: 'signup',

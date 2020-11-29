@@ -47,22 +47,11 @@ export const actions = {
                 image: image,
                 email: email
             })
-            .then(
-                console.log("into Then:"),
-                console.log("username: " + username),
-                console.log("password: " + password),
-                console.log("image: " + image),
-                console.log("email: " + email),
-                commit('succesMsg', "Your registration is successful"),
-                this.$router.push({path:'/'})
-            )
+            .then(res => {
+                commit('succesMsg', `${res.data.message}`)
+                this.$router.push({ path: "/"})
+            })
             .catch(({ response }) => {
-                console.log("into catch:")
-                console.log("username: " + username)
-                console.log("password: " + password)
-                console.log("image: " + image)
-                console.log("email: " + email)
-                console.log(response)
                 if(response.data.error.isEmail) {
                     commit('errorMsg', response.data.error.isEmail)
                 } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
