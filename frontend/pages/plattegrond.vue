@@ -13,13 +13,20 @@ export default {
             let layers = iframe.contentDocument.querySelectorAll('g')
             layers.forEach(element => {
                 if(element.getAttribute("inkscape:label")) {
-                    element.addEventListener('click', function(event) {
-                        alert(element.id + " " + element.getAttribute("inkscape:label"))
-                    })
+                    element.addEventListener("click", joinRoom)
                 }
             });
         });
-    }
+        function joinRoom(event) {
+            console.log(window.localStorage.getItem('token'))
+            this.$store.dispatch({
+                type: 'joinRoom',
+                sessionKey: window.localStorage.getItem('token'),
+                roomId: this.id
+            })
+            console.log(this.id)
+        }
+    },
 }
 </script>
 <style>
