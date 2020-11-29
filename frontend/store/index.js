@@ -23,13 +23,11 @@ export const mutations = {
 };
 
 export const actions = {
-    login({ commit }, { username, password }) {
+    login({ commit }, { email, password }) {
         axios
             .post("http://localhost:5000/login", {
-                data: {
-                    username,
-                    password
-                },
+                email: email,
+                password: password
             })
             .then(res => {saveToken(res.data.sessionKey, commit)
                 window.location.replace('/plattegrond')

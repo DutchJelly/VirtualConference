@@ -4,10 +4,9 @@
     <form class="login-prompt">
       <div class="login-prompt-item">
         <input
-          v-model="loginForm.username"
+          v-model="loginForm.email"
           type="text"
-          placeholder="Username"
-          name="currentUsername"
+          placeholder="Email"
         />
         <div class="icon-container">
           <img class="icon" src="../static/icons/user.svg" alt="" srcset="" />
@@ -19,7 +18,6 @@
           v-model="loginForm.password"
           type="password"
           placeholder="Password"
-          name="currentPassword"
         />
         <div class="icon-container">
           <img
@@ -49,8 +47,8 @@ export default {
   data() {
     return {
       loginForm: {
-        username: "",
-        password: "",
+        email: "",
+        password: ""
       }
     };
   },
@@ -72,12 +70,14 @@ export default {
   },
   methods: {
     login() {
+        console.log(this.loginForm.email)
+        console.log(this.loginForm.password)
 				this.$store.dispatch({
             type: 'login',
-            username: this.loginForm.username,
+            email: this.loginForm.email,
             password: this.loginForm.password
         })
-				this.loginForm.username = ""
+				this.loginForm.email = ""
         this.loginForm.password = ""
     }
   }
