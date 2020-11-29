@@ -70,8 +70,6 @@ export default {
   },
   methods: {
     login() {
-        console.log(this.loginForm.email)
-        console.log(this.loginForm.password)
 				this.$store.dispatch({
             type: 'login',
             email: this.loginForm.email,

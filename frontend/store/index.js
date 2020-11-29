@@ -59,8 +59,25 @@ export const actions = {
                 }
             })
     },
+    joinRoom({ commit }, { sessionKey, roomId } ) {
+        axios
+            .post("http://localhost:5000/joinRoom", {
+                sessionKey: sessionKey,
+                roomId: roomId
+            })
+            .then(res => {
+                console.log("into then")
+                console.log(res)
+                commit('errorMsg', "testing")
+            })
+            .catch(({ response }) => {
+                console.log("into catch")
+                console.log(response)
+                commit('errorMsg', "testing")
+            })
+    },
     logout () {
-
+        localStorage.removeItem(token)
     }
 };
 
