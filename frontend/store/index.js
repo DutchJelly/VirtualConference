@@ -66,14 +66,16 @@ export const actions = {
                 roomId: roomId
             })
             .then(res => {
-                console.log("into then")
-                console.log(res)
-                commit('errorMsg', "testing")
+                console.log(res.data)
+                this.$router.push({ name: "kamerview"})
             })
             .catch(({ response }) => {
-                console.log("into catch")
-                console.log(response)
-                commit('errorMsg', "testing")
+                if(response.error){
+                    commit('errorMsg', response.error)
+                } else {
+                    commit('errorMsg', "a problem occured please try to login again")
+                }
+                this.$router.push({ path: "/" })
             })
     },
     logout () {

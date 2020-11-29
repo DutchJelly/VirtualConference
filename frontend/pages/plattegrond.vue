@@ -16,6 +16,7 @@ export default {
                 if(element.getAttribute("inkscape:label")) {
                     element.addEventListener("click", function() {
                         console.log("into function")
+                        console.log(window.localStorage.getItem('token'))
                         console.log(element.id)
                         that.$store.dispatch({
                             type: 'joinRoom',
