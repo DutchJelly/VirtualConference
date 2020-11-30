@@ -7,7 +7,7 @@
                 :groups="groups" 
                 :gridCols=6
                 :gridSpacing=1
-                :onUserClick="conversations().checkType"
+                :onUserClick="conversations().startConversation"
                 filter=""
                 ref="userspace"
             />
@@ -31,13 +31,14 @@
             :openConference="activeConference"
             :typeConversation="this.conversation.type"
             :isModerator="this.isModerator"
+            :onLeaveConference="leaveConversation()"
         />
 
         <ConformationPrompt 
             class="absolute-center" 
             v-if="conversationRequest.pending === true"
-            :onAccept="conversations().acceptRequest"
-            :onDecline="conversations().declineRequest"
+            :onAccept="() => conversations().requestResponse(true)"
+            :onDecline="() => conversations().requestResponse(false)"
             :user="conversationRequest.user" 
             :typeConversation="this.conversation.type"
         />
@@ -45,9 +46,9 @@
         <TypeConversationPrompt 
             class="absolute-center" 
             v-if="conversationRequest.active === true"
-            :onClosedConversation="closedConversation"
-            :onOpenConversation="openConversation"
-            :onPrivateConversation="privateConversation" 
+            :onClosedConversation="() => sendRequest('closed')"
+            :onOpenConversation="() => sendRequest('open')"
+            :onPrivateConversation="() => sendRequest('private')" 
         />          
     </div>
 </template>
@@ -63,18 +64,25 @@ export default {
     },
     data() {
         return {
-            username: this.$route.query.username,
             info: "", //when updating info the timed message box will automatically update
             users: [],
             groups: [],
             socket: null,
             activeConference: false, //Showing conference window if activeConference is true.
-            typeConversationUser: "", //The username which the current user is starting a conversation with.
+            //TODO: ergens moet de moderator gecheckt worden
             isModerator: false, //If the current user is a moderator.
+
+            //New
+            username: this.$route.query.username,
+            userId: this.$route.query.username, //TODO: moet nog naar user.id veranderen
+            roomId: this.$route.params.id, //TODO: is dit nodig?
+            roomName: this.$route.params.name, //TODO: is dit nodig?
+            groupId: undefined,
+            sentToId: undefined,
+            requestId: undefined,
 
             conversation: {
                 room: "",
-                user: "",
                 type: "",
             },
             
@@ -89,108 +97,81 @@ export default {
         };
     },
     async mounted() {
-        let response = undefined;
-        try {
-            response = await this.$axios(`http://localhost:5000/testlogin/${this.username}`);
-        } catch(error) {
-            console.log(error);
-        }
-
         this.socket = this.$nuxtSocket({name: "home"});
 
-        //Checks which type conversation is running and which function and/or component should be active.
-        this.socket.on("typeConversation", (data) => {
-            if(!data || !data.withwho) return;
+        let sessionKey = window.localStorage.getItem('token');
+        //The server doesn't know what user is using this socket, tell the server.
+        this.socket.emit("register", {sessionKey});
 
-            if(data.type === "private") {
-                this.info = `${data.withwho} is already in a private conversation, you cannot join`;
-            } else if(data.type === "open") {
-                this.info = "It is an open conversation, you can join";
-                this.typeConversationUser = data.withwho;
-                this.joinOpenConversation();
-            } else if(data.type === "closed") {
-                this.info = "It is a closed conversation, you are asking permission to join";
-                this.typeConversationUser = data.withwho;
-                this.joinClosedConversation();
-            } else if(data.type === "none") {
-                this.conversationRequest.active = true;
-                this.typeConversationUser = data.withwho;
-                this.info = `You can chose which type conversation you want to start with ${data.withwho}`;
-            }
-        });
+        //TODO: snap nog niet helemaal wat we met deze gegevens moeten doen
+        this.socket.on("directrequest", (data) => {
+            if(!data || !data.id || !data.type || !data.senderId || !data.sentToId) return;
 
-        //Incoming socket events.
-        this.socket.on("requestConversation", (data) => {
-            if(!data || !data.user) return;
-
-            if(this.conversationRequest.pending) {
-                if(!this.conversationRequest.pendingUsers.includes(this.conversationRequest.user)){
-                    this.conversationRequest.pendingUsers.push(data.user);
-                    this.info = `You received an conversation request from ${data.user}.`;
+            if(this.userId === data.sentToId){
+                this.conversationRequest.user = data.senderId;
+                if(this.conversationRequest.pending) {
+                    if(!this.conversationRequest.pendingUsers.includes(this.conversationRequest.user)){
+                        this.conversationRequest.pendingUsers.push();
+                        this.info = `You received an conversation request from ${requestSentToId}.`;
+                    }
+                    return;
                 }
-                return;
+                this.conversation.type = data.type;
+                this.requestId = data.id;
+                this.conversationRequest.pending = true;
+                this.info = `You received an conversation request from ${requestSentToId}.`;
             }
-            this.conversation.type = data.type;
-            this.conversationRequest.user = data.user;
-            this.conversationRequest.pending = true;
-            this.info = `You received an conversation request from ${data.user}.`;
-        });
-
-        //Temporary way to handle users 'loggin on'.
-        this.socket.on("testlogin", (data) => {
-            if(!data || !data.online) return;
-            
-            this.users = [];
-            for(let online of data.online) {
-                //Users can't log in twice.
-                this.users.push({user: online, id: online});
-            }
-        });
-
-        //Showing conference window on the page of the user who send a request.
-        this.socket.on("requestAcceptedTo", (data) => {
-            this.conversation.user = data.user;
-            this.conversation.room = data.room;
-            this.activeConference = true;
-            this.info = `${data.user} accepted your conversation request`;
-        });
-
-        //Showing conference window on the page of the user who accept a request.
-        this.socket.on("requestAcceptedFrom", (data) => {
-            this.conversation.user = data.withwho;
-            this.conversation.room = data.room;
-            this.activeConference = true;
-            this.info = `You accepted conversation request from ${data.withwho}`;
-        });
-
-        //Showing conference window on the page of the user who joined an already existed open conversation.
-        this.socket.on("joinOpenConversation", (data) => {
-            this.conversation.user = data.user;
-            this.conversation.room = data.room;
-            this.activeConference = true;
-            this.info = `You joined open conversation`;
         });
 
         //Showing message on the page of the user who's request is been declined.
         this.socket.on("requestDeclined", (data) => {
-            this.info = `${data.user} declined your conversation request`;
+            if(!data || !data.message) return;
+            this.info = `${data.message}`;
         });
 
-        //Removing conference on the page of the user who has leaved the conversation.
-        this.socket.on("leaveConversation", (data) => {
-            this.info = `${data.user} leaves conversation`;
-            if(data.user === this.username){
-                this.activeConference = false;
+        //TODO: weet niet of dit klopt
+        //If the request is accepted, show the conference window
+        this.socket.on("requestaccepted", (data) => {
+            if(!data || !data.groupId || !data.roomCode || !data.memberIds || !data.typeConversation) return;
+            
+            for(let member in data.memberIds){
+                if(member === this.userId && !this.activeConference){
+                    this.conversation.room = data.roomCode;
+                    this.conversation.type = data.typeConversation;
+                    this.groupId = data.groupId;
+                    this.activeConference = true;
+                }
             }
         });
 
-        //The server doesn't know what user is using this socket, tell the server.
-        this.socket.emit("register", {username: this.username});
+        //TODO: de backend was nog niet klaar
+        //deze emit wordt nog niet gedaan
+        //maar staat wel in de API layout
+        //snap niet helemaal wat hier moet gebeuren
+        this.socket.on("groupMemberUpdate", (data) => {
+            if(!data || !data.groupId || !data.memberIds) return;
+            for(let member in data.memberIds){
+                if(member === this.userId){
+                    self.info = "A new member joined or leaved the conversation";
+                }
+            }
+        });
 
-        for(let online of response.data.online){
-            this.users.push({user: online, id: online});
-        }
-        this.groups = response.data.groups;
+        //TODO: snap nog niet helemaal wat hier moet gebeuren
+        //Wordt niet in de API layout gespecificieerd
+        this.socket.on("joinrequest", (data) => {
+            if(!data || !data.groupId || !data.memberIds) return;
+            
+            if(this.userId === data.senderId){
+
+            }
+        });
+
+        //TODO: de backend was nog niet klaar
+        //Staat in de API layout, maar niet in de backend
+        this.socket.on("conversationrequest", (data) => {
+            //TODO: nog iets doen met data.requestId, data.User.userId, data.User.userName, data.conversationType
+        })
     },
     methods: {        
         handleChange(event) {
@@ -200,157 +181,135 @@ export default {
 
         //Nested functions are not possible. This is the next best thing.
         conversations: function() {
-            //We have to save the 'this' in a variable because the context
-            //is different for these nested functions.
+            //We have to save the 'this' in a variable because the context is different for these nested functions.
             let self = this;
             
             //Return all functions as json.
             return {
-                //Checks if withWho is already in a conversation. If the user is already in a conversation, checks which type conversation it is.
-                checkType: async function(withWho) {
-                    //TODO: sessionkey meesturen
-                    console.log("send request");
-                    if(self.username === withWho.user) {
+                //The user try to start a conversation with an another user (withWho)
+                startConversation: function(withWho) {
+                    console.log("start conversation");
+                    
+                    //TODO: moet nog veranderen naar user.id
+                    self.sentToId = withWho.user;
+                    if(self.userId === self.sentToId) {
                         self.info = "you cannot invite yourself to a conversation";
                         return;
                     };
-                    try {
-                        await self.$axios(`http://localhost:5000/typeconversation/${self.username}/${withWho.user}`);
-                    } catch(error) {
-                        self.info = error;
-                        console.log("error send request");
-                    }
+                    self.conversationRequest.active = true;
                 },
-                
-                //The request which is send to the user from withWho is been accepted.
-                acceptRequest: async function(withWho){
-                    //TODO: sessionkey meesturen
+
+                //The request which is send to the user from other user is been accepted or declined.
+                requestResponse: async function(res){
+                    let sessionKey = window.localStorage.getItem('token');
+                    console.log(`sessionkey: ${sessionKey}`);
                     console.log("accept request");
                     let response = undefined;
                     try {
-                        response = await self.$axios(`http://localhost:5000/acceptconversation/${self.username}/${withWho}`);
+                        response = await self.$axios("http://localhost:5000/conversationrequestresponse", {
+                            sessionKey,
+                            requestId: self.requestId,
+                            response: res
+                        });
 
-                        self.conversationRequest.pending = false;
-                        self.conversationRequest.user = "none";
+                        if (res === true){
+                            self.conversation.room = response.data.roomCode;
 
-                        self.conversation.user = withWho;
-                        self.conversation.room = response.data.room;
+                            //Automatically decline all other requests that were sent after the accepted one.
+                            for(let pendingUser in self.conversationRequest.pendingUsers) this.declineRequest(pendingUser);
+                            self.conversationRequest.pendingUsers = [];
 
-                        //Automatically decline all other requests that were sent after the accepted one.
-                        for(let pendingUser in self.conversationRequest.pendingUsers){
-                            this.declineRequest(pendingUser);
+                            //TODO: nog iets doen met de callData
+                        } else {
+                            self.info = response.data.message;
+                            if(self.conversationRequest.pendingUsers.length > 0){
+                                self.conversationRequest.user = self.conversationRequest.pendingUsers[0];
+                                self.conversationRequest.pendingUsers.shift();
+                            };
                         }
-                        self.conversationRequest.pendingUsers = [];
-                        
+                        self.conversationRequest.pending = false;
+                        self.conversationRequest.user = "none";
+
                     } catch(error) {
                         self.conversationRequest.pending = false;
                         self.conversationRequest.user = "none";
                         self.info = error;
-                        console.log("error accept request");
+                        console.log("error request");
                     }
-                },
-
-                //The request which is send to the user from withWho is been declined.
-                declineRequest: async function(withWho) {
-                    //TODO: sessionkey meesturen
-                    console.log("decline request");
-                    let response = undefined;
-                    try {
-                        response = await self.$axios(`http://localhost:5000/declineconversation/${self.username}/${withWho}`);
-                        self.info = response.data.message;
-                        if(self.conversationRequest.pendingUsers.length > 0){
-                            self.conversationRequest.user = self.conversationRequest.pendingUsers[0];
-                            self.conversationRequest.pendingUsers.shift();
-                            return;
-                        };
-                        self.conversationRequest.pending = false;
-                        self.conversationRequest.user = "none";
-                    } catch(error) {
-                        self.info = error;
-                        console.log("error decline request");
-                    }                  
-                }       
+                }     
             }
         },
-
-        //Send a request to typeConversationUser from the current user to start a closed conversation.
-        closedConversation: async function() {
-            //TODO: sessionkey meesturen
+        //Send a request to the user
+        sendRequest: async function(type) {
             let self = this;
+            let sessionKey = window.localStorage.getItem('token');
+            console.log(`sessionkey: ${sessionKey}`);
+
             let response = undefined;
-            console.log("closed conversation");
+            console.log("request");
             try {
-                self.conversation.type = "closed";
+                self.conversation.type = type;
                 self.conversationRequest.active = false;
-                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
+                response = await self.$axios("http://localhost:5000/requestconversation", {
+                    sessionKey,
+                    userId: self.sentToId,
+                    conversationType: type 
+                });
                 self.info = response.data.message;
             } catch(error) {
                 self.info = error;
-                console.log("error closed conversation");
+                console.log("error request");
             }
         },
-
-        //Send a request to typeConversationUser from the current user to start a open conversation.
-        openConversation: async function() {
-            //TODO: sessionkey meesturen
+        //Join an existing group conversation
+        //TODO: voor de backend is nog geen test geschreven
+        joinConversation: async function(group) {
+            let sessionKey = window.localStorage.getItem('token');
+            console.log(`sessionkey: ${sessionKey}`);
             let self = this;
             let response = undefined;
-            console.log("open conversation");
+            console.log("join conversation");
             try {
-                self.conversation.type = "open";
-                self.conversationRequest.active = false;
-                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
-                self.info = response.data.message;
+                response = await self.$axios("http://localhost:5000/joinconversation", {
+                    sessionKey,
+                    groupId: group.group.id
+                });
+                //TODO: nog iets doen met response.data.memberIds
+                //TODO: checken of het klopt
+                if(!response || !response.data){
+                    self.info = "response data is not defined";
+                    return;
+                }
+                if(!response.data.message){
+                    if(!response.data.groupId || !response.data.roomCode ||
+                    !response.data.memberIds || !response.data.typeConversation) return;
+
+                    if(response.data.typeConversation === "open"){
+                        self.groupId = response.data.groupId;
+                        self.conversation.room = response.data.roomCode;
+                        self.activeConference = true;
+                    }
+                } else {
+                    self.info = response.data.message;
+                }
             } catch(error) {
                 self.info = error;
-                console.log("error open conversation");
+                console.log("error join conversation");
             }
         },
-
-        //Send a request to typeConversationUser from the current user to start a private conversation.
-        privateConversation: async function() {
-            //TODO: sessionkey meesturen
-            let self = this;
-            let response = undefined;
-            console.log("private conversation");
+        //The user leaves the conversation
+        leaveConversation: async function() {
+            let sessionKey = window.localStorage.getItem('token');
+            console.log(`sessionkey: ${sessionKey}`);
             try {
-                self.conversation.type = "private";
-                self.conversationRequest.active = false;
-                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
-                self.info = response.data.message;
+                await self.$axios("http://localhost:5000/leaveconversation", {
+                    sessionKey,
+                    groupId: this.groupId,
+                });
+                this.activeConference = false;
             } catch(error) {
                 self.info = error;
-                console.log("error private conversation");
-            }
-        },
-
-        //Join an open conversation with typeConversationUser.
-        joinOpenConversation: async function() {
-            //TODO: sessionkey meesturen
-            let self = this;
-            console.log("join open conversation");
-            try {
-                self.conversation.type = "open";
-                await self.$axios(`http://localhost:5000/joinopenconversation/${self.username}/${self.typeConversationUser}`);
-            } catch(error) {
-                self.info = error;
-                console.log("error join open conversation");
-            }
-        },
-
-        //Join a closed conversation with typeConversationUser by sending a request to the typeConversationUser.
-        joinClosedConversation: async function() {
-            //TODO: sessionkey meesturen
-            let self = this;
-            let response = undefined;
-            console.log("join closed conversation");
-            try {
-                self.conversation.type = "closed";
-                response = await self.$axios(`http://localhost:5000/requestconversation/${self.username}/${self.typeConversationUser}/${self.conversation.type}`);
-                self.info = response.data.message;
-            } catch(error) {
-                self.info = error;
-                console.log("error join closed conversation");
+                console.log("error leave conversation");
             }
         }
     }

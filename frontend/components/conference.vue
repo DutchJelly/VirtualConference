@@ -1,13 +1,13 @@
 <template>
     <div class="meet-container" v-if="openConference === true">
         <div id="leaveRoom" ref="leaveRoom" v-if="joinedRoom === true">
-            <button class="leaveButton" style="vertical-align:middle" v-on:click="onLeaveRoom">
+            <button class="leaveButton" style="vertical-align:middle" v-on:click="onLeaveRoom" @click.prevent="onLeaveConversation()">
                 <span>Leave
                 </span>
             </button>
         </div>
         <div id="closeRoom" ref="closeRoom" v-if="closeRoom === true">
-            <button class="closeButton" style="vertical-align:middle" v-on:click="onCloseRoom">
+            <button class="closeButton" style="vertical-align:middle" v-on:click="onCloseRoom" @click.prevent="onLeaveConversation()">
                 <span>Close
                 </span>
             </button>
@@ -43,6 +43,7 @@ export default {
         openConference: Boolean,
         typeConversation: String,
         isModerator: Boolean,
+        onLeaveConversation: Function,
     },
     computed: {
         jitsiOptions() {
@@ -125,7 +126,6 @@ export default {
             try {
                 this.joinedRoom = false; //Show the button with 'Leave'.
                 this.$refs.jitsiRef.removeJitsiWidget();
-                await self.$axios(`http://localhost:5000/leaveconversation/${this.username}`);
             } catch(error) {
                 console.log(error);
                 console.log("error leave room");
@@ -137,7 +137,6 @@ export default {
             try {
                 this.closeRoom = false; //Show the button with 'Close'.
                 this.$refs.jitsiRef.removeJitsiWidget();
-                await self.$axios(`http://localhost:5000/leaveconversation/${this.username}`);
             } catch(error) {
                 console.log(error);
                 console.log("error close room");
