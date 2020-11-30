@@ -1,6 +1,6 @@
 const request = require('supertest');
 const { app, server } = require('../src/routes');
-const { initDatabase, closeDatabase } = require ('../src/entity');
+const { initDatabase, closeDatabase } = require('../src/entity');
 
 //Setup socketio
 const ioClient = require('socket.io-client');
@@ -24,11 +24,11 @@ afterAll(async (done) => {
 beforeEach((done) => {
   let cbCalledCounter = 0;
   const cb = () => {
-    if(++cbCalledCounter === socketsCount)
+    if (++cbCalledCounter === socketsCount)
       done();
   }
 
-  for(let i = 0; i < socketsCount; i++){
+  for (let i = 0; i < socketsCount; i++) {
     sockets[i] = ioClient.connect(`http://[${serverAddr.address}]:${serverAddr.port}`, {
       'reconnection delay': 0,
       'reopen delay': 0,
@@ -40,8 +40,8 @@ beforeEach((done) => {
 });
 
 afterEach((done) => {
-  for(let i = 0; i < socketsCount; i++){
-    if(sockets[i].connected){
+  for (let i = 0; i < socketsCount; i++) {
+    if (sockets[i].connected) {
       sockets[i].disconnect();
     }
   }
@@ -60,7 +60,7 @@ describe('user handling', () => {
         image: 'anImage',
         email: 'test@test.com'
       });
-    if(res.statusCode === 200)
+    if (res.statusCode === 200)
       expect(res.body.message).toBeDefined();
     else expect(res.body.error).toBeDefined();
   })
@@ -105,7 +105,7 @@ describe('user handling', () => {
 })
 
 
-describe('roomhandling',  () => {
+describe('roomhandling', () => {
 
   let roomTesting1Res;
   let roomTesting2Res;
@@ -148,10 +148,10 @@ describe('roomhandling',  () => {
     const res = await request(app).post('/joinroom').send({
       sessionKey: roomTesting1Res.body.sessionKey,
       roomId: 'atestingroom'
-    }) 
+    })
     expect(res.statusCode).toEqual(200);
     expect(res.body.roomId).toEqual('atestingroom');
-    expect(res.body.users).toEqual(expect.arrayContaining([expect.objectContaining({id: roomTesting1Res.body.id})]));
+    expect(res.body.users).toEqual(expect.arrayContaining([expect.objectContaining({ id: roomTesting1Res.body.id })]));
     expect(res.body.groups.length).toEqual(0);
   });
 
@@ -167,8 +167,8 @@ describe('roomhandling',  () => {
     expect(res.statusCode).toEqual(200);
     expect(res.body.roomId).toEqual('atestingroom');
     expect(res.body.users).toEqual(expect.arrayContaining([
-      expect.objectContaining({id: roomTesting1Res.body.id}),
-      expect.objectContaining({id: roomTesting2Res.body.id})
+      expect.objectContaining({ id: roomTesting1Res.body.id }),
+      expect.objectContaining({ id: roomTesting2Res.body.id })
     ]));
     expect(res.body.groups.length).toEqual(0);
   });
@@ -186,10 +186,10 @@ describe('roomhandling',  () => {
     });
 
     expect(res2.body.users).not.toEqual(expect.arrayContaining([
-      expect.objectContaining({id: roomTesting1Res.body.id}),
+      expect.objectContaining({ id: roomTesting1Res.body.id }),
     ]));
     expect(res2.body.users).toEqual(expect.arrayContaining([
-      expect.objectContaining({id: roomTesting2Res.body.id}),
+      expect.objectContaining({ id: roomTesting2Res.body.id }),
     ]));
   });
 });
@@ -260,13 +260,13 @@ describe('conversations', () => {
   })
 
   it('should be possible to send and accept conversation requests between users', async (done) => {
-    
-    sockets[0].emit('register', {sessionKey: conversationTesting1.body.sessionKey});
-    sockets[1].emit('register', {sessionKey: conversationTesting2.body.sessionKey});
-    sockets[2].emit('register', {sessionKey: conversationTesting3.body.sessionKey});
+
+    sockets[0].emit('register', { sessionKey: conversationTesting1.body.sessionKey });
+    sockets[1].emit('register', { sessionKey: conversationTesting2.body.sessionKey });
+    sockets[2].emit('register', { sessionKey: conversationTesting3.body.sessionKey });
 
     sockets[1].on('directrequest', async (data) => {
-      
+
       sockets[0].on('requestaccepted', (data) => {
 
         expect(data.memberIds).toHaveLength(2);
@@ -290,7 +290,7 @@ describe('conversations', () => {
         requestId: data.id,
         response: true
       });
-      if(conversationResponseRes.statusCode === 400)
+      if (conversationResponseRes.statusCode === 400)
         console.error(`received error: ${conversationResponseRes.body.error}`);
 
       expect(conversationResponseRes.body.memberIds).toHaveLength(2);
@@ -308,7 +308,7 @@ describe('conversations', () => {
       conversationType: 'open'
     });
 
-    if(res.statusCode === 400) console.log(res.body);
+    if (res.statusCode === 400) console.log(res.body);
     expect(res.statusCode).toEqual(200);
     expect(res.body.message).toBeDefined();
   });
@@ -319,9 +319,9 @@ describe('conversations', () => {
 
   it('should be possible to leave conversations', async (done) => {
 
-    sockets[0].emit('register', {sessionKey: conversationTesting1.body.sessionKey});
-    sockets[1].emit('register', {sessionKey: conversationTesting2.body.sessionKey});
-    sockets[2].emit('register', {sessionKey: conversationTesting3.body.sessionKey});
+    sockets[0].emit('register', { sessionKey: conversationTesting1.body.sessionKey });
+    sockets[1].emit('register', { sessionKey: conversationTesting2.body.sessionKey });
+    sockets[2].emit('register', { sessionKey: conversationTesting3.body.sessionKey });
 
 
     const leaveRes1 = await request(app).post('/leaveconversation').send({
@@ -336,19 +336,19 @@ describe('conversations', () => {
     sockets[0].on('roomupdate', (data) => {
       expect(data.groups.memberIds.length).toHaveLength(0);
       //TODO, this should be called, write done() here...
+      done();
     });
 
     const leaveRes3 = await request(app).post('/leaveconversation').send({
       sessionKey: conversationTesting3.body.sessionKey,
     });
-    expect(leaveRes3.statusCode).toEqual(200);   
-    done();
+    expect(leaveRes3.statusCode).toEqual(200);
   });
 
   it('should not be possible to accept nonexisting requests', async (done) => {
     done();
   });
-  
+
 });
 
 
