@@ -154,12 +154,12 @@ const leaveRooms = async (user: User, submitUpdate: boolean) => {
 }
 
 /**
- * @api {Function} - LoginRequired
+ * @api {Function} - LoginRequired 
  * @apiDescription Checks if the session key received from the frontend, exists in the database. If so, the user object will be set to the correct user. This function must be used in a pipeline.
  * @apiName loginRequired
  * @apiGroup Functions
  * @apiSuccess {User} user Sets user to corresponding user of sessionkey.
- * @apiError {loginError: string} loginError invalid session was found.
+ * @apiError {loginError} string loginError invalid session was found.
  */
 const loginRequired: Handler = async (req, res, next) => {
     const sessionKey = req.body.sessionKey;
@@ -199,7 +199,7 @@ const roomRequired: Handler = async (req, res, next) => {
 }
 
 /**
- * @api {post} /register
+ * @api {post} /register /register
  * @apiDescription Create a new user for the database.
  * @apiName Register
  * @apiGroup User
@@ -209,13 +209,13 @@ const roomRequired: Handler = async (req, res, next) => {
  * @apiParam {string} image the profile image
  * @apiParam {string} email a unique email adress
  *
- * @apiSuccess {message: string} message The username with which an account has been created will be returned.
+ * @apiSuccess {string} message The username with which an account has been created will be returned.
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 201 OK
  *      {
  *          "message": "Created new user with username test@test.com."
  *      }
- * @apiError {error: string} error could not create the account
+ * @apiError {string} error could not create the account
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -382,9 +382,6 @@ app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, nex
 });
 
 
-/**
- * @apiParam {sessionKey: string, userId: number, conversationType: string} conversationRequest
-*/
 app.post('/requestconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
     
     const {userId, conversationType} = req.body;
