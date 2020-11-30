@@ -75,7 +75,7 @@ export const actions = {
                 } else {
                     commit('errorMsg', "a problem occured please try to login again")
                 }
-                this.$router.push({ path: "/", params: { response.data.room } })
+                this.$router.push({ path: "/", params: { response.body } })
             })
     },
     logout () {
