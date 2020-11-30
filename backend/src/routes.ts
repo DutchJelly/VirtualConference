@@ -41,6 +41,10 @@ export const apiPort = process.env.API_PORT;
 export const server = createServer(app);
 export const io = socketio(server);
 
+//Raise maximum image size
+// app.use(express.json({limit: '50mb'}));
+// app.use(express.urlencoded({limit: '50mb'}));
+
 //TODO add this to .env file, there were some issues with that with jest.
 const SOCKET_LOGGING = false;
 
