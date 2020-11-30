@@ -1,11 +1,11 @@
-import express, {json} from "express"
+import express, { json } from "express"
 import cors from "cors"
 import { User, sessionExpireDuration } from "./entity/User";
 import { Call } from "./entity/Call";
 import { Room } from "./entity/Room";
 import { RoomParticipant } from "./entity/RoomParticipant";
-import { validate} from "class-validator"
-import {compareSync} from "bcrypt"
+import { validate } from "class-validator"
+import { compareSync } from "bcrypt"
 import socketio, { Socket } from "socket.io";
 import randomstring from "randomstring";
 import crypto from "crypto"
@@ -14,10 +14,10 @@ import { createServer } from "http"
 
 declare global {
     namespace Express {
-		interface Request {
+        interface Request {
             user?: User;
             roomParticipant?: RoomParticipant;
-		}
+        }
     }
     interface DirectRequest {
         id: number,
@@ -53,8 +53,8 @@ app.use(
 //Map user id's to their sockets.
 const socketMapping = new Map<number, Socket>();
 const getSocket = async (userId: number) => {
-    let user = await User.findOne({id: userId});
-    if(!user || user.expireDate <= Date.now()) return undefined;
+    let user = await User.findOne({ id: userId });
+    if (!user || user.expireDate <= Date.now()) return undefined;
     return socketMapping.get(userId);
 }
 
@@ -71,26 +71,26 @@ const isDirectRequest = (req: DirectRequest | JoinRequest) => {
 
 //Handle socket connections
 io.on('connection', (socket) => {
-    if(SOCKET_LOGGING)
+    if (SOCKET_LOGGING)
         console.log(`[SocketIO:connection] A client with socket id ${socket.id} was connected.`);
     socket.on('register', async (data) => {
-        if(!data || !data.sessionKey) return;
-        
-        const user = await User.findOne({sessionKey: data.sessionKey});
-        if(!user || user.expireDate <= Date.now()) return;
+        if (!data || !data.sessionKey) return;
+
+        const user = await User.findOne({ sessionKey: data.sessionKey });
+        if (!user || user.expireDate <= Date.now()) return;
 
         socketMapping.set(user.id, socket);
 
-        if(SOCKET_LOGGING)
+        if (SOCKET_LOGGING)
             console.log(`[SocketIO:register] Socket "${socket.id}" is now linked to the user "${user.email}".`);
     });
 
     socket.on('disconnect', () => {
         socketMapping.keys()
-        for(const socketMapItem of socketMapping.entries()){
-            if(socketMapItem[1] === socket){
+        for (const socketMapItem of socketMapping.entries()) {
+            if (socketMapItem[1] === socket) {
                 socketMapping.delete(socketMapItem[0]);
-                if(SOCKET_LOGGING)
+                if (SOCKET_LOGGING)
                     console.log(`[SocketIO:disconnect] User id:${socketMapItem[0]} disconnected with socket "${socket.id}".`);
                 return;
             }
@@ -100,58 +100,59 @@ io.on('connection', (socket) => {
 
 //Emits new room data to all users that are in the room
 const emitRoomUpdate = async (roomId: string) => {
-    const room = await Room.findOne({where: {roomId}, relations: ['members', 'members.user']});
-    const calls = await Call.find({where: {room}, relations: ['members', 'members.user']});
-    if(!room) {
+    const room = await Room.findOne({ where: { roomId }, relations: ['members', 'members.user'] });
+    const calls = await Call.find({ where: { room }, relations: ['members', 'members.user'] });
+    if (!room) {
         console.warn('no room found for id ' + roomId);
         return;
     }
     const roomData = {
         roomId,
         users: room.members.map(x => (x.user.toUserData())),
-        groups: calls.map(x => ({memberIds: x.members.map(y => y.user.id), groupId: x.callId}))
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId }))
     };
     await Promise.all(roomData.users.map(async x => {
-        
+
         const s = await getSocket(x.id);
-        if(s){
+        console.log(`socket for ${x.id} is ${s?.id} [connected: (${s?.connected})]`);
+        if (s) {
             s.emit('roomupdate', roomData);
         }
-            
+
     }));
 }
 
 //Required roomUser relations: ["room", "call", "call.members", "call.members.user"]
 const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
-    if(!roomUser.call) return;
+    if (!roomUser.call) return;
     const call = roomUser.call;
 
-    if(call.members.length === 0) 
+    if (call.members.length === 0)
         throw new Error('Illegal state: found a call with no members.');
 
-    if(call.members.length === 1){
+    if (call.members.length === 1) {
         await Call.remove(call);
     }
 
     roomUser.call = undefined;
     await roomUser.save();
-    
-    if(submitUpdate && roomUser.room){
+
+    if (submitUpdate && roomUser.room) {
         await emitRoomUpdate(roomUser.room.roomId);
     }
 }
 
 const leaveRooms = async (user: User, submitUpdate: boolean) => {
-    const roomUser = await RoomParticipant.findOne({where: {user}, relations: ["room", "call", "call.members", "call.members.user"]});
+    const roomUser = await RoomParticipant.findOne({ where: { user }, relations: ["room", "call", "call.members", "call.members.user"] });
     const roomId = roomUser?.room.roomId;
-    if(!roomUser || !roomUser.room) return;
-    
+    if (!roomUser || !roomUser.room) return;
+
     await RoomParticipant.delete(roomUser.id);
-    if(roomUser.call?.members.length === 1)
+    if (roomUser.call?.members.length === 1)
         await Call.delete(roomUser.call.callId);
 
     //TODO handle leavecall event here
-    if(submitUpdate)
+    if (submitUpdate)
         await emitRoomUpdate(roomId!);
 }
 
@@ -165,32 +166,32 @@ const leaveRooms = async (user: User, submitUpdate: boolean) => {
  */
 const loginRequired: Handler = async (req, res, next) => {
     const sessionKey = req.body.sessionKey;
-	if (!sessionKey) {
+    if (!sessionKey) {
         return res.status(400).json({
             loginError: 'Invalid session key provided.'
         });
     }
 
-	const user = await User.findOne({sessionKey});
-    if (!user || user.expireDate <= Date.now()){
+    const user = await User.findOne({ sessionKey });
+    if (!user || user.expireDate <= Date.now()) {
         return res.status(400).json({
             loginError: 'Invalid or expired session.'
         });
     }
 
-	//Pass the user to the rest of the routes.
+    //Pass the user to the rest of the routes.
     req.user = user;
     // console.log(`successfully logged in user ${user.username}`);
-	next();
+    next();
 }
 
 const roomRequired: Handler = async (req, res, next) => {
     const user = req.user;
 
     //TODO look if this many relations can hurt performance
-    const roomParticipant = await RoomParticipant.findOne({where: {user}, relations: ["room", "user", "call", "call.members", "call.members.user", "call.members.room"]});
-    
-    if(!roomParticipant || !roomParticipant.room){
+    const roomParticipant = await RoomParticipant.findOne({ where: { user }, relations: ["room", "user", "call", "call.members", "call.members.user", "call.members.room"] });
+
+    if (!roomParticipant || !roomParticipant.room) {
         return res.status(400).json({
             error: 'You are not in a room.'
         });
@@ -225,24 +226,24 @@ const roomRequired: Handler = async (req, res, next) => {
  *      }
  */
 app.post('/register', json(), async (req, res, next) => {
-    const {username, password, image, email} = req.body;
+    const { username, password, image, email } = req.body;
     if (!username || !password || !image || !email) {
-        return res.status(400).json({error: 'Not all fields were filled. The fields are: username, password, image, email.'});
+        return res.status(400).json({ error: 'Not all fields were filled. The fields are: username, password, image, email.' });
     }
-	let user = await User.findOne({email})
-	if(user){
-		res.status(400).json({error: `That email address is already in use.`})
-		return;
+    let user = await User.findOne({ email })
+    if (user) {
+        res.status(400).json({ error: `That email address is already in use.` })
+        return;
     }
-    const userdata = {username, password, image, email};
+    const userdata = { username, password, image, email };
     user = User.create(userdata);
     const errors = await validate(user);
-    if (errors.length){
-        return res.status(400).json({error: errors[0].constraints})
+    if (errors.length) {
+        return res.status(400).json({ error: errors[0].constraints })
     }
 
     await user.save();
-    res.status(200).json({message: `Created a new user for ${email}.`});
+    res.status(200).json({ message: `Created a new user for ${email}.` });
 });
 
 /**
@@ -276,29 +277,29 @@ app.post('/register', json(), async (req, res, next) => {
  *      }
  */
 app.post('/login', json(), async (req, res, next) => {
-	
-    const {email, password} = req.body;
+
+    const { email, password } = req.body;
     if (!email || !password) {
-        return res.status(400).json({error: 'Not all fields are present in the post body.'});
+        return res.status(400).json({ error: 'Not all fields are present in the post body.' });
     }
 
-    const user = await User.findOne({email})
+    const user = await User.findOne({ email })
 
     // Check if the credentials are right.
     if (!user || !compareSync(password, user.password)) {
-        return res.status(400).json({error: 'Invalid login credentials.'})
+        return res.status(400).json({ error: 'Invalid login credentials.' })
     }
-    
+
     // Generate new session only if it doesn't exist. Always update expire date of session.
-    if(!user.sessionKey) {
+    if (!user.sessionKey) {
         //Make sure that the session isn't in use by another user.
         do var unusedSession = crypto.randomBytes(20).toString('base64');
-        while(await User.findOne(unusedSession));
+        while (await User.findOne(unusedSession));
         user.sessionKey = unusedSession;
     }
     user.expireDate = Date.now() + sessionExpireDuration;
     await user.save();
-    
+
     // Send back all the user data.
     res.status(200).json({
         sessionKey: user.sessionKey,
@@ -308,7 +309,7 @@ app.post('/login', json(), async (req, res, next) => {
         image: user.image
     })
 })
-	
+
 /**
  * @api {post} /logout /logout
  * @apiDescription Logging out the user. Set userStatus to false and sessionKey to "".
@@ -331,14 +332,14 @@ app.post('/login', json(), async (req, res, next) => {
  *          "error": "There was an error loggin out."
  *      }
  *
- */  
+ */
 app.post('/logout', json(), loginRequired, async (req, res, next) => {
     const user = req.user;
-	user!.expireDate = Date.now();
-	user!.sessionKey = ""; //Do this for debugging purposes, time would be enough.
+    user!.expireDate = Date.now();
+    user!.sessionKey = ""; //Do this for debugging purposes, time would be enough.
     await user!.save();
     await leaveRooms(user!, true);
-    res.status(200).json({message: "Successfully logged out."})
+    res.status(200).json({ message: "Successfully logged out." })
 });
 
 /**
@@ -365,35 +366,35 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
  */
 app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     const user = req.user;
-    if(!user) throw new Error("user is null???????????????")
+    if (!user) throw new Error("user is null???????????????")
     const roomId = req.body.roomId;
-    if(!roomId){
-        return res.status(400).json({error: 'Not all fields are present in the post body.'});
+    if (!roomId) {
+        return res.status(400).json({ error: 'Not all fields are present in the post body.' });
     }
 
-    let room = await Room.findOne({where: {roomId}});
-    if(!room){
-        room = Room.create({roomId});
+    let room = await Room.findOne({ where: { roomId } });
+    if (!room) {
+        room = Room.create({ roomId });
         await room.save();
     }
-       
-    let roomParticipant = await RoomParticipant.findOne({user});
-    if(!roomParticipant){
+
+    let roomParticipant = await RoomParticipant.findOne({ user });
+    if (!roomParticipant) {
         roomParticipant = RoomParticipant.create({ room, user, call: undefined });
     } else roomParticipant.room = room;
-    
+
     await roomParticipant.save();
 
-    const calls = await Call.find({where: {room}, relations: ["room", "members"]});
-    
+    const calls = await Call.find({ where: { room }, relations: ["room", "members"] });
+
     //Now get the members (which are relations) of the room.
-    room = await Room.findOne({where: {roomId}, relations: ["members", "members.user"]});
-    if(!room) throw new Error('Internal error -> room should not be undefined.');
+    room = await Room.findOne({ where: { roomId }, relations: ["members", "members.user"] });
+    if (!room) throw new Error('Internal error -> room should not be undefined.');
 
     res.status(200).json({
         roomId: room.roomId,
         users: room.members.filter(x => x.user).map(x => x.user.toUserData()),
-        groups: calls.map(x => ({memberIds: x.members.map(y => y.id), groupId: x.callId}))
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.id), groupId: x.callId }))
     });
 
     await emitRoomUpdate(roomId);
@@ -402,7 +403,7 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
 app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, next) => {
     const user = req.user;
     await leaveRooms(user!, true);
-    res.status(200).json({message: 'Successfully left the room.'});
+    res.status(200).json({ message: 'Successfully left the room.' });
 });
 
 
@@ -433,27 +434,28 @@ app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, nex
  * @apiParam {sessionKey: string, userId: number, conversationType: string} conversationRequest
 */
 app.post('/requestconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
-    
-    const {userId, conversationType} = req.body;
-    
-    if(!userId || !conversationType)
-        return res.status(400).json({error: 'Not all fields are present in the post body.'});
-           
-    if(conversationType !== 'open' && conversationType !== 'closed' && conversationType !== 'private')
-        return res.status(400).json({error: 'That conversation type is not supported.'});
 
-    if(req.roomParticipant!.call)
-        return res.status(400).json({error: 'You are already in a call.'});
+    const { userId, conversationType } = req.body;
 
-    let requestedUser = await User.findOne({id: userId});
+    if (!userId || !conversationType)
+        return res.status(400).json({ error: 'Not all fields are present in the post body.' });
 
-    if(!requestedUser)
-        return res.status(400).json({error: 'That user doesn\'t exist.'});
+
+    if (conversationType !== 'open' && conversationType !== 'closed' && conversationType !== 'private')
+        return res.status(400).json({ error: 'That conversation type is not supported.' });
+
+    if (req.roomParticipant!.call)
+        return res.status(400).json({ error: 'You are already in a call.' });
+
+    let requestedUser = await User.findOne({ id: userId });
+
+    if (!requestedUser)
+        return res.status(400).json({ error: 'That user doesn\'t exist.' });
 
     const socket = await getSocket(userId);
-    if(!socket)
-        return res.status(400).json({error: `${requestedUser.username} is not connected.`});
-    
+    if (!socket)
+        return res.status(400).json({ error: `${requestedUser.username} is not connected.` });
+
     const requestData = {
         id: freeRequestId++,
         type: conversationType,
@@ -463,8 +465,9 @@ app.post('/requestconversation', json(), loginRequired, roomRequired, async (req
 
     directRequests.push(requestData);
     socket.emit('directrequest', requestData);
-    
-    res.status(200).json({message: 'Succesfully sent a conversation request.'});
+
+
+    res.status(200).json({ message: 'Succesfully sent a conversation request.' });
 });
 
 /**
@@ -475,48 +478,48 @@ type RequestResponse{
 }
  */
 app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, async (req, res, next) => {
-    
-    const {requestId, response} = req.body;
-    if(requestId === undefined || response === undefined)
-        return res.status(400).json({error: 'Not all fields are present in the post body.'});
-    
+
+    const { requestId, response } = req.body;
+    if (requestId === undefined || response === undefined)
+        return res.status(400).json({ error: 'Not all fields are present in the post body.' });
+
     let request = directRequests.find(x => x.id === requestId && x.sentToId === req.user!.id) ?? joinRequests.find(x => x.id === requestId && x.groupId === req.roomParticipant!.call?.callId);
-    if(!request)
-        return res.status(400).json({error: 'You have not received a request to respond to.'});
-        
-    
+    if (!request)
+        return res.status(400).json({ error: 'You have not received a request to respond to.' });
+
+
     //Declare some consts for the sender of the request.
-    const sender = await User.findOne({id: request.senderId});
-    const senderRoom = await RoomParticipant.findOne({where: {user: sender}, relations: ['room', 'user']});
+    const sender = await User.findOne({ id: request.senderId });
+    const senderRoom = await RoomParticipant.findOne({ where: { user: sender }, relations: ['room', 'user'] });
     const socket = await getSocket(request.senderId);
 
-    if(!socket)
-        return res.status(400).json({error: `${sender!.username} is not connected.`});
+    if (!socket)
+        return res.status(400).json({ error: `${sender!.username} is not connected.` });
 
     //Remove the request from memory.
     directRequests = directRequests.filter(x => x.id !== requestId);
-    if(isDirectRequest(request)){
+    if (isDirectRequest(request)) {
         directRequests = directRequests.filter(x => x.id !== requestId);
     } else {
         joinRequests = joinRequests.filter(x => x.id !== requestId);
     }
 
-    if(!response){
-        socket.emit('requestDeclined', {message: `${req.user!.username} declined your request.`})
+    if (!response) {
+        socket.emit('requestDeclined', { message: `${req.user!.username} declined your request.` })
         //TODO: we could also let sender know that you declined his/her request, but this could be a bit harsh.
-        return res.status(200).json({message: `Succesfully declined request of ${sender!.username}.`});
+        return res.status(200).json({ message: `Succesfully declined request of ${sender!.username}.` });
     }
 
     //Check if the sender of the request is still in the same room when we try to accept a conversation.
-    if(!senderRoom || req.roomParticipant!.room.roomId !== senderRoom.room.roomId)
-        return res.status(400).json({error: `${sender!.username} is not present in your room.`});
-    
-    //Check if the sender of the request is now in a call, if so we can't start a conversation.
-    if(senderRoom.call)
-        return res.status(400).json({error: `${sender!.username} is already in a call.`});
+    if (!senderRoom || req.roomParticipant!.room.roomId !== senderRoom.room.roomId)
+        return res.status(400).json({ error: `${sender!.username} is not present in your room.` });
 
-    if(isDirectRequest(request)){
-        if(req.roomParticipant!.call)
+    //Check if the sender of the request is now in a call, if so we can't start a conversation.
+    if (senderRoom.call)
+        return res.status(400).json({ error: `${sender!.username} is already in a call.` });
+
+    if (isDirectRequest(request)) {
+        if (req.roomParticipant!.call)
             await leaveCalls(req.roomParticipant!, false);
 
         const newCall = Call.create({
@@ -524,34 +527,34 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
             type: (<DirectRequest>request).type,
             room: req.roomParticipant!.room,
         });
-        
+
         //Make sure that the call url is unique.
-        while(await Call.findOne({url: newCall.url})) newCall.url = randomstring.generate();
-    
+        while (await Call.findOne({ url: newCall.url })) newCall.url = randomstring.generate();
+
         await newCall.save();
 
         req.roomParticipant!.call = newCall;
         senderRoom.call = newCall;
         await req.roomParticipant!.save();
         await senderRoom.save();
-    
+
         const callData = {
             groupId: newCall.callId,
             roomCode: newCall.url,
             memberIds: [req.roomParticipant!.user.id, senderRoom.user.id],
             typeConversation: newCall.type
         };
-        
+
         socket.emit('requestaccepted', callData);
         await emitRoomUpdate(req.roomParticipant!.room.roomId);
-    
+
         return res.status(200).json(callData);
 
     } else {
         const joinRequest = <JoinRequest>request;
-        const call = await Call.findOne({where: {callId: joinRequest.groupId}, relations: ['members', 'room', 'members.user']});
-        if(!call){
-            return res.status(400).json({error: 'The call doesn\'t exist any more.'});
+        const call = await Call.findOne({ where: { callId: joinRequest.groupId }, relations: ['members', 'room', 'members.user'] });
+        if (!call) {
+            return res.status(400).json({ error: 'The call doesn\'t exist any more.' });
         }
         req.roomParticipant!.call = call;
         await req.roomParticipant!.save();
@@ -562,7 +565,7 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
             memberIds: [...call.members.map(x => x.user.id), req.roomParticipant?.user.id],
             typeConversation: call.type
         };
-        
+
         socket.emit('requestaccepted', callData);
         await emitRoomUpdate(req.roomParticipant!.room.roomId);
         return res.status(200).json(callData);
@@ -578,20 +581,20 @@ type JoinConversation{
 app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
 
     const groupId = req.body.groupId;
-    if(!groupId)
-        return res.status(400).json({error: 'Not all fields are present in the post body.'});
+    if (!groupId)
+        return res.status(400).json({ error: 'Not all fields are present in the post body.' });
 
-    const call = await Call.findOne({where: {groupId}, relations: ["room", "members", "members.user"]});
-    if(!call)
-        return res.status(400).json({error: 'That call doesn\'t exist.'});
+    const call = await Call.findOne({ where: { groupId }, relations: ["room", "members", "members.user"] });
+    if (!call)
+        return res.status(400).json({ error: 'That call doesn\'t exist.' });
 
-    if(call.room.roomId !== req.roomParticipant!.room.roomId)
-        return res.status(400).json({error: 'That call isn\'t part of that room.'});
+    if (call.room.roomId !== req.roomParticipant!.room.roomId)
+        return res.status(400).json({ error: 'That call isn\'t part of that room.' });
 
-    if(req.roomParticipant!.call)
-        return res.status(400).json({error: 'You are already in a call.'});
+    if (req.roomParticipant!.call)
+        return res.status(400).json({ error: 'You are already in a call.' });
 
-    if(call.type === "open"){
+    if (call.type === "open") {
         req.roomParticipant!.call = call;
         await req.roomParticipant!.save();
         await emitRoomUpdate(req.roomParticipant!.room.roomId);
@@ -603,12 +606,13 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
         });
     }
 
-    if(call.type === "closed"){
+
+    if (call.type === "closed") {
         //TODO add cooldown
         //TODO IMPORTANT joinrequests break if user logs out that received the request
 
-        if(joinRequests.find(x => x.groupId === call.callId && x.senderId === req.user!.id))
-            return res.status(400).json({error: 'You already requested to join that conversation.'});
+        if (joinRequests.find(x => x.groupId === call.callId && x.senderId === req.user!.id))
+            return res.status(400).json({ error: 'You already requested to join that conversation.' });
         const requestData = {
             id: freeRequestId++,
             groupId: call.callId,
@@ -617,17 +621,17 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
         joinRequests.push(requestData);
 
         //TODO IMPORTANT add error handler for production builds
-        if(!call.members.length) throw new Error('Invalid state: no call members.');
+        if (!call.members.length) throw new Error('Invalid state: no call members.');
 
         const socket = await getSocket(call.members[0].id);
-        if(!socket) throw new Error('Invalid state: user in call is not connected.');
+        if (!socket) throw new Error('Invalid state: user in call is not connected.');
 
         socket.emit('joinrequest', requestData);
 
-        return res.status(200).json({message: `Join request request sent to ${call.members[0].user.username}.`})
+        return res.status(200).json({ message: `Join request request sent to ${call.members[0].user.username}.` })
     }
 
-    res.status(400).json({error: 'You cannot join that converstation because it\'s private.'})
+    res.status(400).json({ error: 'You cannot join that converstation because it\'s private.' })
 });
 
 
@@ -640,7 +644,7 @@ type LeaveConversation{
 app.post('/leaveconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
     //TODO errorhandling
     await leaveCalls(req.roomParticipant!, true);
-    res.status(200).json({message: 'Successfully left all group(s).'});
+    res.status(200).json({ message: 'Successfully left all group(s).' });
 });
 
 app.get('/');
@@ -648,5 +652,5 @@ app.get('/');
 //404 not found error for API if no route matched
 app.use((req, res) => {
     if (!res.headersSent)
-        res.status(404).json({error: 'This route could not be found'})
+        res.status(404).json({ error: 'This route could not be found' })
 });
