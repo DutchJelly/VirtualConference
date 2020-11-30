@@ -40,6 +40,7 @@ beforeEach((done) => {
 });
 
 afterEach((done) => {
+  console.log('wanneer wordt ik gecalld?')
   for (let i = 0; i < socketsCount; i++) {
     if (sockets[i].connected) {
       sockets[i].disconnect();
