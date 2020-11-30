@@ -339,6 +339,33 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
     res.status(200).json({message: "Successfully logged out."})
 });
 
+/**
+ * @api {post} /joinroom /joinroom
+ * @apiDescription Join a physical room of the conference.
+ * @apiName joinRoom
+ * @apiGroup rooms
+ *
+ * @apiParam {Object} user user object.
+ * @apiParam {Int} roomID the unique identifier of a room.
+ *
+ * @apiSuccess {Int} roomID the unique identifier of a room.
+ * @apiSuccess {Array} users All users in the room with the current roomID.
+ * @apiSuccess {Array} groups All group conversations in the current room with roomID. A group object contains an array of memberID's and its own groupID.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "roomID": 1,
+ * 			"users": array[userObject1, userObject2],
+ * 			"groups": array[groupObject1[], groupObject2[]]
+ *      }
+ * @apiError notEnoughData Not all fields are present in the post body.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "Not all fields are present in the post body.".
+ *      }
+ */
 app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     const user = req.user;
     const roomId = req.body.roomId;
