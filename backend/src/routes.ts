@@ -342,28 +342,6 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
     res.status(200).json({ message: "Successfully logged out." })
 });
 
-/**
- * @api {post} 
- * @apiName 
- * @apiGroup 
- *
- * @apiParam {} 
- * 
- * @apiSuccess 
- * 
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *          
- *      }
- * @apiError 
- * @apiErrorExample Error-Response: 
- *      HTTP/1.1 400 Bad Request
- *      {
- *          
- *      }
- *
- */
 app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     const user = req.user;
     if (!user) throw new Error("user is null???????????????")
@@ -406,29 +384,6 @@ app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, nex
     res.status(200).json({ message: 'Successfully left the room.' });
 });
 
-
-/**
- * @api {get} 
- * @apiName 
- * @apiGroup 
- *
- * @apiParam 
- * 
- * @apiSuccess 
- * 
- * @apiSuccessExample Success-Response:
- *      HTTP/1.1 200 OK
- *      {
- *          
- *      }
- * @apiError 
- * @apiErrorExample Error-Response: 
- *      HTTP/1.1 400 Bad Request
- *      {
- *          
- *      }
- *
- */
 
 /**
  * @apiParam {sessionKey: string, userId: number, conversationType: string} conversationRequest
