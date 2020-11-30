@@ -121,7 +121,7 @@ export default {
             this.closeRoom = false; //Unshow the button with 'Close'.
         },
         //When the user clicks on the button with 'Leave'.
-        onLeaveRoom: async function() {
+        onLeaveRoom: function() {
             let self = this;
             try {
                 this.joinedRoom = false; //Show the button with 'Leave'.
@@ -132,7 +132,7 @@ export default {
             }
         },
         //When the user clicks on the button with 'Close'.
-        onCloseRoom: async function() {
+        onCloseRoom: function() {
             let self = this;
             try {
                 this.closeRoom = false; //Show the button with 'Close'.
