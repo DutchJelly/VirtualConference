@@ -67,7 +67,7 @@ export const actions = {
             })
             .then(res => {
                 console.log(res.data)
-                this.$router.push({ name: "kamerview", params: { userID: 'userID'}})
+                this.$router.push({ name: "kamerview", query: res.body })
             })
             .catch(({ response }) => {
                 if(response.error){
