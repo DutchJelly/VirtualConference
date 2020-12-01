@@ -41,6 +41,10 @@ export const apiPort = process.env.API_PORT;
 export const server = createServer(app);
 export const io = socketio(server);
 
+//Raise maximum image size
+// app.use(express.json({limit: '50mb'}));
+// app.use(express.urlencoded({limit: '50mb'}));
+
 //TODO add this to .env file, there were some issues with that with jest.
 const SOCKET_LOGGING = false;
 
@@ -150,12 +154,12 @@ const leaveRooms = async (user: User, submitUpdate: boolean) => {
 }
 
 /**
- * @api {Function} - LoginRequired
+ * @api {Function} - LoginRequired 
  * @apiDescription Checks if the session key received from the frontend, exists in the database. If so, the user object will be set to the correct user. This function must be used in a pipeline.
  * @apiName loginRequired
  * @apiGroup Functions
  * @apiSuccess {User} user Sets user to corresponding user of sessionkey.
- * @apiError {loginError: string} loginError invalid session was found.
+ * @apiError {loginError} string loginError invalid session was found.
  */
 const loginRequired: Handler = async (req, res, next) => {
     const sessionKey = req.body.sessionKey;
@@ -195,7 +199,7 @@ const roomRequired: Handler = async (req, res, next) => {
 }
 
 /**
- * @api {post} /register
+ * @api {post} /register /register
  * @apiDescription Create a new user for the database.
  * @apiName Register
  * @apiGroup User
@@ -205,13 +209,13 @@ const roomRequired: Handler = async (req, res, next) => {
  * @apiParam {string} image the profile image
  * @apiParam {string} email a unique email adress
  *
- * @apiSuccess {message: string} message The username with which an account has been created will be returned.
+ * @apiSuccess {string} message The username with which an account has been created will be returned.
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 201 OK
  *      {
  *          "message": "Created new user with username test@test.com."
  *      }
- * @apiError {error: string} error could not create the account
+ * @apiError {string} error could not create the account
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -335,6 +339,33 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
     res.status(200).json({message: "Successfully logged out."})
 });
 
+/**
+ * @api {post} /joinroom /joinroom
+ * @apiDescription Join a physical room of the conference.
+ * @apiName joinRoom
+ * @apiGroup rooms
+ *
+ * @apiParam {Object} user user object.
+ * @apiParam {Int} roomID the unique identifier of a room.
+ *
+ * @apiSuccess {Int} roomID the unique identifier of a room.
+ * @apiSuccess {Array} users All users in the room with the current roomID.
+ * @apiSuccess {Array} groups All group conversations in the current room with roomID. A group object contains an array of memberID's and its own groupID.
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          "roomID": 1,
+ * 			"users": array[userObject1, userObject2],
+ * 			"groups": array[groupObject1[], groupObject2[]]
+ *      }
+ * @apiError notEnoughData Not all fields are present in the post body.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "Not all fields are present in the post body.".
+ *      }
+ */
 app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     const user = req.user;
     const roomId = req.body.roomId;
@@ -378,9 +409,6 @@ app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, nex
 });
 
 
-/**
- * @apiParam {sessionKey: string, userId: number, conversationType: string} conversationRequest
-*/
 app.post('/requestconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
     
     const {userId, conversationType} = req.body;
