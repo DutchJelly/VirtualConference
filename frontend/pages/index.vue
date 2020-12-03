@@ -44,6 +44,7 @@
 <script>
 
 export default {
+  middleware: 'loginredirect',
   data() {
     return {
       loginForm: {

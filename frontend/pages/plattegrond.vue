@@ -7,6 +7,7 @@
 
 <script>
 export default {
+    middleware: 'auth',
     mounted() {
         this.$nextTick(() => {
             let that = this

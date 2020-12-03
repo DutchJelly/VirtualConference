@@ -1,16 +1,23 @@
 import axios from 'axios'
+import { resolve } from 'path';
 
 export const state = () => ({
-    loggedIn: false,
+    token: localStorage.getItem('token') || null,
+    user: localStorage.getItem('user') || null,
     errorMsg: null,
     succesMsg: null
 });
   
 export const mutations = {
-    authenticated(state) {
-        state.loggedIn = true
+    authenticate(state, token, user) {
+        state.token = token;
+        state.user = user;
         state.errorMsg = null
         state.succesMsg = null
+    },
+    unauthenticate(state) {
+        state.token = null;
+        state.user = null;
     },
     errorMsg(state, e) {
         state.errorMsg = e
@@ -29,12 +36,18 @@ export const actions = {
                 email: email,
                 password: password
             })
-            .then(res => {saveToken(res.data.sessionKey, commit)
-                window.location.replace('/plattegrond')
-                //this.$router.push({name:'plattegrond', query: {username}})
-            })//TODO change this to a simple path only, this is not secure
+            .then(res => {
+                console.log('saving user:');
+                console.log(res.data);
+                localStorage.setItem('token', res.data.sessionKey);
+                commit('authenticate', res.data.sessionKey, res.data);
+                
+                this.$router.push({ path: "/plattegrond"});
+                resolve(res);
+            })
             .catch(({ response }) => {
-                commit('errorMsg', response.data.error)
+                commit('errorMsg', response.data.error);
+                resolve(response);
             })
     },
     signup({ commit }, { username, password, image, email }) {
@@ -48,6 +61,7 @@ export const actions = {
             .then(res => {
                 commit('succesMsg', `${res.data.message}`)
                 this.$router.push({ path: "/"})
+                resolve(res);
             })
             .catch(({ response }) => {
                 if(response.data.error.isEmail) {
@@ -57,6 +71,7 @@ export const actions = {
                 } else {
                     commit('errorMsg', response.data.error)
                 }
+                resolve(response);
             })
     },
     joinRoom({ commit }, { sessionKey, roomId } ) {
@@ -68,6 +83,7 @@ export const actions = {
             .then(res => {
                 console.log(res.data)
                 this.$router.push({ name: "kamerview", query: res.body })
+                resolve(res);
             })
             .catch(({ response }) => {
                 if(response.error){
@@ -76,15 +92,19 @@ export const actions = {
                     commit('errorMsg', "a problem occured please try to login again")
                 }
                 this.$router.push({ path: "/"})
+                resolve(response);
             })
     },
     logout () {
-        localStorage.removeItem(token)
+        localStorage.removeItem('token')
+        commit('unauthenticate');
+        this.$router.push({ path: "/"})
     }
 };
 
-function saveToken(token, cb) {
-    localStorage.setItem('token', token)
-    // succes
-    cb('authenticated')
+export const getters = {
+    isLoggedIn: state => !!state.token,
+    authErrorMsg: state => state.errorMsg,
+    authSuccessMsg: state => state.succesMsg,
+    getUser: state => state.user
 }

@@ -115,7 +115,7 @@ export default {
                   type: 'signup',
                   username: this.registerForm.newUsername,
                   password: this.registerForm.newPassword,
-                  image: this.image,
+                  image: "not an image",
                   email: this.registerForm.newEmail
               })
               this.registerForm.newUsername = ""
