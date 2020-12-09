@@ -14,9 +14,9 @@ export class RoomParticipant extends BaseEntity {
     room!: Room;
 
     @ManyToOne(() => Call, call => call.members)
-    call!: Call;
+    call?: Call;
 
-    @OneToOne(() => User)
+    @OneToOne(() => User, {nullable: false})
     @JoinColumn()
     user!: User;
 
