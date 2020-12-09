@@ -59,6 +59,7 @@ import TypeConversationPrompt from '../components/typeCoversationPrompt.vue';
 
 export default {
     name: 'Jitsi',
+    middleware: 'auth',
     components: {
         TypeConversationPrompt,
     },

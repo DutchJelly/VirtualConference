@@ -4,10 +4,9 @@
     <form class="login-prompt">
       <div class="login-prompt-item">
         <input
-          v-model="loginForm.username"
+          v-model="loginForm.email"
           type="text"
-          placeholder="Username"
-          name="currentUsername"
+          placeholder="Email"
         />
         <div class="icon-container">
           <img class="icon" src="../static/icons/user.svg" alt="" srcset="" />
@@ -19,7 +18,6 @@
           v-model="loginForm.password"
           type="password"
           placeholder="Password"
-          name="currentPassword"
         />
         <div class="icon-container">
           <img
@@ -33,11 +31,11 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 
-      <router-link to="registreer" class="register-button" tag="button">
+      <nuxt-link to="registreer" class="register-button" tag="button">
           Nog geen account? klik hier
-      </router-link>
-      <div class="error-message" :class="error ? 'opacity-100' : 'opacity-0'">
-        {{ error }}
+      </nuxt-link>
+      <div class="message" :class="error || succes ? 'opacity-100' : 'opacity-0'">
+        {{ error }} {{ succes }}
       </div>
     </form>
   </main>
@@ -46,32 +44,39 @@
 <script>
 
 export default {
+  middleware: 'loginredirect',
   data() {
     return {
       loginForm: {
-        username: "",
-        password: "",
+        email: "",
+        password: ""
       }
     };
   },
   computed: {
     error: function() {
       return this.$store.state.errorMsg
+    },
+    succes: function() {
+      return this.$store.state.succesMsg
     }
   },
   watch: {
     error(oldVal, newVal) {
         if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+    },
+    succes(oldVal, newVal) {
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('succesMsg', null), 4000)
     }
   },
   methods: {
     login() {
 				this.$store.dispatch({
             type: 'login',
-            username: this.loginForm.username,
+            email: this.loginForm.email,
             password: this.loginForm.password
         })
-				this.loginForm.username = ""
+				this.loginForm.email = ""
         this.loginForm.password = ""
     }
   }
