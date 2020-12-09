@@ -306,6 +306,90 @@ app.post('/login', json(), async (req, res, next) => {
         image: user.image
     })
 })
+
+/**
+ * @api {post} /roomObject /roomObject
+ * @apiDescription Returns a room object of a room with given roomID.
+ * @apiName roomObject
+ * @apiGroup rooms
+ *
+ * @apiParam {roomID} roomID The roomID of which the roomObject wants to be returned
+ *
+ * @apiSuccess {json} json_object The json object of the room that with given roomID
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          roomID: "4",
+ * 			conferenceId: "1",
+ * 			roomType: "open",
+ * 			members[]: "[Bob, Jan, Henk, ...]"
+ * 			
+ *      }
+ * @apiError roomIdDoesNotExist The room object with given roomID does not exist
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "Room does not exist."
+ *      }
+ *
+ */  
+app.post('/roomObject', json(), loginRequired, async (req, res, next) => {
+	const roomID = req.body.roomID;
+	const room = await Room.findOne(roomID);
+	if(!room){
+		return res.status(400).json({error: 'Room does not exist.'})
+	}
+	res.status(200).json({
+        roomID: room.roomId,
+        conferenceId: room.conferenceId,
+		roomType: room.roomType,
+		members: room.members
+    })
+});
+
+/**
+ * @api {post} /userObject /userObject
+ * @apiDescription Returns an user object of the user that is logged in.
+ * @apiName userObject
+ * @apiGroup User
+ *
+ * @apiParam {User} User object given from the loginRequired function.
+ *
+ * @apiSuccess {json} json_object The json object of the user that is currently logged in
+ *
+ * @apiSuccessExample Success-Response:
+ *      HTTP/1.1 200 OK
+ *      {
+ *          sessionKey: "123124esfdsg",
+ * 			username: "Bob",
+ * 			email: "bob@gmail.com",
+ * 			id: "5"
+ * 			image: "iojadsfkadfjooaoosfa" (this a a string)
+ * 			
+ *      }
+ * @apiError userDoesNotExits The user object wasn't set in loginRequired.
+ * @apiErrorExample Error-Response:
+ *      HTTP/1.1 400 Bad Request
+ *      {
+ *          "error": "User does not exist."
+ *      }
+ *
+ */  
+app.post('/userObject', json(), loginRequired, async (req, res, next) => {
+	const user = req.user;
+	if (!user) {
+        return res.status(400).json({error: 'User does not exist.'})
+    }
+	// Send back all the user data.
+    res.status(200).json({
+        sessionKey: user.sessionKey,
+        username: user.username,
+        email: user.email,
+        id: user.id,
+        image: user.image
+    })
+});
 	
 /**
  * @api {post} /logout /logout
