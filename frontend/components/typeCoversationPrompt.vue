@@ -4,7 +4,7 @@
       Which type conversation do you want?
     </div>
     <div class="buttons">
-      <button id="closedCoversation" @click.prevent="onClosedCoversation();">Closed</button>
+      <button id="closedCoversation" @click.prevent="onClosedConversation();">Closed</button>
       <button id="openConversation" @click.prevent="onOpenConversation();">Open</button>
       <button id="privateConversation" @click.prevent="onPrivateConversation();">Private</button>
     </div>
@@ -16,7 +16,7 @@
 export default {
   name: 'TypeConversationPrompt',
   props: {
-    onClosedCoversation: Function,
+    onClosedConversation: Function,
     onOpenConversation: Function,
     onPrivateConversation: Function,
   },

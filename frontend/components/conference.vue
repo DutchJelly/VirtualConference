@@ -1,13 +1,13 @@
 <template>
-    <div class="meet-container" v-if="open_conference === true">
-        <div id="leave_room" ref="leave_room" v-if="joined_room === true">
-            <button class="leave_button" style="vertical-align:middle" v-on:click="onLeaveRoom">
+    <div class="meet-container" v-if="openConference === true">
+        <div id="leaveRoom" ref="leaveRoom" v-if="joinedRoom === true">
+            <button class="leaveButton" style="vertical-align:middle" v-on:click="onLeaveRoom" @click.prevent="onLeaveConversation()">
                 <span>Leave
                 </span>
             </button>
         </div>
-        <div id="close_room" ref="close_room" v-if="close_room === true">
-            <button class="close_button" style="vertical-align:middle" v-on:click="onCloseRoom">
+        <div id="closeRoom" ref="closeRoom" v-if="closeRoom === true">
+            <button class="closeButton" style="vertical-align:middle" v-on:click="onCloseRoom" @click.prevent="onLeaveConversation()">
                 <span>Close
                 </span>
             </button>
@@ -32,19 +32,22 @@ export default {
     },
     data: function() {
         return {
-            joined_room: false,
-            close_room: true,
+            username: this.$route.query.username,
+            joinedRoom: false,
+            closeRoom: true,
         };
     },
     props: {
         user: String,
-        withWho: String, 
         room: String,
-        open_conference: Boolean,
+        openConference: Boolean,
         typeConversation: String,
+        isModerator: Boolean,
+        onLeaveConversation: Function,
     },
     computed: {
         jitsiOptions() {
+            //If the user is a moderator.
             if(this.isModerator === true){
                 return {
                     roomName: this.room,
@@ -67,14 +70,14 @@ export default {
                         TOOLBAR_BUTTONS: [
                             'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
                             'fodeviceselection', 'profile', 'chat', 'recording',
-                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
+                            'livestreaming', 'etherpad', 'sharedvideo', 'settings',
                             'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
                             'tileview', 'videobackgroundblur', 'download', 'help', 'mute-everyone', 'security'
                         ],
                     },
                     onload: this.onIFrameLoad
                 };
-            } else {
+            } else { //If the user is not a moderator.
                 return {
                     roomName: this.room,
                     width: 700,
@@ -94,56 +97,57 @@ export default {
                         SHOW_WATERMARK_FOR_GUESTS: false,
                         SHOW_CHROME_EXTENSION_BANNER: false,
                         TOOLBAR_BUTTONS: [
-                            'microphone', 'camera', 'closedcaptions', 'desktop', 'embedmeeting', 'fullscreen',
+                            'microphone', 'camera', 'fullscreen',
                             'fodeviceselection', 'profile', 'chat',
-                            'livestreaming', 'etherpad', 'sharedvideo', 'settings', 'raisehand',
-                            'videoquality', 'filmstrip', 'invite', 'feedback', 'stats', 'shortcuts',
-                            'tileview', 'videobackgroundblur', 'download', 'help', 'security'
+                            'etherpad', 'settings', 'raisehand',
+                            'filmstrip', 'feedback', 'shortcuts',
+                            'tileview', 'videobackgroundblur', 'download', 'help'
                         ],
                     },
                     onload: this.onIFrameLoad
                 };
             }
         },
-        isModerator() {
-            if(this.user === "A") return true
-            else return false    
-        },
     },
     methods: {
         onIFrameLoad() {
-            //this.$refs.jitsiRef.addEventListener('participantJoined', this.onParticipantJoined);
+            this.closeRoom = true; //Show the button with 'Close'.
+            //Event listener when a user joined the video conference.
             this.$refs.jitsiRef.addEventListener('videoConferenceJoined', this.onVideoConferenceJoined);
-            this.$refs.jitsiRef.addEventListener('participantKickedOut', this.onParticipantKickedOut);
-            //this.$refs.jitsiRef.addEventListener('participantLeft', this.onParticipantLeft);
-            
-            //this.$refs.jitsiRef.executeCommand('displayName', 'The display name');
         },
-        onVideoConferenceJoined: function(e) {
-            this.joined_room = true;
-            this.close_room = false;
+        //When the user joined the video conference.
+        onVideoConferenceJoined: function(error) {
+            this.joinedRoom = true; //Show the button with 'Leave'.
+            this.closeRoom = false; //Unshow the button with 'Close'.
         },
-        onParticipantKickedOut(e) {
-            // do stuff
-        },
-        onLeaveRoom: async function() {
+        //When the user clicks on the button with 'Leave'.
+        onLeaveRoom: function() {
             let self = this;
-            this.open_conference = false;
-            this.$refs.jitsiRef.removeJitsiWidget();
-            await self.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
+            try {
+                this.joinedRoom = false; //Show the button with 'Leave'.
+                this.$refs.jitsiRef.removeJitsiWidget();
+            } catch(error) {
+                console.log(error);
+                console.log("error leave room");
+            }
+        },
+        //When the user clicks on the button with 'Close'.
+        onCloseRoom: function() {
+            let self = this;
+            try {
+                this.closeRoom = false; //Show the button with 'Close'.
+                this.$refs.jitsiRef.removeJitsiWidget();
+            } catch(error) {
+                console.log(error);
+                console.log("error close room");
+            }
         }, 
-        onCloseRoom: async function() {
-            let self = this;
-            this.open_conference = false;
-            this.$refs.jitsiRef.removeJitsiWidget();
-            await self.$axios(`http://localhost:5000/leaveconversation/${this.$route.query.username}`);
-        },     
     },
 };
 </script>
 
 <style>
-.leave_button {
+.leaveButton {
   display: inline-block;
   border-radius: 4px;
   background-color: #393c3f;
@@ -158,14 +162,14 @@ export default {
   margin: 5px;
 }
 
-.leave_button span {
+.leaveButton span {
   cursor: pointer;
   display: inline-block;
   position: relative;
   transition: 0.5s;
 }
 
-.leave_button span:after {
+.leaveButton span:after {
   content: '\00bb';
   position: absolute;
   opacity: 0;
@@ -174,16 +178,16 @@ export default {
   transition: 0.5s;
 }
 
-.leave_button:hover span {
+.leaveButton:hover span {
   padding-right: 25px;
 }
 
-.leave_button:hover span:after {
+.leaveButton:hover span:after {
   opacity: 1;
   right: 0;
 }
 
-.close_button {
+.closeButton {
   display: inline-block;
   border-radius: 4px;
   background-color: #122a42;
@@ -198,14 +202,14 @@ export default {
   margin: 5px;
 }
 
-.close_button span {
+.closeButton span {
   cursor: pointer;
   display: inline-block;
   position: relative;
   transition: 0.5s;
 }
 
-.close_button span:after {
+.closeButton span:after {
   content: '\00bb';
   position: absolute;
   opacity: 0;
@@ -214,11 +218,11 @@ export default {
   transition: 0.5s;
 }
 
-.close_button:hover span {
+.closeButton:hover span {
   padding-right: 25px;
 }
 
-.close_button:hover span:after {
+.closeButton:hover span:after {
   opacity: 1;
   right: 0;
 }

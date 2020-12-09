@@ -1,4 +1,7 @@
 export default {
+
+  mode: 'spa',
+
   // Global page headers (https://go.nuxtjs.dev/config-head)
   head: {
     title: 'virtual_conference_vue',
@@ -18,7 +21,7 @@ export default {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
-    '@/plugins/tools-setup.js'
+    '@/plugins/tools-setup.js',
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
