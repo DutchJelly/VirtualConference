@@ -27,6 +27,8 @@ export default {
                     })
                 }
             });
+            console.log("user: ");
+            console.log(this.$store.getters.getUser);
         });
     },
 }

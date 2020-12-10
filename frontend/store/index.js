@@ -3,7 +3,7 @@ import { resolve } from 'path';
 
 export const state = () => ({
     token: localStorage.getItem('token') || null,
-    user: localStorage.getItem('user') || null,
+    user: null,
     errorMsg: null,
     succesMsg: null
 });
@@ -12,99 +12,94 @@ export const mutations = {
     authenticate(state, token, user) {
         state.token = token;
         state.user = user;
-        state.errorMsg = null
-        state.succesMsg = null
     },
-    unauthenticate(state) {
-        state.token = null;
-        state.user = null;
+    setToken(state, token) {
+        state.token = token;
     },
-    errorMsg(state, e) {
-        state.errorMsg = e
-        state.succesMsg = null
+    setUser(state, user) {
+        state.user = user;
     },
-    succesMsg(state, e) {
-        state.succesMsg = e
-        state.errorMsg = null
+    setError(state, e) {
+        state.errorMsg = e;
+        state.succesMsg = null;
+    },
+    setMessage(state, e) {
+        state.succesMsg = e;
+        state.errorMsg = null;
     }
 };
 
 export const actions = {
     login({ commit }, { email, password }) {
-        axios
-            .post("http://localhost:5000/login", {
-                email: email,
-                password: password
-            })
-            .then(res => {
-                console.log('saving user:');
-                console.log(res.data);
-                localStorage.setItem('token', res.data.sessionKey);
-                commit('authenticate', res.data.sessionKey, res.data);
-                
-                this.$router.push({ path: "/plattegrond"});
-                resolve(res);
-            })
-            .catch(({ response }) => {
-                commit('errorMsg', response.data.error);
-                resolve(response);
-            })
+        axios.post("http://localhost:5000/login", {
+            email: email,
+            password: password
+        })
+        .then(res => {
+            localStorage.setItem('token', res.data.sessionKey);
+            commit('authenticate', res.data.sessionKey, res.data);
+            
+            this.$router.push({path: "/plattegrond"});
+        })
+        .catch(() => {
+            commit('setError', "Cannot login.");
+        })
+    },
+    refreshLogin({ commit, state, dispatch }) {
+        const token = state.token;
+        if(!token) return;
+
+        axios.post("http://localhost:5000/userObject", {
+            sessionKey: token
+        })
+        .then(res => {
+            if(!res.data?.id) {
+                commit("setError", "Something went wrong with requesting your user data.");
+                dispatch("logout");
+                return;
+            }
+            commit('setUser', res.data);
+            return;
+        })
+        .catch((err) => {
+            console.error(err);
+            commit("setError", "Your login could not be refreshed.");
+            dispatch("logout");
+        });
     },
     signup({ commit }, { username, password, image, email }) {
-        axios
-            .post("http://localhost:5000/register", {
-                username: username,
-                password: password,
-                image: image,
-                email: email
-            })
-            .then(res => {
-                commit('succesMsg', `${res.data.message}`)
-                this.$router.push({ path: "/"})
-                resolve(res);
-            })
-            .catch(({ response }) => {
-                if(response.data.error.isEmail) {
-                    commit('errorMsg', response.data.error.isEmail)
-                } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
-                    commit('errorMsg', response.data.error.length)
-                } else {
-                    commit('errorMsg', response.data.error)
-                }
-                resolve(response);
-            })
+        axios.post("http://localhost:5000/register", {
+            username: username,
+            password: password,
+            image: image,
+            email: email
+        })
+        .then(res => {
+            commit('setMessage', `${res.data.message}`)
+            this.$router.push("/"); //TODO check if this is right, it was .push({path: "/"})
+        })
+        .catch(({ response }) => {
+            if(response.data.error.isEmail) {
+                commit('setError', response.data.error.isEmail)
+            } else if(typeof response.data.error.length === 'string' || response.data.error.length instanceof String) {
+                commit('setError', response.data.error.length)
+            } else {
+                commit('setError', response.data.error)
+            }
+        })
     },
-    joinRoom({ commit }, { sessionKey, roomId } ) {
-        axios
-            .post("http://localhost:5000/joinRoom", {
-                sessionKey: sessionKey,
-                roomId: roomId
-            })
-            .then(res => {
-                console.log(res.data)
-                this.$router.push({ name: "kamerview", query: res.body })
-                resolve(res);
-            })
-            .catch(({ response }) => {
-                if(response.error){
-                    commit('errorMsg', response.error)
-                } else {
-                    commit('errorMsg', "a problem occured please try to login again")
-                }
-                this.$router.push({ path: "/"})
-                resolve(response);
-            })
-    },
-    logout () {
+    logout ({ commit }) {
+        console.warn("logging out")
         localStorage.removeItem('token')
-        commit('unauthenticate');
+        commit('authenticate', null, null);
         this.$router.push({ path: "/"})
     }
 };
 
 export const getters = {
-    isLoggedIn: state => !!state.token,
+    getToken: state => state.token,
+    getUser: state => state.user,
     authErrorMsg: state => state.errorMsg,
     authSuccessMsg: state => state.succesMsg,
-    getUser: state => state.user
+    
 }

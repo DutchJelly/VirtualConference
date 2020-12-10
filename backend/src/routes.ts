@@ -183,6 +183,8 @@ const loginRequired: Handler = async (req, res, next) => {
         });
     }
 
+    //TODO update login time left here
+
     //Pass the user to the rest of the routes.
     req.user = user;
     // console.log(`successfully logged in user ${user.username}`);
