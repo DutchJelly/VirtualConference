@@ -4,4 +4,5 @@ export default function ({ store, redirect }) {
             console.log(user);
             if(user) return redirect('/plattegrond');
         }});
+    else if(store.getters.getUser) return redirect('/plattegrond');
 }

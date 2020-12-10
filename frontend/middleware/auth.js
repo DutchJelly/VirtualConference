@@ -5,4 +5,5 @@ export default function ({ store, redirect }) {
             console.log(user);
             if(!user) redirect('/');
         }});
+    else if(!store.getters.getToken) redirect('/');
 }

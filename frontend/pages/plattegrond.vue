@@ -1,11 +1,15 @@
 <template>
     <div class="main">
+        <h1>{{user}}</h1>
         <iframe id="ifr" src="YANC21-floorplan.sozi.html">
         </iframe>
     </div>
 </template>
 
 <script>
+
+import { mapState } from 'vuex'
+
 export default {
     middleware: 'auth',
     mounted() {
@@ -26,11 +30,15 @@ export default {
                         })
                     })
                 }
+                
             });
-            console.log("user: ");
-            console.log(this.$store.getters.getUser);
         });
     },
+    computed: {   
+        ...mapState({
+            user: 'user'
+        })
+    }
 }
 </script>
 <style>
