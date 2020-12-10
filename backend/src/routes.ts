@@ -322,20 +322,20 @@ app.post('/login', json(), async (req, res, next) => {
  * @apiName roomObject
  * @apiGroup rooms
  *
- * @apiParam {roomID} roomID The roomID of which the roomObject wants to be returned
+ * @apiParam {roomId} roomId The roomID of which the roomObject wants to be returned
  *
  * @apiSuccess {json} json_object The json object of the room that with given roomID
  *
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
  *      {
- *          roomID: "4",
+ *          roomId: "4",
  * 			conferenceId: "1",
  * 			roomType: "open",
  * 			members[]: "[Bob, Jan, Henk, ...]"
  * 			
  *      }
- * @apiError roomIdDoesNotExist The room object with given roomID does not exist
+ * @apiError roomIdDoesNotExist The room object with given roomId does not exist
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -344,13 +344,13 @@ app.post('/login', json(), async (req, res, next) => {
  *
  */  
 app.post('/roomObject', json(), loginRequired, async (req, res, next) => {
-	const roomID = req.body.roomID;
-	const room = await Room.findOne(roomID);
+	const roomId = req.body.roomId;
+	const room = await Room.findOne(roomId);
 	if(!room){
 		return res.status(400).json({error: 'Room does not exist.'})
 	}
 	res.status(200).json({
-        roomID: room.roomId,
+        roomId: room.roomId,
         conferenceId: room.conferenceId,
 		roomType: room.roomType,
 		members: room.members
