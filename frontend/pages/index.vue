@@ -31,7 +31,7 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 
-      <nuxt-link to="registreer" class="register-button" tag="button">
+      <nuxt-link to="register" class="register-button" tag="button">
           Nog geen account? klik hier
       </nuxt-link>
       <div class="message" :class="error || succes ? 'opacity-100' : 'opacity-0'">

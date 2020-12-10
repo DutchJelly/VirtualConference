@@ -1,13 +1,20 @@
-import axios from 'axios'
-import { resolve } from 'path';
+/**
+ * Manage authorization of the user that's using the app.
+ * @author RichardMiddelkoop
+ * @author DutchJelly
+ */
 
+import axios from 'axios'
+
+//The state of the login.
 export const state = () => ({
     token: localStorage.getItem('token') || null,
     user: null,
     errorMsg: null,
     succesMsg: null
 });
-  
+
+//Mutations for the login state.
 export const mutations = {
     authenticate(state, token, user) {
         state.token = token;
@@ -29,7 +36,10 @@ export const mutations = {
     }
 };
 
+//Actions that possibly commit mutations to the login state.
 export const actions = {
+
+    //Logs in a user with the specified email and password. Redirects to plattegrond.vue.
     login({ commit }, { email, password }) {
         console.log('login call');
 
@@ -43,12 +53,17 @@ export const actions = {
             localStorage.setItem('token', res.data.sessionKey);
             commit('authenticate', res.data.sessionKey, res.data);
             
-            this.$router.push({path: "/plattegrond"});
+            this.$router.push({path: "/mapview"});
         })
         .catch(() => {
             commit('setError', "Cannot login.");
         })
     },
+
+    //Refreshes the logged in user with the session key. cb gets called with the user object
+    //if this action is successful. This action will commit the user if anything changed.
+    //This action will also logout if the user doesn't exist anymore. If anything internal
+    //error occurs, this'll be commited to the errorMsg.
     refreshLogin({ commit, state, dispatch }, {cb}) {
         console.log('refreshLogin call');
 
@@ -78,6 +93,8 @@ export const actions = {
             dispatch("logout");
         });
     },
+
+    //Will signup a user with the specified username, password, image and email.
     signup({ commit }, { username, password, image, email }) {
         axios.post("http://localhost:5000/register", {
             username: username,
@@ -86,8 +103,8 @@ export const actions = {
             email: email
         })
         .then(res => {
-            commit('setMessage', `${res.data.message}`)
-            this.$router.push("/"); //TODO check if this is right, it was .push({path: "/"})
+            commit('setMessage', `${res.data.message}`);
+            this.$router.push({ path: "/"} );
         })
         .catch(({ response }) => {
             if(response.data.error.isEmail) {
@@ -99,18 +116,20 @@ export const actions = {
             }
         })
     },
+
+    //Logs out the current user and redirects to login page, if any is logged in.
     logout ({ commit }) {
-        console.warn("logging out")
-        localStorage.removeItem('token')
+        console.warn("logging out");
+        localStorage.removeItem('token');
         commit('authenticate', null, null);
         this.$router.push({ path: "/"})
     }
 };
 
+//Getters of the state variables. This is a bit redundant.
 export const getters = {
     getToken: state => state.token,
     getUser: state => state.user,
     authErrorMsg: state => state.errorMsg,
     authSuccessMsg: state => state.succesMsg,
-    
 }

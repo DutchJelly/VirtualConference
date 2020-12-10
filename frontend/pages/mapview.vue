@@ -7,25 +7,26 @@
 </template>
 
 <script>
-
+/**
+ * See the map of the conference.
+ */
 import { mapState } from 'vuex'
 
 export default {
     middleware: 'auth',
     mounted() {
         this.$nextTick(() => {
-            let that = this
             let iframe = document.getElementById('ifr')
             let layers = iframe.contentDocument.querySelectorAll('g')
-            layers.forEach(function(element) {
+            layers.forEach((element) => {
                 if(element.getAttribute("inkscape:label")) {
-                    element.addEventListener("click", function() {
+                    element.addEventListener("click", () => {
                         console.log("into function")
-                        console.log(window.localStorage.getItem('token'))
+                        console.log(this.$store.getters.getToken)
                         console.log(element.id)
-                        that.$store.dispatch({
+                        this.$store.dispatch({
                             type: 'joinRoom',
-                            sessionKey: window.localStorage.getItem('token'),
+                            sessionKey: this.$store.getters.getToken,
                             roomId: element.id
                         })
                     })
@@ -38,6 +39,14 @@ export default {
         ...mapState({
             user: 'user'
         })
+    },
+    beforeRouteLeave (to, from, next){
+        alert('leaving mapview page');
+    },
+    methods: {
+        joinRoom(){
+            
+        }
     }
 }
 </script>

@@ -25,7 +25,9 @@
 </template>
 
 <script>
-
+/**
+ * Test page for the UserSpace component.
+ */
 
 export default {
     name: 'Test',
