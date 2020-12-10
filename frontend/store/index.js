@@ -67,7 +67,8 @@ export const actions = {
                 return;
             }
             console.log('setting user');
-            commit('setUser', res.data);
+            if(state.user !== res.data)
+                commit('setUser', res.data);
             cb(res.data);
             return;
         })

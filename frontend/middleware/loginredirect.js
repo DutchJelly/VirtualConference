@@ -1,8 +1,6 @@
 export default function ({ store, redirect }) {
-    if(!store.getters.getUser && store.getters.getToken)
+    if(store.getters.getToken)
         store.dispatch('refreshLogin', {cb: (user) => {
-            console.log(user);
             if(user) return redirect('/plattegrond');
         }});
-    else if(store.getters.getUser) return redirect('/plattegrond');
 }
