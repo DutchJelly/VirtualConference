@@ -31,11 +31,15 @@ export const mutations = {
 
 export const actions = {
     login({ commit }, { email, password }) {
+        console.log('login call');
+
         axios.post("http://localhost:5000/login", {
             email: email,
             password: password
         })
         .then(res => {
+            console.log('logged in for ');
+            console.log(res.data);
             localStorage.setItem('token', res.data.sessionKey);
             commit('authenticate', res.data.sessionKey, res.data);
             
@@ -45,7 +49,11 @@ export const actions = {
             commit('setError', "Cannot login.");
         })
     },
-    refreshLogin({ commit, state, dispatch }) {
+    refreshLogin({ commit, state, dispatch }, {cb}) {
+        console.log('refreshLogin call');
+
+        console.log(cb);
+
         const token = state.token;
         if(!token) return;
 
@@ -58,7 +66,9 @@ export const actions = {
                 dispatch("logout");
                 return;
             }
+            console.log('setting user');
             commit('setUser', res.data);
+            cb(res.data);
             return;
         })
         .catch((err) => {
