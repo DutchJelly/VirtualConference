@@ -12,28 +12,23 @@
  * See the map of the conference.
  */
 import { mapState } from 'vuex'
-
 export default {
     middleware: 'auth',
-    mounted() {
+    async mounted() {
         this.$nextTick(() => {
             let iframe = document.getElementById('ifr')
-            let layers = iframe.contentDocument.querySelectorAll('g')
-            layers.forEach((element) => {
-                if(element.getAttribute("inkscape:label")) {
-                    element.addEventListener("click", () => {
-                        console.log("into function")
-                        console.log(this.$store.getters.getToken)
-                        console.log(element.id)
-                        this.$store.dispatch({
-                            type: 'joinRoom',
-                            sessionKey: this.$store.getters.getToken,
-                            roomId: element.id
+            setTimeout(() => {
+                let layers = iframe.contentDocument.querySelectorAll('g')
+                layers.forEach((element) => {
+                    if(element.getAttribute("inkscape:label")) {
+                        element.addEventListener("click", () => {
+                            this.$router.push({ path:"/roomview", query: element.id })
                         })
-                    })
-                }
-                
-            });
+                    }
+                    
+                }); 
+            }, 200)
+
         });
     },
     computed: {   
