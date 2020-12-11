@@ -1,8 +1,10 @@
 <template>
     <div class="main">
         <h1>{{user}}</h1>
+        <button class="logout" @click.prevent="logout">log out</button>
         <iframe id="ifr" src="YANC21-floorplan.sozi.html">
         </iframe>
+
     </div>
 </template>
 
@@ -46,6 +48,9 @@ export default {
     methods: {
         joinRoom(){
             
+        },
+        logout(){
+            this.$store.dispatch('logout')
         }
     }
 }
@@ -58,5 +63,20 @@ export default {
 iframe {
     height:100%;
     width: 100%;
+}
+
+.logout {
+  outline: none;
+  @apply shadow bg-green-700 mt-3 text-xl text-white p-2 rounded border-2 border-transparent;
+  position: absolute;
+  top: 90%;
+  left: 1%;
+  width: 200px;
+  max-width: 10%;
+  height: 60px;
+}
+.logout:hover,
+.logout:focus {
+  @apply bg-green-600;
 }
 </style>
