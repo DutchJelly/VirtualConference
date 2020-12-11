@@ -75,7 +75,7 @@
 </template>
 
 <script>
-
+import resizeImage from '@/plugins/image-resize.js';
 export default {
 
   data () {
@@ -87,6 +87,7 @@ export default {
         newEmail: "",
         checkNewPassword: ""
       },
+      resizedImg: "",
     };
   },
   computed: {
@@ -115,12 +116,13 @@ export default {
                   type: 'signup',
                   username: this.registerForm.newUsername,
                   password: this.registerForm.newPassword,
-                  image: "not an image",
+                  image: this.resizedImg,
                   email: this.registerForm.newEmail
               })
               this.registerForm.newUsername = ""
               this.registerForm.newPassword = ""
               this.image = ""
+              this.resizeImg = ""
               this.registerForm.newEmail = ""
               this.registerForm.checkNewPassword = ""
           } else {
@@ -142,6 +144,11 @@ export default {
           vm.image = e.target.result;
         };
         reader.readAsDataURL(file);
+        resizeImage({ file: file, maxSize: 50 }).then((resizedImage) => {
+          this.resizedImg = URL.createObjectURL(resizedImage);
+        }).catch((err) => {
+          console.error(err);
+        });
       }
   }
 };

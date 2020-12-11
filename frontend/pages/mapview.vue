@@ -1,6 +1,5 @@
 <template>
     <div class="main">
-        <h1>{{user}}</h1>
         <button class="logout" @click.prevent="logout">log out</button>
         <iframe id="ifr" src="YANC21-floorplan.sozi.html">
         </iframe>
