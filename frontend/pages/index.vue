@@ -31,7 +31,7 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 
-      <nuxt-link to="registreer" class="register-button" tag="button">
+      <nuxt-link to="register" class="register-button" tag="button">
           Nog geen account? klik hier
       </nuxt-link>
       <div class="message" :class="error || succes ? 'opacity-100' : 'opacity-0'">
@@ -55,18 +55,18 @@ export default {
   },
   computed: {
     error: function() {
-      return this.$store.state.errorMsg
+      return this.$store.getters.authErrorMsg;
     },
     succes: function() {
-      return this.$store.state.succesMsg
+      return this.$store.getters.authSuccessMsg;
     }
   },
   watch: {
     error(oldVal, newVal) {
-        if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('setError', null), 2000)
     },
     succes(oldVal, newVal) {
-        if (newVal != oldVal)setTimeout(() => this.$store.commit('succesMsg', null), 4000)
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('setMessage', null), 4000)
     }
   },
   methods: {

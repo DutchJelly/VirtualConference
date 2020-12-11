@@ -1,8 +1,13 @@
-export default function ({ store, redirect }) {
-    console.log(store);
-    //TODO the getters of the store aren't defined?
-    //TODO the user object isn't saved?
-    console.log(`user ${store.isLoggedIn ? 'is' : 'isn\'t'} logged in`);
-    if (!store.state.token) 
-        return redirect('/');
+/**
+ * Redirect back to login if the user isn't logged in anymore.
+ * @author DutchJelly
+ */
+export default function ({ store, redirect }) {    
+    if(store.getters.getToken)
+        store.dispatch('refreshLogin', {cb: (user) => {
+            console.log("authorized user:");
+            console.log(user);
+            if(!user) return redirect('/');
+        }});
+    else if(!store.getters.getToken) redirect('/');
 }
