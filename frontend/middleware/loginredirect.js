@@ -3,9 +3,7 @@
  * currently set to mapview.
  * @author DutchJelly
  */
-export default function ({ store, redirect }) {
+export default async function ({ store, redirect }) {
     if(store.getters.getToken)
-        store.dispatch('refreshLogin', {cb: (user) => {
-            if(user) return redirect('/mapview');
-        }});
+        if(await store.dispatch('refreshLogin')) return redirect('/mapview');
 }

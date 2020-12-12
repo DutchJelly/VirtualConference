@@ -40,63 +40,57 @@ export const mutations = {
 export const actions = {
 
     //Logs in a user with the specified email and password. Redirects to plattegrond.vue.
-    login({ commit }, { email, password }) {
+    async login({ commit }, { email, password }) {
         console.log('login call');
-
-        axios.post("http://localhost:5000/login", {
-            email: email,
-            password: password
-        })
-        .then(res => {
+        try{
+            const res = await axios.post("http://localhost:5000/login", {
+                email: email,
+                password: password
+            });
             console.log('logged in for ');
             console.log(res.data);
             localStorage.setItem('token', res.data.sessionKey);
             commit('authenticate', res.data.sessionKey, res.data);
-            
             this.$router.push({path: "/mapview"});
-        })
-        .catch(() => {
+            return res.data;
+        } catch(err){
             commit('setError', "Cannot login.");
-        })
+        }
     },
 
     //Refreshes the logged in user with the session key. cb gets called with the user object
     //if this action is successful. This action will commit the user if anything changed.
     //This action will also logout if the user doesn't exist anymore. If anything internal
     //error occurs, this'll be commited to the errorMsg.
-    refreshLogin({ commit, state, dispatch }, {cb}) {
+    async refreshLogin({ commit, state, dispatch }) {
         console.log('refreshLogin call');
-
-        console.log(cb);
-
         const token = state.token;
         if(!token) return;
 
-        axios.post("http://localhost:5000/userObject", {
-            sessionKey: token
-        })
-        .then(res => {
+        try{
+            const res = await axios.post("http://localhost:5000/userObject", {
+                sessionKey: token
+            });
             if(!res.data?.id) {
                 commit("setError", "Something went wrong with requesting your user data.");
                 dispatch("logout");
-                return;
+            } else {
+                console.log('setting user');
+                if(state.user !== res.data)
+                    commit('setUser', res.data);
+                return res.data;
             }
-            console.log('setting user');
-            if(state.user !== res.data)
-                commit('setUser', res.data);
-            cb(res.data);
-            return;
-        })
-        .catch((err) => {
+            return null;
+        } catch(err){
             console.error(err);
             commit("setError", "Your login could not be refreshed.");
             dispatch("logout");
-        });
+        }
     },
 
     //Will signup a user with the specified username, password, image and email.
     signup({ commit }, { username, password, image, email }) {
-        axios.post("http://localhost:5000/register", {
+        return axios.post("http://localhost:5000/register", {
             username: username,
             password: password,
             image: image,
