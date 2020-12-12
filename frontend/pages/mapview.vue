@@ -38,13 +38,13 @@ export default {
                     if(element.getAttribute("inkscape:label")) {
                         element.addEventListener("click", () => {
                             this.$router.push({ path:"/roomview", query: element.id })
-                        })
+                        });
                         element.addEventListener("mouseover", () => {
                             this.roomNumber = element.getAttribute("inkscape:label")
-                        })
+                        });
                     }
                 });
-            }
+            };
         });
     },
     computed: {   
