@@ -38,11 +38,9 @@ export default {
     },
     beforeRouteLeave (to, from, next){
         alert('leaving mapview page');
+        next();
     },
     methods: {
-        joinRoom(){
-            
-        },
         logout(){
             this.$store.dispatch('logout')
         }
