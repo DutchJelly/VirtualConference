@@ -1,5 +1,5 @@
 <template>
-    <div class="meet-container" v-if="openConference === true">
+    <div class="meet-container" v-if="conversation">
         <div id="leaveRoom" ref="leaveRoom" v-if="joinedRoom === true">
             <button class="leaveButton" style="vertical-align:middle" v-on:click="onLeaveRoom" @click.prevent="onLeaveConversation()">
                 <span>Leave
@@ -38,10 +38,12 @@ export default {
         };
     },
     props: {
-        user: String,
-        room: String,
-        openConference: Boolean,
-        typeConversation: String,
+        conversation: {
+            groupId: Number,
+            roomCode: String,
+            memberIds: [],
+            typeConversation: String
+        },
         isModerator: Boolean,
         onLeaveConversation: Function,
     },
@@ -50,7 +52,7 @@ export default {
             //If the user is a moderator.
             if(this.isModerator === true){
                 return {
-                    roomName: this.room,
+                    roomName: this.conversation.roomCode,
                     width: 700,
                     height: 700,
                     noSSL: false,
@@ -79,7 +81,7 @@ export default {
                 };
             } else { //If the user is not a moderator.
                 return {
-                    roomName: this.room,
+                    roomName: this.conversation.roomCode,
                     width: 700,
                     height: 700,
                     noSSL: false,

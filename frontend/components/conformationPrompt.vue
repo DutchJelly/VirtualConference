@@ -15,7 +15,12 @@
 export default {
   name: 'ConformationPrompt',
   props: {
-    user: String,
+    user: {
+      id: Number,
+      username: String,
+      email: String,
+      image: String
+    },
     onAccept: Function,
     onDecline: Function,
     typeConversation: String,

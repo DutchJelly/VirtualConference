@@ -31,13 +31,14 @@ export default {
     },
     async mounted() {
         this.$nextTick(() => {
-            let iframe = document.getElementById('ifr');
+            const iframe = document.getElementById('ifr');
             iframe.onload = () => {
-                let layers = iframe.contentDocument.querySelectorAll('g')
+                const layers = iframe.contentDocument.querySelectorAll('g')
                 layers.forEach((element) => {
                     if(element.getAttribute("inkscape:label")) {
+                        const label = element.getAttribute("inkscape:label");
                         element.addEventListener("click", () => {
-                            this.$router.push({ path:"/roomview", query: element.id })
+                            this.$router.push({ path:"/roomview", query: {roomId: label}});
                         });
                         element.addEventListener("mouseover", () => {
                             this.roomNumber = element.getAttribute("inkscape:label")
@@ -53,7 +54,6 @@ export default {
         })
     },
     beforeRouteLeave (to, from, next){
-        alert('leaving mapview page');
         next();
     },
     methods: {

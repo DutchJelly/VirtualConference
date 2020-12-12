@@ -1,9 +1,9 @@
 <template>
     <main class="sidebar-content">
-        <ul v-for="item in items" :key="item.user">
-            <div v-if="item.user.toLowerCase().includes(contains.toLowerCase())">
+        <ul v-for="item in items" :key="item.username">
+            <div v-if="item.username.toLowerCase().includes(contains.toLowerCase())">
                 <button class="user">
-                    {{ item.user }}
+                    {{ item.username }}
                 </button>
             </div>
         </ul>

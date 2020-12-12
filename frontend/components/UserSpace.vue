@@ -27,13 +27,13 @@
         <div 
             class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
-            v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.members.includes(user.id))"
+            v-show="(!filter || user.username.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.members.includes(user.id))"
             @click.prevent="onUserClick(user)"
         >
             <!-- This break the formatting if it overflows on the right of the page -->
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
-                    Gebruikersnaam: {{ user.user }}
+                    Gebruikersnaam: {{ user.username }}
                 </span>
             </div>
         </div>
