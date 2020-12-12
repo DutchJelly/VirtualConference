@@ -31,8 +31,8 @@ export default {
     },
     async mounted() {
         this.$nextTick(() => {
-            let iframe = document.getElementById('ifr')
-            setTimeout(() => {
+            let iframe = document.getElementById('ifr');
+            iframe.onload = () => {
                 let layers = iframe.contentDocument.querySelectorAll('g')
                 layers.forEach((element) => {
                     if(element.getAttribute("inkscape:label")) {
@@ -43,10 +43,8 @@ export default {
                             this.roomNumber = element.getAttribute("inkscape:label")
                         })
                     }
-                    
-                }); 
-            }, 200)
-
+                });
+            }
         });
     },
     computed: {   
