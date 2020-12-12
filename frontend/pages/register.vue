@@ -75,7 +75,6 @@
 </template>
 
 <script>
-
 export default {
 
   data () {
@@ -91,10 +90,10 @@ export default {
   },
   computed: {
     error: function() {
-      return this.$store.state.errorMsg
+      return this.$store.getters.authErrorMsg;
     },
     succes: function() {
-      return this.$store.state.succesMsg
+      return this.$store.getters.authSuccessMsg;
     },
     match() {
       return (this.registerForm.newPassword == this.registerForm.checkNewPassword)
@@ -102,20 +101,20 @@ export default {
   },
   watch: {
     error(oldVal, newVal) {
-        if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('setError', null), 2000)
     },
     succes(oldVal, newVal) {
-        if (newVal != oldVal)setTimeout(() => this.$store.commit('succesMsg', null), 4000)
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('setMessage', null), 4000)
     }
   },
   methods: {
       signup() {
-          if (this.registerForm.newPassword == this.registerForm.checkNewPassword ) {
+          if (this.match && this.image != "data:,") {
               this.$store.dispatch({
                   type: 'signup',
                   username: this.registerForm.newUsername,
                   password: this.registerForm.newPassword,
-                  image: "not an image",
+                  image: this.image,
                   email: this.registerForm.newEmail
               })
               this.registerForm.newUsername = ""
@@ -124,7 +123,8 @@ export default {
               this.registerForm.newEmail = ""
               this.registerForm.checkNewPassword = ""
           } else {
-            this.$store.commit('errorMsg', "passwords do not match")
+            if (this.image == "data:,") this.$store.commit('setError', "Please select a different image")
+            else this.$store.commit('setError', "passwords do not match")
           }
       },
       onFileChange(e) {
@@ -134,14 +134,31 @@ export default {
         this.createImage(files[0]);
       },
       createImage(file) {
-        var image = new Image();
         var reader = new FileReader();
-        var vm = this;
+        
+        reader.readAsDataURL(file);
 
         reader.onload = (e) => {
-          vm.image = e.target.result;
-        };
-        reader.readAsDataURL(file);
+          
+          var img = new Image();
+          img.src = e.target.result;
+          
+          img.onload = (el) => {
+            
+            var elem = document.createElement('canvas');
+            var scaleFactor = 40 / el.target.width; //verhouding afbeelding
+            elem.width = 40;
+            elem.height = el.target.height * scaleFactor;
+          
+            var ctx = elem.getContext('2d');
+            ctx.drawImage(el.target, 0, 0, elem.width, elem.height);
+            var base64 = ctx.canvas.toDataURL(el.target, 'image/jpeg', 0);
+            this.image = base64;
+          
+          }
+
+        }
+
       }
   }
 };
