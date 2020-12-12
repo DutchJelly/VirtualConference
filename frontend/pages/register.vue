@@ -86,7 +86,6 @@ export default {
         newEmail: "",
         checkNewPassword: ""
       },
-      resizedImg: "",
     };
   },
   computed: {
@@ -115,13 +114,12 @@ export default {
                   type: 'signup',
                   username: this.registerForm.newUsername,
                   password: this.registerForm.newPassword,
-                  image: this.resizedImg,
+                  image: this.image,
                   email: this.registerForm.newEmail
               })
               this.registerForm.newUsername = ""
               this.registerForm.newPassword = ""
               this.image = ""
-              this.resizeImg = ""
               this.registerForm.newEmail = ""
               this.registerForm.checkNewPassword = ""
           } else {
@@ -152,16 +150,13 @@ export default {
             elem.width = 40;
             elem.height = el.target.height * scaleFactor;
           
-            //draw in canvas
             var ctx = elem.getContext('2d');
             ctx.drawImage(el.target, 0, 0, elem.width, elem.height);
             var base64 = ctx.canvas.toDataURL(el.target, 'image/jpeg', 0);
             this.image = base64;
+          
           }
-          
-          
-          //vm.image = e.target.result;
-          //console.log(vm.image)
+
         }
 
       }
