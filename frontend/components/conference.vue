@@ -1,5 +1,5 @@
 <template>
-    <div class="meet-container" v-show="conversation">
+    <div class="meet-container" v-if="conversation">
         <div id="leaveRoom" ref="leaveRoom" v-if="joinedRoom === true">
             <button class="leaveButton" style="vertical-align:middle" v-on:click="onLeaveRoom" @click.prevent="onLeaveConversation()">
                 <span>Leave
@@ -12,7 +12,7 @@
                 </span>
             </button>
         </div>
-        <div id="meet" ref="meet" v-if="conversation">
+        <div id="meet" ref="meet">
             <vue-jitsi-meet
                 ref="jitsiRef"
                 domain="meet.jit.si"
@@ -32,7 +32,6 @@ export default {
     },
     data: function() {
         return {
-            username: this.$route.query.username,
             joinedRoom: false,
             closeRoom: true,
         };
@@ -57,10 +56,7 @@ export default {
                     height: 700,
                     noSSL: false,
                     userInfo: {
-                        email: function() {
-                            return this.user + '@email.com'
-                        },
-                        displayName: this.user,
+                        displayName: this.$store.getters.getUser?.username,
                     },
                     configOverwrite: {
                         enableNoisyMicDetection: false
@@ -81,15 +77,12 @@ export default {
                 };
             } else { //If the user is not a moderator.
                 return {
-                    roomName: this.roomCode,
+                    roomName: this.conversation?.roomCode,
                     width: 700,
                     height: 700,
                     noSSL: false,
                     userInfo: {
-                        email: function() {
-                            return this.user + '@email.com'
-                        },
-                        displayName: this.user,
+                        displayName: this.$store.getters.getUser?.username,
                     },
                     configOverwrite: {
                         enableNoisyMicDetection: false

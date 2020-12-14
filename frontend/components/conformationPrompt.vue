@@ -26,6 +26,7 @@ export default {
 
 .conformation-window{
   @apply p-5 bg-gray-800 rounded flex flex-col items-center;
+  z-index: 4;
 }
 
 .conformation-window .message{

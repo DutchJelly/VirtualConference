@@ -5,7 +5,7 @@
                 class="userspace" 
                 :users="users"
                 :groups="groups" 
-                :gridCols=10
+                :gridCols=14
                 :gridSpacing=1
                 :onUserClick="openTypeConversationPrompt"
                 :onGroupClick="joinConversation"
@@ -164,7 +164,7 @@ export default {
 
             //Handle requests for joining the current user's existing group.
             this.socket.on("joinrequest", (data) => {
-                if(!data || data.groupId === null || !data.memberIds) {
+                if(!data || data.groupId === undefined) {
                     console.error("unexpected data type of received join request");
                     return;
                 }
@@ -274,11 +274,13 @@ export default {
                 this.info = "That conversation is private, which means that you cannot join.";
                 return;
             }
+
+            console.log(group);
             
             try {
                 const response = await this.$axios.post("http://localhost:5000/joinconversation", {
                     sessionKey,
-                    groupId: group.id
+                    groupId: group.groupId
                 });
 
                 if(!response.data){
@@ -286,8 +288,9 @@ export default {
                     return;
                 }
 
+
                 if(response.data.message){
-                    this.info = response.message;
+                    this.info = response.data.message;
                     return;
                 }
 
