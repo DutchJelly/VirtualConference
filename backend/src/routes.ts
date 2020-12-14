@@ -104,6 +104,7 @@ io.on('connection', (socket) => {
 
 //Emits new room data to all users that are in the room
 const emitRoomUpdate = async (roomId: string) => {
+    console.log('emmitting room update');
     const room = await Room.findOne({ where: { roomId }, relations: ['members', 'members.user'] });
     const calls = await Call.find({ where: { room }, relations: ['members', 'members.user'] });
     if (!room) {
@@ -113,7 +114,7 @@ const emitRoomUpdate = async (roomId: string) => {
     const roomData = {
         roomId,
         users: room.members.map(x => (x.user.toUserData())),
-        groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId }))
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId, typeConversation: x.type}))
     };
     await Promise.all(roomData.users.map(async x => {
 
@@ -134,12 +135,13 @@ const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if (call.members.length === 0)
         throw new Error('Illegal state: found a call with no members.');
 
-    if (call.members.length === 1) {
-        await Call.remove(call);
-    }
-
     roomUser.call = undefined;
     await roomUser.save();
+
+    if (call.members.length === 1) {
+        await Call.delete(call.callId);
+    }
+    
 
     if (submitUpdate && roomUser.room) {
         await emitRoomUpdate(roomUser.room.roomId);
@@ -348,7 +350,8 @@ app.post('/roomObject', json(), loginRequired, async (req, res, next) => {
 	const room = await Room.findOne(roomId);
 	if(!room){
 		return res.status(400).json({error: 'Room does not exist.'})
-	}
+    }
+    //TODO: This should return all groups too. Currently it also won't find any members.
 	res.status(200).json({
         roomId: room.roomId,
         conferenceId: room.conferenceId,
@@ -489,7 +492,7 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     res.status(200).json({
         roomId: room.roomId,
         users: room.members.filter(x => x.user).map(x => x.user.toUserData()),
-        groups: calls.map(x => ({ memberIds: x.members.map(y => y.id), groupId: x.callId }))
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.id), groupId: x.callId, typeConversation: x.type }))
     });
 
     await emitRoomUpdate(roomId);
@@ -574,7 +577,7 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
     }
 
     if (!response) {
-        socket.emit('requestDeclined', { message: `${req.user!.username} declined your request.` })
+        socket.emit('requestdeclined', { message: `${req.user!.username} declined your request.` })
         //TODO: we could also let sender know that you declined his/her request, but this could be a bit harsh.
         return res.status(200).json({ message: `Succesfully declined request of ${sender!.username}.` });
     }
@@ -650,7 +653,7 @@ type JoinConversation{
 app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
 
     const groupId = req.body.groupId;
-    if (!groupId)
+    if (groupId === null)
         return res.status(400).json({ error: 'Not all fields are present in the post body.' });
 
     const call = await Call.findOne({ where: { groupId }, relations: ["room", "members", "members.user"] });
