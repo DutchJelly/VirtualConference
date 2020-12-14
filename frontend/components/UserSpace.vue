@@ -30,9 +30,15 @@
         >
             <!-- This break the formatting if it overflows on the right of the page -->
             <div class="popupBox" :style="`top: 20px; left: 110%`">
-                <span>
-                    Gebruikersnaam: {{ user.username }}
-                </span>
+                <div v-if="currentUser.id == user.id">
+                    Gebruikersnaam: {{ user.username }} (this is you)
+                </div>
+                <div v-else>
+                    <span>
+                        Gebruikersnaam: {{ user.username }}
+                    </span>
+                </div>
+                
             </div>
         </div>
         <div class="buttons">
@@ -204,7 +210,9 @@ export default {
             return (100/this.gridCols) - this.gridSpacing;
         },
 
-        
+        currentUser: function() {
+            return this.$store.getters.getUser;
+        },
 
     },
 
