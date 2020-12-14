@@ -43,7 +43,10 @@
         </div>
         <div class="buttons">
             <button class="refreshMapping" @click.prevent="newMapping">Reposition Icons</button>
-            <button class="logoutButton" @click.prevent="logout">log out</button>
+
+            <!-- Creates a problem with leaveRoom -->
+            <!-- <button class="logoutButton" @click.prevent="logout">log out</button> -->
+            
             <button class="mapViewButton" @click.prevent="toMapView">back to the map</button>
         </div>
         
