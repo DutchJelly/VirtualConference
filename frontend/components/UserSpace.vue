@@ -30,7 +30,7 @@
         >
             <!-- This break the formatting if it overflows on the right of the page -->
             <div class="popupBox" :style="`top: 20px; left: 110%`">
-                <div v-if="currentUser.id == user.id">
+                <div v-if="currentUserId == user.id">
                     Gebruikersnaam: {{ user.username }} (this is you)
                 </div>
                 <div v-else>
@@ -210,8 +210,10 @@ export default {
             return (100/this.gridCols) - this.gridSpacing;
         },
 
-        currentUser: function() {
-            return this.$store.getters.getUser;
+        currentUserId: function() {
+            var currentUser = this.$store.getters.getUser
+            if(currentUser == undefined) return -1;
+            else return this.$store.getters.getUser.id;
         },
 
     },

@@ -3,7 +3,7 @@
         <ul v-for="item in items" :key="item.username">
             <div v-if="item.username.toLowerCase().includes(contains.toLowerCase())">
                 <button class="user">
-                    <div v-if="currentUser.id == item.id">{{ item.username }} (this is you)</div>
+                    <div v-if="currentUserId == item.id">{{ item.username }} (this is you)</div>
                     <div v-else>{{ item.username }} </div>
                 </button>
             </div>
@@ -20,8 +20,10 @@ export default {
         contains: String,
     },
     computed: {
-        currentUser: function() {
-            return this.$store.getters.getUser;
+        currentUserId: function() {
+            var currentUser = this.$store.getters.getUser
+            if(currentUser == undefined) return -1;
+            else return this.$store.getters.getUser.id;
         },
     },
 
