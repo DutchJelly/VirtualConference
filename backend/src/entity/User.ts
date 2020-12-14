@@ -39,7 +39,7 @@ export class User extends BaseEntity {
 	
     toUserData() {
         return {
-			username: this.email,
+			username: this.username,
 			id: this.id,
 			image: this.image,
 			email: this.email

@@ -5,7 +5,7 @@
                 class="userspace" 
                 :users="users"
                 :groups="groups" 
-                :gridCols=6
+                :gridCols=10
                 :gridSpacing=1
                 :onUserClick="openTypeConversationPrompt"
                 :onGroupClick="joinConversation"
@@ -84,6 +84,8 @@ export default {
             users: [],
             groups: [],
 
+
+            roomCode: null,
             //A conversation contains this data:
             // groupId: number,
             // roomCode: string,
@@ -196,8 +198,8 @@ export default {
             const request = this.incomingRequests[0];
             const user = this.getUserById(request.senderId);
             if(!user) console.error("cannot find user that sent a request");
-
-            if(request.groupId !== null) { //it's a join request
+            console.log(request);
+            if(request.groupId !== undefined) { //it's a join request
                 return `User ${user?.username} (${user?.email}) wants to join your conversation. Do you accept?`;
             }
             return `User ${user?.username} (${user?.email}) wants to start a ${request.type} conversation with you. Do you accept?`;

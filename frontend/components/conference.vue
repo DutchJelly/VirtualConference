@@ -1,5 +1,5 @@
 <template>
-    <div class="meet-container" v-if="conversation">
+    <div class="meet-container" v-show="conversation">
         <div id="leaveRoom" ref="leaveRoom" v-if="joinedRoom === true">
             <button class="leaveButton" style="vertical-align:middle" v-on:click="onLeaveRoom" @click.prevent="onLeaveConversation()">
                 <span>Leave
@@ -12,7 +12,7 @@
                 </span>
             </button>
         </div>
-        <div id="meet" ref="meet">
+        <div id="meet" ref="meet" v-if="conversation">
             <vue-jitsi-meet
                 ref="jitsiRef"
                 domain="meet.jit.si"
@@ -52,7 +52,7 @@ export default {
             //If the user is a moderator.
             if(this.isModerator === true){
                 return {
-                    roomName: this.conversation.roomCode,
+                    roomName: this.conversation?.roomCode,
                     width: 700,
                     height: 700,
                     noSSL: false,
@@ -81,7 +81,7 @@ export default {
                 };
             } else { //If the user is not a moderator.
                 return {
-                    roomName: this.conversation.roomCode,
+                    roomName: this.roomCode,
                     width: 700,
                     height: 700,
                     noSSL: false,
@@ -149,6 +149,11 @@ export default {
 </script>
 
 <style>
+
+.meet-container {
+    z-index: 2;
+}
+
 .leaveButton {
   display: inline-block;
   border-radius: 4px;

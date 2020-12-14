@@ -4,8 +4,8 @@
       {{message}}
     </div>
     <div class="buttons">
-      <button id="accept" @click.prevent="onAccept(user);">Accept</button>
-      <button id="decline" @click.prevent="onDecline(user);">Decline</button>
+      <button id="accept" @click.prevent="onAccept();">Accept</button>
+      <button id="decline" @click.prevent="onDecline();">Decline</button>
     </div>
   </main>
 </template>
