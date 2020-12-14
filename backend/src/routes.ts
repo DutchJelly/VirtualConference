@@ -30,6 +30,12 @@ declare global {
         groupId: number,
         senderId: number
     }
+
+    //If we would remove this, the ts would not compile because for some reason it then doesn't know that
+    //the null of RoomParticipant.call is fine.
+    interface Nullable {
+        id: null | Object
+    }
 }
 
 const env = require('dotenv');
@@ -117,6 +123,7 @@ io.on('connection', (socket) => {
  * @apiError {missingID} 'no room found for id [roomId]'
  */
 const emitRoomUpdate = async (roomId: string) => {
+    console.log('emmitting room update');
     const room = await Room.findOne({ where: { roomId }, relations: ['members', 'members.user'] });
     const calls = await Call.find({ where: { room }, relations: ['members', 'members.user'] });
     if (!room) {
@@ -126,8 +133,9 @@ const emitRoomUpdate = async (roomId: string) => {
     const roomData = {
         roomId,
         users: room.members.map(x => (x.user.toUserData())),
-        groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId }))
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId, typeConversation: x.type}))
     };
+    roomData.groups = roomData.groups.filter(x => x.memberIds.length > 0);
     await Promise.all(roomData.users.map(async x => {
 
         const s = await getSocket(x.id);
@@ -155,12 +163,13 @@ const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if (call.members.length === 0)
         throw new Error('Illegal state: found a call with no members.');
 
-    if (call.members.length === 1) {
-        await Call.remove(call);
-    }
-
-    roomUser.call = undefined;
+    roomUser.call = null;
     await roomUser.save();
+
+    if (call.members.length === 1) {
+        await Call.delete(call.callId);
+    }
+    
 
     if (submitUpdate && roomUser.room) {
         await emitRoomUpdate(roomUser.room.roomId);
@@ -389,7 +398,8 @@ app.post('/roomObject', json(), loginRequired, async (req, res, next) => {
 	const room = await Room.findOne(roomId);
 	if(!room){
 		return res.status(400).json({error: 'Room does not exist.'})
-	}
+    }
+    //TODO: This should return all groups too. Currently it also won't find any members.
 	res.status(200).json({
         roomId: room.roomId,
         conferenceId: room.conferenceId,
@@ -530,7 +540,7 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     res.status(200).json({
         roomId: room.roomId,
         users: room.members.filter(x => x.user).map(x => x.user.toUserData()),
-        groups: calls.map(x => ({ memberIds: x.members.map(y => y.id), groupId: x.callId }))
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.id), groupId: x.callId, typeConversation: x.type })).filter(x => x.memberIds.length > 0)
     });
 
     await emitRoomUpdate(roomId);
@@ -693,7 +703,7 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
     }
 
     if (!response) {
-        socket.emit('requestDeclined', { message: `${req.user!.username} declined your request.` })
+        socket.emit('requestdeclined', { message: `${req.user!.username} declined your request.` })
         //TODO: we could also let sender know that you declined his/her request, but this could be a bit harsh.
         return res.status(200).json({ message: `Succesfully declined request of ${sender!.username}.` });
     }
@@ -744,8 +754,8 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
         if (!call) {
             return res.status(400).json({ error: 'The call doesn\'t exist any more.' });
         }
-        req.roomParticipant!.call = call;
-        await req.roomParticipant!.save();
+        senderRoom.call = call;
+        await senderRoom.save();
 
         const callData = {
             groupId: call.callId,
@@ -799,10 +809,10 @@ type JoinConversation{
 app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
 
     const groupId = req.body.groupId;
-    if (!groupId)
+    if (groupId === null)
         return res.status(400).json({ error: 'Not all fields are present in the post body.' });
 
-    const call = await Call.findOne({ where: { groupId }, relations: ["room", "members", "members.user"] });
+    const call = await Call.findOne({ where: { callId: groupId }, relations: ["room", "members", "members.user"] });
     if (!call)
         return res.status(400).json({ error: 'That call doesn\'t exist.' });
 
@@ -841,7 +851,7 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
         //TODO IMPORTANT add error handler for production builds
         if (!call.members.length) throw new Error('Invalid state: no call members.');
 
-        const socket = await getSocket(call.members[0].id);
+        const socket = await getSocket(call.members[0].user.id);
         if (!socket) throw new Error('Invalid state: user in call is not connected.');
 
         socket.emit('joinrequest', requestData);
