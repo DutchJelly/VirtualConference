@@ -30,6 +30,12 @@ declare global {
         groupId: number,
         senderId: number
     }
+
+    //If we would remove this, the ts would not compile because for some reason it then doesn't know that
+    //the null of RoomParticipant.call is fine.
+    interface Nullable {
+        id: null | Object
+    }
 }
 
 const env = require('dotenv');
@@ -116,6 +122,7 @@ const emitRoomUpdate = async (roomId: string) => {
         users: room.members.map(x => (x.user.toUserData())),
         groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId, typeConversation: x.type}))
     };
+    roomData.groups = roomData.groups.filter(x => x.memberIds.length > 0);
     await Promise.all(roomData.users.map(async x => {
 
         const s = await getSocket(x.id);
@@ -135,8 +142,10 @@ const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if (call.members.length === 0)
         throw new Error('Illegal state: found a call with no members.');
 
-    roomUser.call = undefined;
+    console.log('removing call..');
+    roomUser.call = null;
     await roomUser.save();
+    console.log(roomUser.call);
 
     if (call.members.length === 1) {
         await Call.delete(call.callId);
@@ -492,7 +501,7 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     res.status(200).json({
         roomId: room.roomId,
         users: room.members.filter(x => x.user).map(x => x.user.toUserData()),
-        groups: calls.map(x => ({ memberIds: x.members.map(y => y.id), groupId: x.callId, typeConversation: x.type }))
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.id), groupId: x.callId, typeConversation: x.type })).filter(x => x.memberIds.length > 0)
     });
 
     await emitRoomUpdate(roomId);
@@ -656,7 +665,7 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
     if (groupId === null)
         return res.status(400).json({ error: 'Not all fields are present in the post body.' });
 
-    const call = await Call.findOne({ where: { groupId }, relations: ["room", "members", "members.user"] });
+    const call = await Call.findOne({ where: { callId: groupId }, relations: ["room", "members", "members.user"] });
     if (!call)
         return res.status(400).json({ error: 'That call doesn\'t exist.' });
 
