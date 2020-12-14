@@ -1,7 +1,7 @@
 <template>
   <main class="conformation-window">
     <div class="message">
-      <span class="requestinguser">{{user}}</span> wants to start a <span class="type">{{typeConversation}}</span> conversation with you
+      {{message}}
     </div>
     <div class="buttons">
       <button id="accept" @click.prevent="onAccept(user);">Accept</button>
@@ -15,25 +15,10 @@
 export default {
   name: 'ConformationPrompt',
   props: {
-    user: {
-      id: Number,
-      username: String,
-      email: String,
-      image: String
-    },
+    message: String,
     onAccept: Function,
-    onDecline: Function,
-    typeConversation: String,
-  },
-
-  data() {
-    return {
-    
-    };
-  },
-  methods: {
-    
-  },
+    onDecline: Function
+  }
 };
 </script>
 
