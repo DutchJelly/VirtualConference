@@ -2,7 +2,7 @@
     <div ref="userspace">
         <!-- I temporarely removed the group size because it's really difficult to implement with the current position mapping -->
         <div 
-            class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
+            class="group" v-for="group in groups" :key="'g' + group.groupId" :id="`g${group.groupId}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="!visibleGroup || visibleGroup === group"
             @click.prevent="onGroupClick(group)"
@@ -15,15 +15,9 @@
             
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
-                    In groep {{group.id}} zitten: {{group.memberIds}}
+                    In groep {{group.groupId}} zitten: {{group.memberIds}}
                 </span>
             </div>
-            
-            <!-- <div v-if="visibleGroup == group.id" class="text-gray-800">
-                <div v-for="member in group.members" :key="member" class="rounded-full w-20 h-20 bg-gray-800 relative">
-                    Dit is {{member}} van de group.
-                </div>
-            </div> -->
         </div>
 
         <div 
@@ -137,7 +131,7 @@ export default {
             //Map old version of group to new version of group
             let possiblyChangedGroupMapping = new Map();
             this.groupsCopy.forEach(group => {
-                let otherVersion = newVal.find(x => x.id === group.id);
+                let otherVersion = newVal.find(x => x.groupId === group.groupId);
                 if(otherVersion){
                     possiblyChangedGroupMapping.set(group, otherVersion);
                 }
@@ -148,7 +142,7 @@ export default {
 
             //Remove all removed groups from the position mapping, and also register their users as non positioned.
             removedGroups.forEach(group => {
-                this.positionMapping.delete('g' + group.id);
+                this.positionMapping.delete('g' + group.groupId);
                 group.memberIds.forEach(memberId => {
                     let member = this.users.find(u => u.id === memberId);
                     if(member) {
@@ -178,7 +172,7 @@ export default {
                 if(addedUsers?.length) changedMemberIds.push(...addedUsers);
                 if(removedUsers?.length) changedMemberIds.push(...removedUsers); 
 
-                console.log(`for group ${newVersion.id} the changed list is [${changedMemberIds.join(', ')}] (length ${changedMemberIds.length})`);
+                console.log(`for group ${newVersion.groupId} the changed list is [${changedMemberIds.join(', ')}] (length ${changedMemberIds.length})`);
 
                 changedMemberIds.forEach(changedMemberId => {
                     let changedMember = this.users.find(u => u.id === changedMemberId);
@@ -219,7 +213,7 @@ export default {
                 // Move all the users back to the group.
                 let members = this.getGroupMembers(this.visibleGroup);
                 members.forEach(member => {
-                    this.positionMapping.set('u' + member.id, this.positionMapping.get('g' + group.id));
+                    this.positionMapping.set('u' + member.id, this.positionMapping.get('g' + group.groupId));
                     this.positionAll();
                 });
 
@@ -241,7 +235,7 @@ export default {
             let toPlace = [...this.getGroupMembers(group)];
             let sideLength = 1;
             //Walk over all the 'sides'
-            let pos = this.positionMapping.get('g' + group.id);
+            let pos = this.positionMapping.get('g' + group.groupId);
             let x = pos.x;
             let y = pos.y;
             while(toPlace.length){
@@ -303,7 +297,7 @@ export default {
                 if(groups && groups.length){
                     //Set a random group's position to some pivot position.
                     let randomGroup = groups[Math.floor(Math.random() * groups.length)];
-                    this.positionMapping.set('g' + randomGroup.id, {
+                    this.positionMapping.set('g' + randomGroup.groupId, {
                         x: Math.floor(this.gridCols/2), 
                         y: Math.floor(this.visibleRows/2),
                         minDistance: 3,
@@ -326,10 +320,10 @@ export default {
 
         mapGroupPositions(groups){
             groups.forEach(group => {
-                if(!this.positionMapping.get('g' + group.id)) {
+                if(!this.positionMapping.get('g' + group.groupId)) {
                     let rSpotInfo = this.getRandomFreeSpot(3,5);
                     rSpotInfo.minDistance = 3;
-                    this.positionMapping.set('g' + group.id, rSpotInfo);
+                    this.positionMapping.set('g' + group.groupId, rSpotInfo);
                 }
             });
         },
@@ -341,7 +335,7 @@ export default {
                     //If the user is in a group, set the position of the user to the position of the group
                     let group = this.getUserGroup(user.id);
                     if(group) {
-                        this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.id));
+                        this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.groupId));
                     } else {
                         let rSpotInfo = this.getRandomFreeSpot(2,5);
                         rSpotInfo.minDistance = 2;
@@ -401,7 +395,7 @@ export default {
          * @returns a - b
          */
         getIdDifference(a, b){
-            return a.filter(x => !b.find(y => y.id === x.id));
+            return a.filter(x => !b.find(y => y.id === x.id || (y.groupId === x.groupId && y.groupId !== undefined)));
         },
 
         /**
@@ -511,7 +505,7 @@ export default {
          * Position the users and groups like mapped in positionMapping.
          */
         positionAll() {
-            this.groups.forEach(group => this.position('g' + group.id));
+            this.groups.forEach(group => this.position('g' + group.groupId));
             this.users.forEach(user => this.position('u' + user.id));
         },
         /**
