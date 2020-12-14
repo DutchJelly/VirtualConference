@@ -37,7 +37,8 @@
         </div>
         <div class="buttons">
             <button class="refreshMapping" @click.prevent="newMapping">Reposition Icons</button>
-            <button>test</button>
+            <button class="logoutButton" @click.prevent="logout">log out</button>
+            <button class="mapViewButton" @click.prevent="toMapView">back to the map</button>
         </div>
         
     </div>
@@ -209,6 +210,14 @@ export default {
 
     methods: {
 
+        logout(){
+            this.$store.dispatch('logout')
+        },
+
+        toMapView(){
+            this.$router.push({ path: "/mapview"} );
+        },
+        
         newMapping() {
             this.refreshPixelSizeReferences();
             this.positionMapping = new Map();
