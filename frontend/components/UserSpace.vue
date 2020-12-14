@@ -12,12 +12,14 @@
             <div class="group-text" :style="`font-size: ${squareSize/2}px; line-height: ${squareSize}px; top: -${squareSize/10}px;`">
                 {{groupText(group)}}
             </div>
+
             
-            <div class="popupBox" :style="`top: 20px; left: 110%`">
+            
+            <!-- <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
                     In groep {{group.groupId}} zitten: {{group.memberIds}}
                 </span>
-            </div>
+            </div> -->
         </div>
 
         <div 
@@ -33,7 +35,11 @@
                 </span>
             </div>
         </div>
-
+        <div class="buttons">
+            <button class="refreshMapping" @click.prevent="newMapping">Reposition Icons</button>
+            <button>test</button>
+        </div>
+        
     </div>
 </template>
 
@@ -47,11 +53,7 @@ export default {
 
         //We can only read the size of the element by using this Vue.nextTick callback.
         this.$nextTick(() => {
-            this.refreshPixelSizeReferences();
-            this.positionMapping = new Map();
-            this.mapPositions(this.users, this.groups);
-            this.positionAll();
-            this.positioned = true;
+            this.newMapping();
         });
     },
 
@@ -207,7 +209,15 @@ export default {
 
     methods: {
 
-        onGroupHover: function(group){
+        newMapping() {
+            this.refreshPixelSizeReferences();
+            this.positionMapping = new Map();
+            this.mapPositions(this.users, this.groups);
+            this.positionAll();
+            this.positioned = true;
+        },
+
+        onGroupHover(group){
             if(this.visibleGroup === group || (this.visibleGroup && this.visibleGroup !== group)){
                 
                 // Move all the users back to the group.
@@ -270,7 +280,7 @@ export default {
             }
         },
 
-        groupText: function(group){
+        groupText(group){
             if(!group?.memberIds?.length) return "0";
 
             let memberCount = group.memberIds.length;
@@ -534,9 +544,30 @@ export default {
 </script>
 
 <style>
-.userspace{
+
+
+.userspace {
     display: grid;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.buttons {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.buttons > button {
+    width: 100%;
+    height: 50px;
+    margin: 0.5rem;
+    border: 1px solid black;
+    border-radius: 0.5rem;
+}
+
+.buttons > button:active, .buttons > button:focus {
+    outline: none;
 }
 
 .userspace > * {
