@@ -6,6 +6,8 @@
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="!visibleGroup || visibleGroup === group"
             @click.prevent="onGroupClick(group)"
+            @mouseenter.prevent="onGroupHover(group)"
+            @mouseleave.prevent="onGroupHover(group)"
         > 
             <div class="group-text" :style="`font-size: ${squareSize/2}px; line-height: ${squareSize}px; top: -${squareSize/10}px;`">
                 {{groupText(group)}}
@@ -13,7 +15,7 @@
             
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <span>
-                    In groep {{group.id}} zitten: {{group.members}}
+                    In groep {{group.id}} zitten: {{group.memberIds}}
                 </span>
             </div>
             
@@ -27,7 +29,7 @@
         <div 
             class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
-            v-show="(!filter || user.username.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.members.includes(user.id))"
+            v-show="(!filter || user.username.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.memberIds.includes(user.id))"
             @click.prevent="onUserClick(user)"
         >
             <!-- This break the formatting if it overflows on the right of the page -->
@@ -74,6 +76,7 @@ export default {
     props: {
         users: Array, //username, id, image, group id
         onUserClick: Function,
+        onGroupClick: Function,
         filter: String,
         groups: Array, //Array of all groups with their respective members.
         gridCols: Number, //Grid contains squares, so no need for rows prop.
@@ -146,7 +149,7 @@ export default {
             //Remove all removed groups from the position mapping, and also register their users as non positioned.
             removedGroups.forEach(group => {
                 this.positionMapping.delete('g' + group.id);
-                group.members.forEach(memberId => {
+                group.memberIds.forEach(memberId => {
                     let member = this.users.find(u => u.id === memberId);
                     if(member) {
                         nonPositionedMembers.push(member);
@@ -157,7 +160,7 @@ export default {
 
             //Register all members of new groups as non positioned.
             newGroups.forEach(group => {
-                group.members.forEach(memberId => {
+                group.memberIds.forEach(memberId => {
                     let member = this.users.find(u => u.id === memberId);
                     if(member) {
                         nonPositionedMembers.push(member);
@@ -170,8 +173,8 @@ export default {
             //Check for removed and added users from possibly changed groups
             possiblyChangedGroupMapping.forEach((newVersion, oldVersion) => {
                 let changedMemberIds = [];
-                let addedUsers = newVersion.members.filter(x => !oldVersion.members.includes(x));
-                let removedUsers = oldVersion.members.filter(x => !newVersion.members.includes(x));
+                let addedUsers = newVersion.memberIds.filter(x => !oldVersion.memberIds.includes(x));
+                let removedUsers = oldVersion.memberIds.filter(x => !newVersion.memberIds.includes(x));
                 if(addedUsers?.length) changedMemberIds.push(...addedUsers);
                 if(removedUsers?.length) changedMemberIds.push(...removedUsers); 
 
@@ -210,7 +213,7 @@ export default {
 
     methods: {
 
-        onGroupClick: function(group){
+        onGroupHover: function(group){
             if(this.visibleGroup === group || (this.visibleGroup && this.visibleGroup !== group)){
                 
                 // Move all the users back to the group.
@@ -274,9 +277,9 @@ export default {
         },
 
         groupText: function(group){
-            if(!group?.members?.length) return "0";
+            if(!group?.memberIds?.length) return "0";
 
-            let memberCount = group.members.length;
+            let memberCount = group.memberIds.length;
             if(memberCount > 9) return "9+";
 
             return memberCount;
@@ -352,7 +355,7 @@ export default {
         getGroupsArrayCopy(groups){
             let groupsCopy = [...groups];
             groupsCopy.forEach(x => {
-                x.members = [...x.members];
+                x.memberIds = [...x.memberIds];
             });
             return groupsCopy;
         },
@@ -376,12 +379,12 @@ export default {
          * @returns {{members: Array<Number>, id: Number}} group that contains the user with id userId (or undefined) 
          */
         getUserGroup(userId) {
-            return this.groups.find(group => group.members.includes(userId));
+            return this.groups.find(group => group.memberIds.includes(userId));
         },
 
         getGroupMembers(group){
             let members = [];
-            group.members.forEach(memberId => {
+            group.memberIds.forEach(memberId => {
                 let member = this.users.find(u => u.id === memberId);
                 if(member) {
                     members.push(member);
@@ -412,7 +415,7 @@ export default {
             //TODO: This value seems to never change... remove this line?
             this.visibleRows = Math.floor(this.screenHeight/this.squareSize);
 
-            console.log(`height: ${this.screenHeight}, width: ${this.screenWidth}, squareSize: ${this.squareSize}, visible rows: ${this.visibleRows}`);
+            // console.log(`height: ${this.screenHeight}, width: ${this.screenWidth}, squareSize: ${this.squareSize}, visible rows: ${this.visibleRows}`);
         },
 
         /**
