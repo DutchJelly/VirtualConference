@@ -142,10 +142,8 @@ const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if (call.members.length === 0)
         throw new Error('Illegal state: found a call with no members.');
 
-    console.log('removing call..');
     roomUser.call = null;
     await roomUser.save();
-    console.log(roomUser.call);
 
     if (call.members.length === 1) {
         await Call.delete(call.callId);
@@ -637,8 +635,8 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
         if (!call) {
             return res.status(400).json({ error: 'The call doesn\'t exist any more.' });
         }
-        req.roomParticipant!.call = call;
-        await req.roomParticipant!.save();
+        senderRoom.call = call;
+        await senderRoom.save();
 
         const callData = {
             groupId: call.callId,
@@ -704,7 +702,7 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
         //TODO IMPORTANT add error handler for production builds
         if (!call.members.length) throw new Error('Invalid state: no call members.');
 
-        const socket = await getSocket(call.members[0].id);
+        const socket = await getSocket(call.members[0].user.id);
         if (!socket) throw new Error('Invalid state: user in call is not connected.');
 
         socket.emit('joinrequest', requestData);
