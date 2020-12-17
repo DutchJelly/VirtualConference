@@ -106,35 +106,33 @@ export default {
     },
     methods: {
         onIFrameLoad() {
-            this.closeRoom = true; //Show the button with 'Close'.
+            this.closeRoom = true;
             //Event listener when a user joined the video conference.
             this.$refs.jitsiRef.addEventListener('videoConferenceJoined', this.onVideoConferenceJoined);
         },
         //When the user joined the video conference.
         onVideoConferenceJoined: function(error) {
-            this.joinedRoom = true; //Show the button with 'Leave'.
-            this.closeRoom = false; //Unshow the button with 'Close'.
+            this.joinedRoom = true;
+            this.closeRoom = false;
         },
         //When the user clicks on the button with 'Leave'.
         onLeaveRoom: function() {
             let self = this;
             try {
-                this.joinedRoom = false; //Show the button with 'Leave'.
+                this.joinedRoom = false;
                 this.$refs.jitsiRef.removeJitsiWidget();
             } catch(error) {
                 console.log(error);
-                console.log("error leave room");
             }
         },
         //When the user clicks on the button with 'Close'.
         onCloseRoom: function() {
             let self = this;
             try {
-                this.closeRoom = false; //Show the button with 'Close'.
+                this.closeRoom = false;
                 this.$refs.jitsiRef.removeJitsiWidget();
             } catch(error) {
                 console.log(error);
-                console.log("error close room");
             }
         }, 
     },

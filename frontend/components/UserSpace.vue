@@ -1,6 +1,5 @@
 <template>
     <div ref="userspace">
-        <!-- I temporarely removed the group size because it's really difficult to implement with the current position mapping -->
         <div 
             class="group" v-for="group in groups" :key="'g' + group.groupId" :id="`g${group.groupId}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
@@ -12,14 +11,6 @@
             <div class="group-text" :style="`font-size: ${squareSize/2}px; line-height: ${squareSize}px; top: -${squareSize/10}px;`">
                 {{groupText(group)}}
             </div>
-
-            
-            
-            <!-- <div class="popupBox" :style="`top: 20px; left: 110%`">
-                <span>
-                    In groep {{group.groupId}} zitten: {{group.memberIds}}
-                </span>
-            </div> -->
         </div>
 
         <div 
@@ -28,7 +19,6 @@
             v-show="(!filter || user.username.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.memberIds.includes(user.id))"
             @click.prevent="onUserClick(user)"
         >
-            <!-- This break the formatting if it overflows on the right of the page -->
             <div class="popupBox" :style="`top: 20px; left: 110%`">
                 <div v-if="currentUserId == user.id">
                     Gebruikersnaam: {{ user.username }} (this is you)
@@ -43,10 +33,6 @@
         </div>
         <div class="buttons">
             <button class="refreshMapping" @click.prevent="newMapping">Reposition Icons</button>
-
-            <!-- Creates a problem with leaveRoom -->
-            <!-- <button class="logoutButton" @click.prevent="logout">log out</button> -->
-
             <button class="mapViewButton" @click.prevent="toMapView">back to the map</button>
         </div>
         
@@ -109,9 +95,6 @@ export default {
             }
 
             this.usersCopy = [...newVal]; //Keep track of the current values in users.
-
-            console.log("joined: " + joinedUsers.length);
-            console.log("left: " + leftUsers.length);
 
             leftUsers.forEach(user => this.positionMapping.delete('u' + user.id));
 
@@ -183,8 +166,6 @@ export default {
                 let removedUsers = oldVersion.memberIds.filter(x => !newVersion.memberIds.includes(x));
                 if(addedUsers?.length) changedMemberIds.push(...addedUsers);
                 if(removedUsers?.length) changedMemberIds.push(...removedUsers); 
-
-                console.log(`for group ${newVersion.groupId} the changed list is [${changedMemberIds.join(', ')}] (length ${changedMemberIds.length})`);
 
                 changedMemberIds.forEach(changedMemberId => {
                     let changedMember = this.users.find(u => u.id === changedMemberId);
@@ -438,10 +419,8 @@ export default {
             this.screenHeight = this.$refs.userspace.clientHeight;
             this.squareSize = this.screenWidth/this.gridCols; //Size of grid squares including the spacing around them.
             
-            //TODO: This value seems to never change... remove this line?
             this.visibleRows = Math.floor(this.screenHeight/this.squareSize);
 
-            // console.log(`height: ${this.screenHeight}, width: ${this.screenWidth}, squareSize: ${this.squareSize}, visible rows: ${this.visibleRows}`);
         },
 
         /**
@@ -493,7 +472,6 @@ export default {
                 if(value.y > lowestPosition)
                     lowestPosition = value.y;
             });
-            console.log(`lowest position: ${lowestPosition}`);
             return lowestPosition;
         },
 
@@ -551,11 +529,6 @@ export default {
             if(Number.isNaN(position.x) || Number.isNaN(position.y))
                 throw new Error(`Either x[${position.x}] or y${position.y} is NaN (probably divided by 0 somewhere)`);
 
-            // console.log(`positioning user ${id} to ${position.x},${position.y}`)
-
-            //Selected user without vue refs because those were not allowing me to add styling.
-
-            //This could also be done in the template, but this is just a bit more modulair.
             let htmlElement = document.querySelector(`#${CSS.escape(id)}`);
             let positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';

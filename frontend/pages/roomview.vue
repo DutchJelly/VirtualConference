@@ -77,14 +77,11 @@ export default {
 
     data() {
         return {
-            info: "", //when updating info the timed message box will automatically update
+            info: "",
             socket: null,
             roomId: this.$route.query.roomId,
-            
             users: [],
             groups: [],
-
-
             roomCode: null,
             //A conversation contains this data:
             // groupId: number,
@@ -120,10 +117,6 @@ export default {
                 this.users = res.data.users;
             if(res.data?.groups)
                 this.groups = res.data.groups;
-            console.log('joined room with users:');
-            console.log(this.users);
-            console.log('and groups..');
-            console.log(this.groups);
         } catch(error) {
             showError(error, "(error) cannot join the room");
         }
@@ -139,14 +132,10 @@ export default {
             //Handle anything that changes in your room.
             this.socket.on("roomupdate", (data) => {
 
-                console.log('recieved room update:');
-                console.log(data);
-
                 if(data.users)
                     this.users = data.users;
                 else this.users = [];
                 
-                //TODO add info message for when a user leaves your group. Maybe automatically leave if the group is empty.
                 if(data.groups)
                     this.groups = data.groups;
                 else this.groups = [];
@@ -181,8 +170,6 @@ export default {
             //Handle request accepting.
             this.socket.on("requestaccepted", (data) => {
                 if(!data || !data.groupId || !data.roomCode || !data.memberIds || !data.typeConversation) return;
-                
-                //TODO make sure that the open window actually closes and reopens with a new conversation if one is open
                 this.currentConversation = data;
             });
         },
@@ -198,8 +185,7 @@ export default {
             const request = this.incomingRequests[0];
             const user = this.getUserById(request.senderId);
             if(!user) console.error("cannot find user that sent a request");
-            console.log(request);
-            if(request.groupId !== undefined) { //it's a join request
+            if(request.groupId !== undefined) { 
                 return `User ${user?.username} (${user?.email}) wants to join your conversation. Do you accept?`;
             }
             return `User ${user?.username} (${user?.email}) wants to start a ${request.type} conversation with you. Do you accept?`;
@@ -218,7 +204,6 @@ export default {
             this.ongoingTypeConversationPrompt = withWho;
         },
 
-        //The request which is send to the user from other user is been accepted or declined.
         async requestResponse (res, silent) {
             if(!this.incomingRequests?.length){
                 console.error("Invalid state: trying to respond to a non-existing request.");
@@ -274,8 +259,6 @@ export default {
                 this.info = "That conversation is private, which means that you cannot join.";
                 return;
             }
-
-            console.log(group);
             
             try {
                 const response = await this.$axios.post("http://localhost:5000/joinconversation", {

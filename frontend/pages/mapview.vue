@@ -16,9 +16,6 @@
 </template>
 
 <script>
-/**
- * See the map of the conference.
- */
 import { mapState } from 'vuex'
 export default {
     middleware: 'auth',

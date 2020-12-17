@@ -112,8 +112,6 @@ body {
 }
 
 .login-prompt {
-  /* @apply w-11/12 max-w-lg bg-white shadow-lg rounded flex flex-col items-center py-6; */
-
   width: 500px;
   max-width: 90%;
   margin: 2rem;
@@ -139,7 +137,7 @@ body {
   height: 65%;
   width: 70px;
   position: absolute;
-  bottom: 17.5%; /* (100-height)/2*/
+  bottom: 17.5%;
   pointer-events: none;
 
   @apply flex flex-row justify-center items-center;

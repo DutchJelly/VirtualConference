@@ -146,10 +146,9 @@ export default {
           img.onload = (el) => {
             
             var elem = document.createElement('canvas');
-            var scaleFactor = 40 / el.target.width; //verhouding afbeelding
+            var scaleFactor = 40 / el.target.width;
             elem.width = 40;
             elem.height = el.target.height * scaleFactor;
-          
             var ctx = elem.getContext('2d');
             ctx.drawImage(el.target, 0, 0, elem.width, elem.height);
             var base64 = ctx.canvas.toDataURL(el.target, 'image/jpeg', 0);
@@ -193,8 +192,6 @@ body{
 }
 
 .register-prompt {
-  /* @apply w-11/12 max-w-lg bg-white shadow-lg rounded flex flex-col items-center py-6; */
-
   width: 500px;
   max-width: 90%;
   margin: 2rem;
