@@ -15,7 +15,7 @@
 
         <div 
             class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
-            :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
+            :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%; background-size: cover;`"
             v-show="(!filter || user.username.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.memberIds.includes(user.id))"
             @click.prevent="onUserClick(user)"
         >
