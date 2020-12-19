@@ -131,7 +131,6 @@ export default {
 
             //Handle anything that changes in your room.
             this.socket.on("roomupdate", (data) => {
-
                 if(data.users)
                     this.users = data.users;
                 else this.users = [];
