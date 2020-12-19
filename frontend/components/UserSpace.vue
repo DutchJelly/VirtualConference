@@ -533,11 +533,15 @@ export default {
             let positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';
             htmlElement.style.marginLeft = (position.x * this.iconSize + this.gridSpacing) + '%';
-            
+            console.log(id)
             //add the users image to the html
-            let foundUserId = id.substring(1);
-            let foundUser = this.users.find(u => u.id == foundUserId)
-            htmlElement.style.background = 'rgb(19, 64, 70) url("' + foundUser.image + '") center no-repeat';
+            if (id.substring(0,1) == "u") {
+                let foundUserId = id.substring(1);
+                let foundUser = this.users.find(u => u.id == foundUserId)
+                htmlElement.style.background = 'rgb(19, 64, 70) url("' + foundUser.image + '") center no-repeat';
+            } else {
+                htmlElement.style.background = 'rgb(19, 64, 70)';
+            }
            
         },
 
