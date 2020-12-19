@@ -41,14 +41,11 @@ export const actions = {
 
     //Logs in a user with the specified email and password. Redirects to plattegrond.vue.
     async login({ commit }, { email, password }) {
-        console.log('login call');
         try{
             const res = await axios.post("http://localhost:5000/login", {
                 email: email,
                 password: password
             });
-            console.log('logged in for ');
-            console.log(res.data);
             localStorage.setItem('token', res.data.sessionKey);
             commit('authenticate', res.data.sessionKey, res.data);
             this.$router.push({path: "/mapview"});
@@ -63,7 +60,6 @@ export const actions = {
     //This action will also logout if the user doesn't exist anymore. If anything internal
     //error occurs, this'll be commited to the errorMsg.
     async refreshLogin({ commit, state, dispatch }) {
-        console.log('refreshLogin call');
         const token = state.token;
         if(!token) return;
 
@@ -75,14 +71,12 @@ export const actions = {
                 commit("setError", "Something went wrong with requesting your user data.");
                 dispatch("logout");
             } else {
-                console.log('setting user');
                 if(state.user !== res.data)
                     commit('setUser', res.data);
                 return res.data;
             }
             return null;
         } catch(err){
-            console.error(err);
             commit("setError", "Your login could not be refreshed.");
             dispatch("logout");
         }
@@ -113,7 +107,6 @@ export const actions = {
 
     //Logs out the current user and redirects to login page, if any is logged in.
     logout ({ commit }) {
-        console.warn("logging out");
         localStorage.removeItem('token');
         commit('authenticate', null, null);
         this.$router.push({ path: "/"})
