@@ -47,9 +47,9 @@ export const apiPort = process.env.API_PORT;
 export const server = createServer(app);
 export const io = socketio(server);
 
-//Raise maximum image size
-// app.use(express.json({limit: '50mb'}));
-// app.use(express.urlencoded({limit: '50mb'}));
+//Raise maximum image size.
+//app.use(express.json({limit: '50mb'}));
+//app.use(express.urlencoded({limit: '50mb'}));
 
 //TODO add this to .env file, there were some issues with that with jest.
 const SOCKET_LOGGING = false;
@@ -68,7 +68,7 @@ const getSocket = async (userId: number) => {
     return socketMapping.get(userId);
 }
 
-//TODO: this solution will overflow at 'some' point.. (it'll take A LOT of requests tho so it's no problem for now)
+//TODO: this solution will overflow at 'some' point.. (it'll take A LOT of requests tho so it's no problem for now).
 let freeRequestId = 0;
 
 //Map the requests that are pending.
@@ -79,10 +79,8 @@ const isDirectRequest = (req: DirectRequest | JoinRequest) => {
     return (<DirectRequest>req).sentToId !== undefined;
 }
 
-//Handle socket connections
+//Handle socket connections.
 io.on('connection', (socket) => {
-    if (SOCKET_LOGGING)
-        console.log(`[SocketIO:connection] A client with socket id ${socket.id} was connected.`);
     socket.on('register', async (data) => {
         if (!data || !data.sessionKey) return;
 
@@ -90,9 +88,6 @@ io.on('connection', (socket) => {
         if (!user || user.expireDate <= Date.now()) return;
 
         socketMapping.set(user.id, socket);
-
-        if (SOCKET_LOGGING)
-            console.log(`[SocketIO:register] Socket "${socket.id}" is now linked to the user "${user.email}".`);
     });
 
     socket.on('disconnect', () => {
@@ -100,8 +95,6 @@ io.on('connection', (socket) => {
         for (const socketMapItem of socketMapping.entries()) {
             if (socketMapItem[1] === socket) {
                 socketMapping.delete(socketMapItem[0]);
-                if (SOCKET_LOGGING)
-                    console.log(`[SocketIO:disconnect] User id:${socketMapItem[0]} disconnected with socket "${socket.id}".`);
                 return;
             }
         }
@@ -113,17 +106,18 @@ io.on('connection', (socket) => {
  * @apiDescription Emits new room data to all users that are in the room
  * @apiName leaveCalls
  * @apiGroup Room
+ * 
  * @apiSuccess Success-Response:
  *      roomData =
  *      {
  *          roomId: 1,
  *          users: [Jan, Pieter, Coen, Barend]),
-            groups: [123456, 654321]
+ *          groups: [123456, 654321]
  *      }
+ *
  * @apiError {missingID} 'no room found for id [roomId]'
  */
 const emitRoomUpdate = async (roomId: string) => {
-    console.log('emmitting room update');
     const room = await Room.findOne({ where: { roomId }, relations: ['members', 'members.user'] });
     const calls = await Call.find({ where: { room }, relations: ['members', 'members.user'] });
     if (!room) {
@@ -137,13 +131,10 @@ const emitRoomUpdate = async (roomId: string) => {
     };
     roomData.groups = roomData.groups.filter(x => x.memberIds.length > 0);
     await Promise.all(roomData.users.map(async x => {
-
         const s = await getSocket(x.id);
-        console.log(`socket for ${x.id} is ${s?.id} [connected: (${s?.connected})]`);
         if (s) {
             s.emit('roomupdate', roomData);
         }
-
     }));
 }
 
@@ -157,7 +148,6 @@ const emitRoomUpdate = async (roomId: string) => {
  * 
  * @apiError {illegalState} 'Illegal state: found a call with no members.'
  */
-//Required roomUser relations: ["room", "call", "call.members", "call.members.user"] 
 const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if (!roomUser.call) return;
     const call = roomUser.call;
@@ -238,7 +228,6 @@ const loginRequired: Handler = async (req, res, next) => {
 
     //Pass the user to the rest of the routes.
     req.user = user;
-    // console.log(`successfully logged in user ${user.username}`);
     next();
 }
 
