@@ -235,6 +235,9 @@ const loginRequired: Handler = async (req, res, next) => {
         });
     }
 
+    user.expireDate = Date.now() + sessionExpireDuration;
+    await user.save();
+
     //TODO update login time left here
 
     //Pass the user to the rest of the routes.
