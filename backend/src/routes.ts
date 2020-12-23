@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
  * @api {Function} - emitRoomUpdate 
  * @apiDescription Emits new room data to all users that are in the room
  * @apiName leaveCalls
- * @apiGroup Room
+ * @apiGroup Helpfunctions
  * 
  * @apiSuccess Success-Response:
  *      roomData =
@@ -115,7 +115,6 @@ io.on('connection', (socket) => {
  *          groups: [123456, 654321]
  *      }
  *
- * @apiError {missingID} 'no room found for id [roomId]'
  */
 const emitRoomUpdate = async (roomId: string) => {
     const room = await Room.findOne({ where: { roomId }, relations: ['members', 'members.user'] });
@@ -127,9 +126,11 @@ const emitRoomUpdate = async (roomId: string) => {
     const roomData = {
         roomId,
         users: room.members.map(x => (x.user.toUserData())),
-        groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId, typeConversation: x.type}))
+        //We filter out empty groups because these could still occur in some cases. Ideally this would not be possible.
+        groups: calls.map(x => ({ memberIds: x.members.map(y => y.user.id), groupId: x.callId, typeConversation: x.type})).filter(x => x.memberIds.length > 0)
     };
-    roomData.groups = roomData.groups.filter(x => x.memberIds.length > 0);
+
+    //This trick allows us to use promisis in a lambda loop.
     await Promise.all(roomData.users.map(async x => {
         const s = await getSocket(x.id);
         if (s) {
@@ -142,11 +143,11 @@ const emitRoomUpdate = async (roomId: string) => {
  * @api {Function} - leaveCalls 
  * @apiDescription Lets a user leave the conversation room they are currently in
  * @apiName leaveCalls
- * @apiGroup Conversation
+ * @apiGroup Helpfunctions
  * 
  * @apiSuccess {Call} call User is removed from the call they were participating in.
  * 
- * @apiError {illegalState} 'Illegal state: found a call with no members.'
+ * @apiError {Error} Illegal state: found a call with no members.
  */
 const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if (!roomUser.call) return;
@@ -155,7 +156,10 @@ const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
     if (call.members.length === 0)
         throw new Error('Illegal state: found a call with no members.');
 
-    roomUser.call = null;
+    //We have to use null instead of undefined because typeORM will not update relations when using 
+    //undefined for obvious reasons (these relations are undefined by default, only if you specify
+    //that typeORM needs to query them they get set).
+    roomUser.call = null; 
     await roomUser.save();
 
     if (call.members.length === 1) {
@@ -171,7 +175,7 @@ const leaveCalls = async (roomUser: RoomParticipant, submitUpdate: boolean) => {
  * @api {Function} - leaveRooms 
  * @apiDescription Lets a user leave the physical room they are currently in
  * @apiName leaveRooms
- * @apiGroup Rooms
+ * @apiGroup Helpfunctions
  * 
  * @apiSuccess {Room} room User is removed from this room.
  * 
@@ -192,17 +196,24 @@ const leaveRooms = async (user: User, submitUpdate: boolean) => {
         await emitRoomUpdate(roomId!);
 }
 
+/**
+ * @apiDefine loginRequired
+ * @apiError {String} loginError1 Invalid session was found.
+ * @apiError {String} loginError2 Invalid session key provided.
+ */
+
 /** 
  * @api {Function} - loginRequired 
  * @apiDescription Checks if the session key received from the frontend, exists in the database. If so, the user object will be set to the correct user. This function must be used in a pipeline.
  * @apiName loginRequired
- * @apiGroup General Functions
+ * @apiGroup Middleware
  * 
  * @apiParam {String} sessionKey The sessionkey of the user.
  * 
- * @apiSuccess {User} user Sets user to corresponding user of sessionkey.
+ * @apiSuccess {User} user Sets user to corresponding user of sessionkey in the request.
  * 
- * @apiError {loginError} loginError Invalid session was found.
+ * @apiError {String} loginError Invalid session was found.
+ * @apiError {String} loginError Invalid session key provided.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -231,11 +242,16 @@ const loginRequired: Handler = async (req, res, next) => {
     next();
 }
 
+/**
+ * @apiDefine roomRequired
+ * @apiError {String} error0 The user is not in a room.
+ */
+
 /** 
  * @api {Function} - roomRequired 
  * @apiDescription Checks if the user is currently in a physical room in the database, if so the room they are in is notified to the frontend
  * @apiName roomRequired
- * @apiGroup Rooms
+ * @apiGroup Middleware
  * 
  * @apiParam {User} user User object.
  * 
@@ -270,6 +286,7 @@ const roomRequired: Handler = async (req, res, next) => {
  * @apiName Register
  * @apiGroup User
  *
+ * 
  * @apiParam {string} username The username for the new account
  * @apiParam {string} password The password to login
  * @apiParam {string} image The profile image
@@ -320,19 +337,22 @@ app.post('/register', json(), async (req, res, next) => {
  * @apiParam {String} password User who wants to login's password.
  *
  * @apiSuccess {String} sessionKey A session token that can be used to make authenticated requests.
+ * @apiSuccess {String} username The username of the logged in user.
+ * @apiSuccess {String} email The email of the logged in user.
+ * @apiSuccess {Number} id The unique identifier of the logged in user.
+ * @apiSuccess {String} image The encoded image string of the logged in user.
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
  *      {
- *          "sessionToken": "ABCDEFGHIJ0123456789".
+ *          sessionKey: user.sessionKey,
+ *          username: user.username,
+ *          email: user.email,
+ *          id: user.id,
+ *          image: user.image
  *      }
  * 
- * @apiError EmailNotFound The provided email address did not match any existing ones.
- * @apiErrorExample Error-Response:
- *      HTTP/1.1 400 Bad Request
- *      {
- *          "error": "No registered user for email {provided email address}".
- *      }
- * @apiError PasswordIncorrect The provided password was incorrect.
+ * @apiError {String} error Not all fields are present in the post body.
+ * @apiError {String} loginError Invalid login credentials.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -373,6 +393,7 @@ app.post('/login', json(), async (req, res, next) => {
 })
 
 /** 
+ * @apiDeprecated joinroom should be used instead.
  * @api {post} /roomObject /roomObject
  * @apiDescription Returns a room object of a room with given roomID.
  * @apiName roomObject
@@ -390,7 +411,7 @@ app.post('/login', json(), async (req, res, next) => {
  * 			members[]: "[Bob, Jan, Henk, ...]"
  * 			
  *      }
- * 
+ * @apiUse loginRequired
  * @apiError roomIdDoesNotExist The room object with given roomId does not exist
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
@@ -414,6 +435,7 @@ app.post('/roomObject', json(), loginRequired, async (req, res, next) => {
 });
 
 /**
+ * @apiDeprecated this method doesn't query user table relations from the database
  * @api {post} /userObject /userObject
  * @apiDescription Returns an user object of the user that is logged in.
  * @apiName userObject
@@ -432,8 +454,8 @@ app.post('/roomObject', json(), loginRequired, async (req, res, next) => {
  * 			image: "iojadsfkadfjooaoosfa" (this a a string)
  * 			
  *      }
- * 
- * @apiError userDoesNotExits The user object wasn't set in loginRequired.
+ * @apiUse loginRequired
+ * @apiError {String} error The user object wasn't set in loginRequired.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -469,8 +491,8 @@ app.post('/userObject', json(), loginRequired, async (req, res, next) => {
  *      {
  *          "User Bob Smit logged out."
  *      }
- * 
- * @apiError ErrorLoggingOut The user object wasn't set in loginRequired.
+ * @apiUse loginRequired
+ * @apiError {String} error The user object wasn't set in loginRequired.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -505,8 +527,8 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
  * 			"users": array[userObject1, userObject2],
  * 			"groups": array[groupObject1[], groupObject2[]]
  *      }
- * 
- * @apiError notEnoughData Not all fields are present in the post body.
+ * @apiUse loginRequired
+ * @apiError {String} error Not all fields are present in the post body.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -515,7 +537,6 @@ app.post('/logout', json(), loginRequired, async (req, res, next) => {
  */
 app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
     const user = req.user;
-    if (!user) throw new Error("user is null???????????????")
     const roomId = req.body.roomId;
     if (!roomId) {
         return res.status(400).json({ error: 'Not all fields are present in the post body.' });
@@ -555,7 +576,7 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
  * @apiName leaveRoom
  * @apiGroup Rooms
  *
- * @apiParam {User} user User object.
+ * @apiParam {String} sessionKey A valid login token of a user.
  *
  * @apiSuccess {String} message A confirmation message.
  * @apiSuccessExample Success-Response:
@@ -563,13 +584,13 @@ app.post('/joinroom', json(), loginRequired, async (req, res, next) => {
  *      {
  *          "message": 'Successfully left the room.',
  *      }
- * 
- * @apiError No errors implemented.
+ * @apiUse loginRequired
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "error": "Error Missing".
+ *          "loginError": "Something went wrong with logging in."
  *      }
+ * @socket roomupdate sends roomupdate to all users in the corresponding room
  */
 app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, next) => {
     const user = req.user;
@@ -583,30 +604,33 @@ app.post('/leaveroom', json(), loginRequired, roomRequired, async (req, res, nex
  * @apiName requestConversation
  * @apiGroup Conversation
  *
- * @apiParam {Int} userId The unique identifier of the user who is receiving the request.
+ * @apiParam {Number} userId The unique identifier of the user who is receiving the request.
  * @apiParam {String} conversationType The type of the requested conversation.
  *
- * @apiSuccess {Int} id The unique identifier of the request.
+ * @apiSuccess {Number} id The unique identifier of the request.
  * @apiSuccess {String} type The type of the requested conversation.
- * @apiSuccess {Int} senderId The unique identifier of the user sending the request.
- * @apiSuccess {Int} sentToId The unique identifier of the user receiving the request.
+ * @apiSuccess {Number} senderId The unique identifier of the user sending the request.
+ * @apiSuccess {Number} sentToId The unique identifier of the user receiving the request.
  * @apiSuccess {String} message A confirmation message that the request is send.
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
  *      {
  *          message: 'Succesfully sent a conversation request.' 
  *      }
- * 
- * @apiError notEnoughData Not all fields are present in the post body.
- * @apiError typeError The type of the requested conversation is not supported.
- * @apiError alreadyInCall The user who is sending the request is already in a call.
- * @apiError notExistUser The user who is receiving the request does not exist.
- * @apiError notConnected The user is not connected.
+ * @apiUse loginRequired
+ * @apiUse roomRequired
+ * @apiError {String} error1 Not all fields are present in the post body.
+ * @apiError {String} error2 The type of the requested conversation is not supported.
+ * @apiError {String} error3 The user who is sending the request is already in a call.
+ * @apiError {String} error4 The user who is receiving the request does not exist.
+ * @apiError {String} error5 The user is not connected.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
  *          "error": "Not all fields are present in the post body.".
  *      }
+ * 
+ * @socket directrequest Sends directrequest socket event to specified user.
  */
 app.post('/requestconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
     const { userId, conversationType } = req.body;
@@ -659,20 +683,19 @@ app.post('/requestconversation', json(), loginRequired, roomRequired, async (req
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
  *      {
- *          const callData = {
- *              groupId: callId,
- *              roomCode: callUrl,
- *              memberIds: [user1ID, user2ID],
- *              typeConversation: type
- *          };
+ *          groupId: callId,
+ *          roomCode: callUrl,
+ *          memberIds: [user1ID, user2ID],
+ *          typeConversation: type
  *      }
- *
- * @apiError notEnoughData Not all fields are present in the post body.
- * @apiError notReceivingRequest The user has not received a request.
- * @apiError notConnected The user is not connected. 
- * @apiError notInSameRoom The user who sends the request is not in this room anymore. 
- * @apiError alreadyInCall The user who sends the request is already in a call. 
- * @apiError notExistCall The conversation the sender tries to join does not exist anymore.
+ * @apiUse loginRequired
+ * @apiUse roomRequired
+ * @apiError {String} error1 Not all fields are present in the post body.
+ * @apiError {String} error2 The user has not received a request.
+ * @apiError {String} error3 The user is not connected. 
+ * @apiError {String} error4 The user who sends the request is not in this room anymore. 
+ * @apiError {String} error5 The user who sends the request is already in a call. 
+ * @apiError {String} error6 The conversation the sender tries to join does not exist anymore.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -719,6 +742,8 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
     if (senderRoom.call)
         return res.status(400).json({ error: `${sender!.username} is already in a call.` });
 
+    //If the request is a direct request, we make a new call and put both users in the call. The user that accepts will
+    //also leave any call that the users is in.
     if (isDirectRequest(request)) {
         if (req.roomParticipant!.call)
             await leaveCalls(req.roomParticipant!, false);
@@ -751,7 +776,9 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
 
         return res.status(200).json(callData);
 
-    } else {
+    } 
+    //If it's a join request, we'll send the request sender the call info and put the user in the call.
+    else {
         const joinRequest = <JoinRequest>request;
         const call = await Call.findOne({ where: { callId: joinRequest.groupId }, relations: ['members', 'room', 'members.user'] });
         if (!call) {
@@ -779,49 +806,47 @@ app.post('/conversationrequestresponse', json(), loginRequired, roomRequired, as
  * @apiName joinConversation
  * @apiGroup Conversation
  *
- * @apiParam {Object} user User object.
+ * @apiParam {String} sessionKey User session.
  * @apiParam {Int} roomId The unique identifier of a room.
  * @apiParam {Int} groupId The unique identifier of a conversation.
  *
  * ***Open Conversation***
- * @apiSuccess {Int} groupId The unique identifier of the group conversation.
- * @apiSuccess {String} roomCode The url of the conversation.
- * @apiSuccess {Int} memberIds All unique identifiers of the users in the conversation.
- * @apiSuccess {Int} typeConversation The type of the conversation (closed/open/private).
+ * @apiSuccess {Int} groupId1 The unique identifier of the group conversation.
+ * @apiSuccess {String} roomCode1 The url of the conversation.
+ * @apiSuccess {Int} memberIds1 All unique identifiers of the users in the conversation.
+ * @apiSuccess {Int} typeConversation1 The type of the conversation (closed/open/private).
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
  *      {
- *          const callData = {
  *              groupId: callId,
  *              roomCode: callUrl,
  *              memberIds: [user1ID, user2ID],
  *              typeConversation: type
- *          };
  *      }
  * 
  * ***Closed Conversation***
- * @apiSuccess {Int} id The unique identifier of the request.
- * @apiSuccess {Int} groupId The unique identifier of the group conversation.
- * @apiSuccess {Int} senderId The id of the user who sends the request.
- * @apiSuccess {String} message A confimation message that the request is send.
+ * @apiSuccess {Int} id2 The unique identifier of the request.
+ * @apiSuccess {Int} groupId2 The unique identifier of the group conversation.
+ * @apiSuccess {Int} senderId2 The id of the user who sends the request.
+ * @apiSuccess {String} message2 A confimation message that the request is send.
  * @apiSuccessExample Success-Response:
  *      HTTP/1.1 200 OK
  *      {
- *          const requestData = {
  *              "id" : requestId,
  *              "groupId" : callId,
  *              "senderId" : requestSender,
- *          }
  *      }
  * 
- * @apiError notEnoughData Not all fields are present in the post body.
- * @apiError notExistCall The conversation the sender tries to join does not exist anymore.
- * @apiError notRightRoom The conversation the user tries to join is not in that room.
- * @apiError alreadyInCall The user who sends the request is already in a call. 
- * @apiError alreadyRequested The user already received a request for that conversation.
- * @apiError invalidState1 The conversation has no members.
- * @apiError invalidState2 The user receiving the request is not connected.
- * @apiError privateCall The user cannot join a private conversation.
+ * @apiUse loginRequired
+ * @apiUse roomRequired
+ * @apiError error1 Not all fields are present in the post body.
+ * @apiError error2 The conversation the sender tries to join does not exist anymore.
+ * @apiError error3 The conversation the user tries to join is not in that room.
+ * @apiError error4 The user who sends the request is already in a call. 
+ * @apiError error5 The user already received a request for that conversation.
+ * @apiError error6 The conversation has no members.
+ * @apiError error7 The user receiving the request is not connected.
+ * @apiError error8 The user cannot join a private conversation.
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
@@ -843,6 +868,7 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
     if (req.roomParticipant!.call)
         return res.status(400).json({ error: 'You are already in a call.' });
 
+    //If the conversation is open, we let the user join the conversation.
     if (call.type === "open") {
         req.roomParticipant!.call = call;
         await req.roomParticipant!.save();
@@ -855,10 +881,8 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
         });
     }
 
+    //If the conversation is closed, we first send a request to the first user in the conversation.
     if (call.type === "closed") {
-        //TODO add cooldown
-        //TODO IMPORTANT joinrequests break if user logs out that received the request
-
         if (joinRequests.find(x => x.groupId === call.callId && x.senderId === req.user!.id))
             return res.status(400).json({ error: 'You already requested to join that conversation.' });
         const requestData = {
@@ -868,7 +892,6 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
         }
         joinRequests.push(requestData);
 
-        //TODO IMPORTANT add error handler for production builds
         if (!call.members.length) throw new Error('Invalid state: no call members.');
 
         const socket = await getSocket(call.members[0].user.id);
@@ -895,11 +918,12 @@ app.post('/joinconversation', json(), loginRequired, roomRequired, async (req, r
  *          "message": 'Successfully left all group(s).',
  *      }
  * 
- * @apiError No errors implemented.
+ * @apiUse loginRequired
+ * @apiUse roomRequired
  * @apiErrorExample Error-Response:
  *      HTTP/1.1 400 Bad Request
  *      {
- *          "error": "Error Missing".
+ *          "error": "The user is not in a room."
  *      }
  */
 app.post('/leaveconversation', json(), loginRequired, roomRequired, async (req, res, next) => {
