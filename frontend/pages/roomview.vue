@@ -64,25 +64,42 @@ export default {
             user: 'user'
         })
     },
+
+    //Make sure that the user leaves the room when the route changes (the nuxt router
+    //will change pages with js, so the window.beforeunload won't work)
     async beforeRouteLeave (to, from, next){
         await this.leaveRoom();
         next();
     },
+
+    //Make sure that when the user forcefully reloads or clicks away the page the user also 
+    //leaves the room.
     async created() {
         window.addEventListener('beforeunload', async () => await this.leaveRoom());
     },
     async beforeDestroy() {
+        //This is still untested and this might not even make a difference.
         window.removeEventListener('beforeunload', async () => await this.leaveRoom());
     },
 
     data() {
         return {
+            //When this updates, the info box pops up automatically.
             info: "",
+
+            //The socket that's connected to the backend.
             socket: null,
+
+            //The room id, that is passed in the url.
             roomId: this.$route.query.roomId,
+
+            //The users in the room (set in the mounted lifecycle, updated by socket events)
             users: [],
+            //The groups in the room (set in the mounted lifecycle, updated by socket events)
             groups: [],
+            //The code of the conversation. Currently this is not used.
             roomCode: null,
+
             //A conversation contains this data:
             // groupId: number,
             // roomCode: string,
@@ -90,6 +107,7 @@ export default {
             // typeConversation: string
             currentConversation: null,
             
+            //This array contains all incoming requests. These could be one of the 2 following types:
             //Direct requests contain this data:
             // id: number,
             // type: string,
@@ -101,13 +119,17 @@ export default {
             // senderId: number
             incomingRequests: [],
 
-            //If a type prompt is open, this'll store the user id that is clicked.
+            //If a type prompt is open, this'll store the user id that is clicked. To be more precise, a prompt
+            //will open when this is set.
             ongoingTypeConversationPrompt: null
         };
     },
     async mounted() {
+        //Setup sockets and get user token.
         const sessionKey = this.$store.getters.getToken;
         this.setupSocket();
+
+        //Join the room and set all data.
         try {
             const res = await this.$axios.post("http://localhost:5000/joinRoom", {
                 sessionKey,
@@ -122,6 +144,7 @@ export default {
         }
     },
     methods: {
+        //Register socket, and set all event handlers.
         setupSocket(){
             this.socket = this.$nuxtSocket({name: "home"});
 
@@ -172,11 +195,14 @@ export default {
                 this.currentConversation = data;
             });
         },
-
+        
+        //Get a user in the room by id, undefined if not found.
         getUserById(id){
             return this.users.find(x => x.id === id);
         },
 
+        //Gets the request message of the first incoming request. This could either be a join request or a direct request, so the
+        //message will change accordingly.
         getCurrentRequestMessage(){
             if(!this.incomingRequests.length) 
                 return null;
@@ -190,6 +216,7 @@ export default {
             return `User ${user?.username} (${user?.email}) wants to start a ${request.type} conversation with you. Do you accept?`;
         },
 
+        //Open a prompt where the type is asked. This prompt opens when setting ongoingTypeConversationPrompt.
         openTypeConversationPrompt(withWho) {
             if(withWho?.id === this.$store.getters.getUser.id) {
                 this.info = "You cannot start a conversation with yourself.";
@@ -203,6 +230,7 @@ export default {
             this.ongoingTypeConversationPrompt = withWho;
         },
 
+        //Respond to the first request with true or false. If silent is set to true, it'll not show info messages. 
         async requestResponse (res, silent) {
             if(!this.incomingRequests?.length){
                 console.error("Invalid state: trying to respond to a non-existing request.");
@@ -231,7 +259,7 @@ export default {
             }
         },
 
-        //Send a request to the user
+        //Send a personal request to the user with type.
         async sendDirectRequest(type) {
             const withWho = this.ongoingTypeConversationPrompt;
             this.ongoingTypeConversationPrompt = null;
@@ -250,7 +278,7 @@ export default {
             }
         },
 
-        //Join an existing group conversation
+        //Ask to or join an existing group conversation depending on the type.
         async joinConversation(group) {
             const sessionKey = this.$store.getters.getToken;
 
@@ -283,7 +311,8 @@ export default {
                 this.showError(error, "Cannot join the conversation.");
             }
         },
-        //The user leaves the conversation
+
+        //Leave the conversation.
         async leaveConversation() {
             const sessionKey = this.$store.getters.getToken;
             try {
@@ -298,6 +327,7 @@ export default {
             }
         },
 
+        //Error handler of errors from the backend. It's expecting a generic error or loginErrors.
         showError(error, fallback){
             if(error.response?.data){
                 if(error.response.data.error)
@@ -310,7 +340,8 @@ export default {
             this.info = fallback;
             console.error(error.response);
         },
-
+        
+        //Leave the room.
         async leaveRoom() {
             await this.$axios.post("http://localhost:5000/leaveRoom", {
                 sessionKey: this.$store.getters.getToken,

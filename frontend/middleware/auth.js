@@ -1,6 +1,5 @@
 /**
  * Redirect back to login if the user isn't logged in anymore.
- * @author DutchJelly
  */
 export default async function ({ store, redirect }) {    
     if(store.getters.getToken){

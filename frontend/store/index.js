@@ -1,7 +1,5 @@
 /**
  * Manage authorization of the user that's using the app.
- * @author RichardMiddelkoop
- * @author DutchJelly
  */
 
 import axios from 'axios'
