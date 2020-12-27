@@ -1,43 +1,41 @@
 <template>
     <div ref="userspace">
-        <!-- I temporarely removed the group size because it's really difficult to implement with the current position mapping -->
         <div 
-            class="group" v-for="group in groups" :key="'g' + group.id" :id="`g${group.id}`"
+            class="group" v-for="group in groups" :key="'g' + group.groupId" :id="`g${group.groupId}`"
             :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
             v-show="!visibleGroup || visibleGroup === group"
             @click.prevent="onGroupClick(group)"
+            @mouseenter.prevent="onGroupHover(group)"
+            @mouseleave.prevent="onGroupHover(group)"
         > 
             <div class="group-text" :style="`font-size: ${squareSize/2}px; line-height: ${squareSize}px; top: -${squareSize/10}px;`">
                 {{groupText(group)}}
             </div>
-            
-            <div class="popupBox" :style="`top: 20px; left: 110%`">
-                <span>
-                    In groep {{group.id}} zitten: {{group.members}}
-                </span>
-            </div>
-            
-            <!-- <div v-if="visibleGroup == group.id" class="text-gray-800">
-                <div v-for="member in group.members" :key="member" class="rounded-full w-20 h-20 bg-gray-800 relative">
-                    Dit is {{member}} van de group.
-                </div>
-            </div> -->
         </div>
 
         <div 
             class="user" v-for="user in users" :key="'u' + user.id" :id="`u${user.id}`" 
-            :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%;`"
-            v-show="(!filter || user.user.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.members.includes(user.id))"
+            :style="`width: ${iconSize}%; padding-bottom: ${iconSize}%; background-size: cover;`"
+            v-show="(!filter || user.username.toLowerCase().includes(filter.toLowerCase()) && positioned) && (!visibleGroup || visibleGroup.memberIds.includes(user.id))"
             @click.prevent="onUserClick(user)"
         >
-            <!-- This break the formatting if it overflows on the right of the page -->
             <div class="popupBox" :style="`top: 20px; left: 110%`">
-                <span>
-                    Gebruikersnaam: {{ user.user }}
-                </span>
+                <div v-if="currentUserId == user.id">
+                    Gebruikersnaam: {{ user.username }} (this is you)
+                </div>
+                <div v-else>
+                    <span>
+                        Gebruikersnaam: {{ user.username }}
+                    </span>
+                </div>
+                
             </div>
         </div>
-
+        <div class="buttons">
+            <button class="refreshMapping" @click.prevent="newMapping">Reposition Icons</button>
+            <button class="mapViewButton" @click.prevent="toMapView">back to the map</button>
+        </div>
+        
     </div>
 </template>
 
@@ -51,11 +49,7 @@ export default {
 
         //We can only read the size of the element by using this Vue.nextTick callback.
         this.$nextTick(() => {
-            this.refreshPixelSizeReferences();
-            this.positionMapping = new Map();
-            this.mapPositions(this.users, this.groups);
-            this.positionAll();
-            this.positioned = true;
+            this.newMapping();
         });
     },
 
@@ -74,6 +68,7 @@ export default {
     props: {
         users: Array, //username, id, image, group id
         onUserClick: Function,
+        onGroupClick: Function,
         filter: String,
         groups: Array, //Array of all groups with their respective members.
         gridCols: Number, //Grid contains squares, so no need for rows prop.
@@ -100,9 +95,6 @@ export default {
             }
 
             this.usersCopy = [...newVal]; //Keep track of the current values in users.
-
-            console.log("joined: " + joinedUsers.length);
-            console.log("left: " + leftUsers.length);
 
             leftUsers.forEach(user => this.positionMapping.delete('u' + user.id));
 
@@ -134,7 +126,7 @@ export default {
             //Map old version of group to new version of group
             let possiblyChangedGroupMapping = new Map();
             this.groupsCopy.forEach(group => {
-                let otherVersion = newVal.find(x => x.id === group.id);
+                let otherVersion = newVal.find(x => x.groupId === group.groupId);
                 if(otherVersion){
                     possiblyChangedGroupMapping.set(group, otherVersion);
                 }
@@ -145,8 +137,8 @@ export default {
 
             //Remove all removed groups from the position mapping, and also register their users as non positioned.
             removedGroups.forEach(group => {
-                this.positionMapping.delete('g' + group.id);
-                group.members.forEach(memberId => {
+                this.positionMapping.delete('g' + group.groupId);
+                group.memberIds.forEach(memberId => {
                     let member = this.users.find(u => u.id === memberId);
                     if(member) {
                         nonPositionedMembers.push(member);
@@ -157,7 +149,7 @@ export default {
 
             //Register all members of new groups as non positioned.
             newGroups.forEach(group => {
-                group.members.forEach(memberId => {
+                group.memberIds.forEach(memberId => {
                     let member = this.users.find(u => u.id === memberId);
                     if(member) {
                         nonPositionedMembers.push(member);
@@ -170,12 +162,10 @@ export default {
             //Check for removed and added users from possibly changed groups
             possiblyChangedGroupMapping.forEach((newVersion, oldVersion) => {
                 let changedMemberIds = [];
-                let addedUsers = newVersion.members.filter(x => !oldVersion.members.includes(x));
-                let removedUsers = oldVersion.members.filter(x => !newVersion.members.includes(x));
+                let addedUsers = newVersion.memberIds.filter(x => !oldVersion.memberIds.includes(x));
+                let removedUsers = oldVersion.memberIds.filter(x => !newVersion.memberIds.includes(x));
                 if(addedUsers?.length) changedMemberIds.push(...addedUsers);
                 if(removedUsers?.length) changedMemberIds.push(...removedUsers); 
-
-                console.log(`for group ${newVersion.id} the changed list is [${changedMemberIds.join(', ')}] (length ${changedMemberIds.length})`);
 
                 changedMemberIds.forEach(changedMemberId => {
                     let changedMember = this.users.find(u => u.id === changedMemberId);
@@ -204,19 +194,39 @@ export default {
             return (100/this.gridCols) - this.gridSpacing;
         },
 
-        
+        currentUserId: function() {
+            var currentUser = this.$store.getters.getUser
+            if(currentUser == undefined) return -1;
+            else return this.$store.getters.getUser.id;
+        },
 
     },
 
     methods: {
 
-        onGroupClick: function(group){
+        logout(){
+            this.$store.dispatch('logout')
+        },
+
+        toMapView(){
+            this.$router.push({ path: "/mapview"} );
+        },
+        
+        newMapping() {
+            this.refreshPixelSizeReferences();
+            this.positionMapping = new Map();
+            this.mapPositions(this.users, this.groups);
+            this.positionAll();
+            this.positioned = true;
+        },
+
+        onGroupHover(group){
             if(this.visibleGroup === group || (this.visibleGroup && this.visibleGroup !== group)){
                 
                 // Move all the users back to the group.
                 let members = this.getGroupMembers(this.visibleGroup);
                 members.forEach(member => {
-                    this.positionMapping.set('u' + member.id, this.positionMapping.get('g' + group.id));
+                    this.positionMapping.set('u' + member.id, this.positionMapping.get('g' + group.groupId));
                     this.positionAll();
                 });
 
@@ -238,7 +248,7 @@ export default {
             let toPlace = [...this.getGroupMembers(group)];
             let sideLength = 1;
             //Walk over all the 'sides'
-            let pos = this.positionMapping.get('g' + group.id);
+            let pos = this.positionMapping.get('g' + group.groupId);
             let x = pos.x;
             let y = pos.y;
             while(toPlace.length){
@@ -273,10 +283,10 @@ export default {
             }
         },
 
-        groupText: function(group){
-            if(!group?.members?.length) return "0";
+        groupText(group){
+            if(!group?.memberIds?.length) return "0";
 
-            let memberCount = group.members.length;
+            let memberCount = group.memberIds.length;
             if(memberCount > 9) return "9+";
 
             return memberCount;
@@ -300,7 +310,7 @@ export default {
                 if(groups && groups.length){
                     //Set a random group's position to some pivot position.
                     let randomGroup = groups[Math.floor(Math.random() * groups.length)];
-                    this.positionMapping.set('g' + randomGroup.id, {
+                    this.positionMapping.set('g' + randomGroup.groupId, {
                         x: Math.floor(this.gridCols/2), 
                         y: Math.floor(this.visibleRows/2),
                         minDistance: 3,
@@ -323,10 +333,10 @@ export default {
 
         mapGroupPositions(groups){
             groups.forEach(group => {
-                if(!this.positionMapping.get('g' + group.id)) {
+                if(!this.positionMapping.get('g' + group.groupId)) {
                     let rSpotInfo = this.getRandomFreeSpot(3,5);
                     rSpotInfo.minDistance = 3;
-                    this.positionMapping.set('g' + group.id, rSpotInfo);
+                    this.positionMapping.set('g' + group.groupId, rSpotInfo);
                 }
             });
         },
@@ -338,7 +348,7 @@ export default {
                     //If the user is in a group, set the position of the user to the position of the group
                     let group = this.getUserGroup(user.id);
                     if(group) {
-                        this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.id));
+                        this.positionMapping.set(`u${user.id}`, this.positionMapping.get('g' + group.groupId));
                     } else {
                         let rSpotInfo = this.getRandomFreeSpot(2,5);
                         rSpotInfo.minDistance = 2;
@@ -352,7 +362,7 @@ export default {
         getGroupsArrayCopy(groups){
             let groupsCopy = [...groups];
             groupsCopy.forEach(x => {
-                x.members = [...x.members];
+                x.memberIds = [...x.memberIds];
             });
             return groupsCopy;
         },
@@ -376,12 +386,12 @@ export default {
          * @returns {{members: Array<Number>, id: Number}} group that contains the user with id userId (or undefined) 
          */
         getUserGroup(userId) {
-            return this.groups.find(group => group.members.includes(userId));
+            return this.groups.find(group => group.memberIds.includes(userId));
         },
 
         getGroupMembers(group){
             let members = [];
-            group.members.forEach(memberId => {
+            group.memberIds.forEach(memberId => {
                 let member = this.users.find(u => u.id === memberId);
                 if(member) {
                     members.push(member);
@@ -398,7 +408,7 @@ export default {
          * @returns a - b
          */
         getIdDifference(a, b){
-            return a.filter(x => !b.find(y => y.id === x.id));
+            return a.filter(x => !b.find(y => y.id === x.id || (y.groupId === x.groupId && y.groupId !== undefined)));
         },
 
         /**
@@ -409,10 +419,8 @@ export default {
             this.screenHeight = this.$refs.userspace.clientHeight;
             this.squareSize = this.screenWidth/this.gridCols; //Size of grid squares including the spacing around them.
             
-            //TODO: This value seems to never change... remove this line?
             this.visibleRows = Math.floor(this.screenHeight/this.squareSize);
 
-            console.log(`height: ${this.screenHeight}, width: ${this.screenWidth}, squareSize: ${this.squareSize}, visible rows: ${this.visibleRows}`);
         },
 
         /**
@@ -464,7 +472,6 @@ export default {
                 if(value.y > lowestPosition)
                     lowestPosition = value.y;
             });
-            console.log(`lowest position: ${lowestPosition}`);
             return lowestPosition;
         },
 
@@ -508,7 +515,7 @@ export default {
          * Position the users and groups like mapped in positionMapping.
          */
         positionAll() {
-            this.groups.forEach(group => this.position('g' + group.id));
+            this.groups.forEach(group => this.position('g' + group.groupId));
             this.users.forEach(user => this.position('u' + user.id));
         },
         /**
@@ -522,24 +529,50 @@ export default {
             if(Number.isNaN(position.x) || Number.isNaN(position.y))
                 throw new Error(`Either x[${position.x}] or y${position.y} is NaN (probably divided by 0 somewhere)`);
 
-            // console.log(`positioning user ${id} to ${position.x},${position.y}`)
-
-            //Selected user without vue refs because those were not allowing me to add styling.
-
-            //This could also be done in the template, but this is just a bit more modulair.
             let htmlElement = document.querySelector(`#${CSS.escape(id)}`);
             let positionHeight = position.y * this.squareSize;
             htmlElement.style.marginTop = positionHeight + 'px';
             htmlElement.style.marginLeft = (position.x * this.iconSize + this.gridSpacing) + '%';
-        }
+            //add the users image to the html
+            if (id.substring(0,1) == "u") {
+                let foundUserId = id.substring(1);
+                let foundUser = this.users.find(u => u.id == foundUserId)
+                htmlElement.style.background = 'rgb(19, 64, 70) url("' + foundUser.image + '") center no-repeat';
+            } else {
+                htmlElement.style.background = 'rgb(19, 64, 70)';
+            }
+           
+        },
+
     }
 }
 </script>
 
 <style>
-.userspace{
+
+
+.userspace {
     display: grid;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+.buttons {
+    width: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.buttons > button {
+    width: 100%;
+    height: 50px;
+    margin: 0.5rem;
+    border: 1px solid black;
+    border-radius: 0.5rem;
+}
+
+.buttons > button:active, .buttons > button:focus {
+    outline: none;
 }
 
 .userspace > * {

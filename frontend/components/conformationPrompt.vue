@@ -1,11 +1,11 @@
 <template>
   <main class="conformation-window">
     <div class="message">
-      <span class="requestinguser">{{user}}</span> wants to start a <span class="type">{{typeConversation}}</span> conversation with you
+      {{message}}
     </div>
     <div class="buttons">
-      <button id="accept" @click.prevent="onAccept(user);">Accept</button>
-      <button id="decline" @click.prevent="onDecline(user);">Decline</button>
+      <button id="accept" @click.prevent="onAccept();">Accept</button>
+      <button id="decline" @click.prevent="onDecline();">Decline</button>
     </div>
   </main>
 </template>
@@ -15,20 +15,10 @@
 export default {
   name: 'ConformationPrompt',
   props: {
-    user: String,
+    message: String,
     onAccept: Function,
-    onDecline: Function,
-    typeConversation: String,
-  },
-
-  data() {
-    return {
-    
-    };
-  },
-  methods: {
-    
-  },
+    onDecline: Function
+  }
 };
 </script>
 
@@ -36,6 +26,7 @@ export default {
 
 .conformation-window{
   @apply p-5 bg-gray-800 rounded flex flex-col items-center;
+  z-index: 4;
 }
 
 .conformation-window .message{

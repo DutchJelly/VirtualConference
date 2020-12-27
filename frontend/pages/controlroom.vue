@@ -7,7 +7,6 @@
             <div v-if="file">
                 <div v-if="file.name.includes('.sozi.html')">
                     The selected file is: {{file.name}}
-                    <!-- Here needs be a button which ask to conform to update the plattegrond -->
                 </div>
                 <div v-else-if="file.name.includes('.svg')">
                     The file you selected is an svg, please upload the file to sozi to select the frames which will be used as floors.
@@ -18,7 +17,6 @@
             </div>
         </div>
         <Sidebar class="sidebar">
-            <!-- Hier moeten de items komen van de users gesorteerd per kamer. -->
         </Sidebar>
     </main>
 </template>

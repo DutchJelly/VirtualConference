@@ -1,5 +1,5 @@
 <template>
-    <div class="meet-container" v-if="openConference === true">
+    <div class="meet-container" v-if="conversation">
         <div id="leaveRoom" ref="leaveRoom" v-if="joinedRoom === true">
             <button class="leaveButton" style="vertical-align:middle" v-on:click="onLeaveRoom" @click.prevent="onLeaveConversation()">
                 <span>Leave
@@ -32,16 +32,17 @@ export default {
     },
     data: function() {
         return {
-            username: this.$route.query.username,
             joinedRoom: false,
             closeRoom: true,
         };
     },
     props: {
-        user: String,
-        room: String,
-        openConference: Boolean,
-        typeConversation: String,
+        conversation: {
+            groupId: Number,
+            roomCode: String,
+            memberIds: [],
+            typeConversation: String
+        },
         isModerator: Boolean,
         onLeaveConversation: Function,
     },
@@ -50,15 +51,12 @@ export default {
             //If the user is a moderator.
             if(this.isModerator === true){
                 return {
-                    roomName: this.room,
+                    roomName: this.conversation?.roomCode,
                     width: 700,
                     height: 700,
                     noSSL: false,
                     userInfo: {
-                        email: function() {
-                            return this.user + '@email.com'
-                        },
-                        displayName: this.user,
+                        displayName: this.$store.getters.getUser?.username,
                     },
                     configOverwrite: {
                         enableNoisyMicDetection: false
@@ -79,15 +77,12 @@ export default {
                 };
             } else { //If the user is not a moderator.
                 return {
-                    roomName: this.room,
+                    roomName: this.conversation?.roomCode,
                     width: 700,
                     height: 700,
                     noSSL: false,
                     userInfo: {
-                        email: function() {
-                            return this.user + '@email.com'
-                        },
-                        displayName: this.user,
+                        displayName: this.$store.getters.getUser?.username,
                     },
                     configOverwrite: {
                         enableNoisyMicDetection: false
@@ -111,35 +106,33 @@ export default {
     },
     methods: {
         onIFrameLoad() {
-            this.closeRoom = true; //Show the button with 'Close'.
+            this.closeRoom = true;
             //Event listener when a user joined the video conference.
             this.$refs.jitsiRef.addEventListener('videoConferenceJoined', this.onVideoConferenceJoined);
         },
         //When the user joined the video conference.
         onVideoConferenceJoined: function(error) {
-            this.joinedRoom = true; //Show the button with 'Leave'.
-            this.closeRoom = false; //Unshow the button with 'Close'.
+            this.joinedRoom = true;
+            this.closeRoom = false;
         },
         //When the user clicks on the button with 'Leave'.
         onLeaveRoom: function() {
             let self = this;
             try {
-                this.joinedRoom = false; //Show the button with 'Leave'.
+                this.joinedRoom = false;
                 this.$refs.jitsiRef.removeJitsiWidget();
             } catch(error) {
                 console.log(error);
-                console.log("error leave room");
             }
         },
         //When the user clicks on the button with 'Close'.
         onCloseRoom: function() {
             let self = this;
             try {
-                this.closeRoom = false; //Show the button with 'Close'.
+                this.closeRoom = false;
                 this.$refs.jitsiRef.removeJitsiWidget();
             } catch(error) {
                 console.log(error);
-                console.log("error close room");
             }
         }, 
     },
@@ -147,6 +140,11 @@ export default {
 </script>
 
 <style>
+
+.meet-container {
+    z-index: 2;
+}
+
 .leaveButton {
   display: inline-block;
   border-radius: 4px;

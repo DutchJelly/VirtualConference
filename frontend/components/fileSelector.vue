@@ -1,11 +1,9 @@
 <template>
     <label class="file-select">
-        <!-- Credits to:https://www.digitalocean.com/community/tutorials/vuejs-file-select-component  -->
         <div class="select-button">
             <span v-if="file">Selected File: {{file.name}}</span>
             <span v-else>Select File</span>
         </div>
-        
         <input type="file" @change="handleFileChange"/>
     </label>
 </template>

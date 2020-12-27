@@ -31,8 +31,8 @@
 
       <button class="login-button" @click.prevent="login">login</button>
 
-      <nuxt-link to="registreer" class="register-button" tag="button">
-          Nog geen account? klik hier
+      <nuxt-link to="register" class="register-button" tag="button">
+          No account yet? Click here
       </nuxt-link>
       <div class="message" :class="error || succes ? 'opacity-100' : 'opacity-0'">
         {{ error }} {{ succes }}
@@ -55,18 +55,18 @@ export default {
   },
   computed: {
     error: function() {
-      return this.$store.state.errorMsg
+      return this.$store.getters.authErrorMsg;
     },
     succes: function() {
-      return this.$store.state.succesMsg
+      return this.$store.getters.authSuccessMsg;
     }
   },
   watch: {
     error(oldVal, newVal) {
-        if (newVal != oldVal)setTimeout(() => this.$store.commit('errorMsg', null), 2000)
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('setError', null), 2000)
     },
     succes(oldVal, newVal) {
-        if (newVal != oldVal)setTimeout(() => this.$store.commit('succesMsg', null), 4000)
+        if (newVal != oldVal)setTimeout(() => this.$store.commit('setMessage', null), 4000)
     }
   },
   methods: {
@@ -112,8 +112,6 @@ body {
 }
 
 .login-prompt {
-  /* @apply w-11/12 max-w-lg bg-white shadow-lg rounded flex flex-col items-center py-6; */
-
   width: 500px;
   max-width: 90%;
   margin: 2rem;
@@ -139,7 +137,7 @@ body {
   height: 65%;
   width: 70px;
   position: absolute;
-  bottom: 17.5%; /* (100-height)/2*/
+  bottom: 17.5%;
   pointer-events: none;
 
   @apply flex flex-row justify-center items-center;

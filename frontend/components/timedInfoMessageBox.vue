@@ -29,7 +29,6 @@ export default {
       //If the timer of another message is still 
       //running, we add the message to a queue.
       if(this.timeout != null) {
-        //TODO: this seems to be ignored.. New messages are not waiting for previous messages.
         this.nonShown.push(newVal);
         return;
       } 
