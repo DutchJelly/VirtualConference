@@ -11,8 +11,10 @@ This virtual conference room app is worked on for the Software Engineering cours
 * Jie Wu
 
 ### Languages:
-* Html, css
-* Javascript
+* HTML
+* CSS
+* JavaScript
+* TypeScript
 
 ### Framework:
 * Vue
